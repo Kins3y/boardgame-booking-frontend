@@ -1,0 +1,204 @@
+.sessions-page {
+  min-height: 100vh;
+  padding: 32px;
+  background: #0f1220;
+  color: #f2f4ff;
+}
+
+.sessions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sessions-header h1 {
+  margin: 0;
+  font-size: 36px;
+}
+
+.sessions-header p {
+  margin: 8px 0 0;
+  color: #aeb6d9;
+}
+
+.sessions-header button,
+.session-actions-cell button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.sessions-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+
+  background: #181c2f;
+  border: 1px solid #2b3150;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-group label {
+  color: #aeb6d9;
+  font-size: 14px;
+}
+
+.control-group input,
+.control-group select {
+  min-width: 220px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+.sessions-table-wrapper {
+  overflow-x: auto;
+  background: #181c2f;
+  border: 1px solid #2b3150;
+  border-radius: 16px;
+}
+
+.sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.sessions-table th,
+.sessions-table td {
+  padding: 14px;
+  border-bottom: 1px solid #2b3150;
+  vertical-align: top;
+  text-align: left;
+}
+
+.sessions-table th {
+  color: #aeb6d9;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.session-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.session-name-cell span,
+.muted-text {
+  color: #aeb6d9;
+  font-size: 13px;
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-created {
+  background: #263a5f;
+  color: #c9dcff;
+}
+
+.status-started {
+  background: #234a34;
+  color: #c9ffd9;
+}
+
+.status-finished {
+  background: #4a2630;
+  color: #ffd3dc;
+}
+
+.players-list-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.session-player-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  padding: 8px;
+  border-radius: 8px;
+  background: #20263f;
+}
+
+.session-player-row span {
+  color: #c6cbea;
+  font-size: 13px;
+}
+
+.session-actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.finish-button {
+  background: #ff6b8a;
+  color: #2a0f17;
+}
+
+.finish-button:hover {
+  background: #ff8aa3;
+}
+
+.sessions-error {
+  background: #5c1f2d;
+  border: 1px solid #ff6b8a;
+  color: #ffd9e1;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.empty-cell {
+  text-align: center;
+  color: #aeb6d9;
+  padding: 32px !important;
+}
+
+@media (max-width: 768px) {
+  .sessions-page {
+    padding: 16px;
+  }
+
+  .sessions-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .sessions-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-group input,
+  .control-group select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .sessions-header button {
+    width: 100%;
+  }
+}

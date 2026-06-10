@@ -1,0 +1,61 @@
+export type SessionPlayer = {
+  id: number;
+  session_id: number;
+  user_id: number;
+  faction_name: string;
+  matter: number;
+  energy: number;
+  data: number;
+  start_system_id: number | null;
+};
+
+export type SessionBuilding = {
+  id: number;
+  building_type: string;
+  owner_player_id: number;
+};
+
+export type SessionSystem = {
+  system_id: number;
+  system_name: string;
+  owner_player_id: number | null;
+  owner_faction: string | null;
+
+  buildings?: SessionBuilding[];
+};
+
+export type FullGameSession = {
+  id: number;
+  map_id: number;
+  name: string;
+  status: string;
+  current_round: number;
+  players_count: number;
+  players: SessionPlayer[];
+  systems: SessionSystem[];
+};
+
+export type AvailableUser = {
+  id: number;
+  email: string;
+  nickname: string;
+};
+
+export type SessionOverviewPlayer = {
+  session_player_id: number;
+  user_id: number;
+  nickname: string | null;
+  email: string | null;
+  faction_name: string;
+  start_system_id: number | null;
+};
+
+export type SessionOverviewItem = {
+  id: number;
+  map_id: number;
+  name: string;
+  status: string;
+  current_round: number;
+  players_count: number;
+  players: SessionOverviewPlayer[];
+};
