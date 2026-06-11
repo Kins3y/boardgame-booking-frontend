@@ -151,8 +151,9 @@
 
 .available-users-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
+  min-width: 0;
 }
 
 .available-user-card {
@@ -164,6 +165,9 @@
   border: 1px solid #343b5f;
   border-radius: 14px;
   padding: 16px;
+
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .available-user-card span {
@@ -183,6 +187,42 @@
 .available-user-card button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.available-user-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+
+  color: #c6cbea;
+  font-size: 14px;
+}
+
+.available-user-card input,
+.available-user-card select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #343b5f;
+
+  background: #101426;
+  color: #f2f4ff;
+}
+
+.available-user-card input:disabled,
+.available-user-card select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.available-user-card select {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {

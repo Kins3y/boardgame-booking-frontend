@@ -1,7 +1,8 @@
 import type {
   AvailableUser,
   FullGameSession,
-  SessionOverviewItem
+  SessionOverviewItem,
+  StartSystemOption
 } from "../types/game";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -129,4 +130,18 @@ export async function finishGameSession(sessionId: number): Promise<void> {
   if (!response.ok) {
     throw new Error(await getErrorMessage(response));
   }
+}
+
+export async function getSessionStartSystems(
+  sessionId: number
+): Promise<StartSystemOption[]> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/start-systems`
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
 }

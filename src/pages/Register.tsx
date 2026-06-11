@@ -24,13 +24,13 @@ export default function Register() {
       });
 
       navigate("/login");
-    } catch (err: any) {
-      if (err.response?.status === 409) {
-        setError("Email already exists");
-      } else {
-        setError("Registration failed");
-      }
-    } finally {
+   } catch (err: any) {
+  if (err.response?.data?.detail) {
+    setError(err.response.data.detail);
+  } else {
+    setError("Registration failed");
+  }
+} finally {
       setLoading(false);
     }
   };
@@ -61,6 +61,7 @@ export default function Register() {
       <button onClick={handleRegister} disabled={loading}>
         {loading ? "Creating..." : "Create account"}
       </button>
+
 
       {error && (
         <p style={{ color: "red", marginTop: 10 }}>

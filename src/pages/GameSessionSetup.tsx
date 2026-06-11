@@ -4,9 +4,14 @@ import {
   addPlayerToSession,
   getAvailableUsers,
   getFullSession,
+  getSessionStartSystems,
   startGameSession
 } from "../api/gameApi";
-import type { AvailableUser, FullGameSession } from "../types/game";
+import type {
+  AvailableUser,
+  FullGameSession,
+  StartSystemOption
+} from "../types/game";
 import "./GameSession.css";
 
 export default function GameSessionSetup() {
@@ -15,76 +20,98 @@ export default function GameSessionSetup() {
 
   const [session, setSession] = useState<FullGameSession | null>(null);
   const [availableUsers, setAvailableUsers] = useState<AvailableUser[]>([]);
+  const [startSystems, setStartSystems] = useState<StartSystemOption[]>([]);
+  const [selectedStartSystemIds, setSelectedStartSystemIds] = useState<
+    Record<number, number>
+  >({});
+  const [factionNames, setFactionNames] = useState<Record<number, string>>({});
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const numericSessionId = Number(sessionId);
 
+  function isStartSystemSelectedByAnotherUser(
+  systemId: number,
+  currentUserId: number
+): boolean {
+  return Object.entries(selectedStartSystemIds).some(
+    ([userId, selectedSystemId]) =>
+      Number(userId) !== currentUserId && selectedSystemId === systemId
+  );
+}
+
   async function loadSession() {
-    if (!Number.isInteger(numericSessionId) || numericSessionId < 1) {
-      setError("Invalid session ID");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const sessionData = await getFullSession(numericSessionId);
-      const usersData = await getAvailableUsers(numericSessionId);
-
-      setSession(sessionData);
-      setAvailableUsers(usersData);
-    } catch (err) {
-      setSession(null);
-      setAvailableUsers([]);
-      setError(err instanceof Error ? err.message : "Failed to load session");
-    } finally {
-      setIsLoading(false);
-    }
+  if (!Number.isInteger(numericSessionId) || numericSessionId < 1) {
+    setError("Invalid session ID");
+    return;
   }
+
+  try {
+    setIsLoading(true);
+    setError("");
+
+    const sessionData = await getFullSession(numericSessionId);
+    const usersData = await getAvailableUsers(numericSessionId);
+    const startSystemsData = await getSessionStartSystems(numericSessionId);
+
+    setSession(sessionData);
+    setAvailableUsers(usersData);
+    setStartSystems(startSystemsData);
+
+    setFactionNames((currentFactionNames) => {
+      const nextFactionNames = { ...currentFactionNames };
+
+      for (const user of usersData) {
+        if (!nextFactionNames[user.id]) {
+          nextFactionNames[user.id] = user.nickname;
+        }
+      }
+
+      return nextFactionNames;
+    });
+  } catch (err) {
+    setSession(null);
+    setAvailableUsers([]);
+    setStartSystems([]);
+    setError(err instanceof Error ? err.message : "Failed to load session");
+  } finally {
+    setIsLoading(false);
+  }
+}
 
   async function handleAddUser(user: AvailableUser) {
-    if (!session) {
-      return;
-    }
-
-    const factionName = window.prompt(
-      `Enter faction name for ${user.nickname}:`,
-      user.nickname
-    );
-
-    if (!factionName) {
-      return;
-    }
-
-    const startSystemIdValue = window.prompt(
-      `Enter start system ID for ${user.nickname}:`
-    );
-
-    if (!startSystemIdValue) {
-      return;
-    }
-
-    const startSystemId = Number(startSystemIdValue);
-
-    if (
-      Number.isNaN(startSystemId) ||
-      !Number.isInteger(startSystemId) ||
-      startSystemId < 1
-    ) {
-      setError("Start system ID must be a positive integer");
-      return;
-    }
-
-    try {
-      setError("");
-      await addPlayerToSession(session.id, user.id, factionName, startSystemId);
-      await loadSession();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add player");
-    }
+  if (!session) {
+    return;
   }
+
+  const factionName = factionNames[user.id]?.trim();
+  const startSystemId = selectedStartSystemIds[user.id];
+
+  if (!factionName) {
+    setError(`Enter faction name for ${user.nickname}`);
+    return;
+  }
+
+  if (!startSystemId) {
+    setError(`Select start system for ${user.nickname}`);
+    return;
+  }
+
+  try {
+    setError("");
+    await addPlayerToSession(session.id, user.id, factionName, startSystemId);
+
+    setSelectedStartSystemIds((currentSelectedStartSystemIds) => {
+      const nextSelectedStartSystemIds = { ...currentSelectedStartSystemIds };
+      delete nextSelectedStartSystemIds[user.id];
+      return nextSelectedStartSystemIds;
+    });
+
+    await loadSession();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Failed to add player");
+  }
+}
 
   async function handleStartSession() {
     if (!session) {
@@ -175,29 +202,83 @@ export default function GameSessionSetup() {
           </section>
 
           <section className="game-panel">
-            <h2>Available users</h2>
+  <h2>Available users</h2>
 
-            {availableUsers.length === 0 ? (
-              <p>No available users outside active sessions.</p>
-            ) : (
-              <div className="available-users-grid">
-                {availableUsers.map((user) => (
-                  <div className="available-user-card" key={user.id}>
-                    <strong>{user.nickname}</strong>
-                    <span>User ID: {user.id}</span>
-                    <span>{user.email}</span>
+  {availableUsers.length === 0 ? (
+    <p>No available users outside active sessions.</p>
+  ) : (
+    <div className="available-users-grid">
+      {availableUsers.map((user) => (
+        <div className="available-user-card" key={user.id}>
+          <strong>{user.nickname}</strong>
+          <span>User ID: {user.id}</span>
+          <span>{user.email}</span>
 
-                    <button
-                      onClick={() => handleAddUser(user)}
-                      disabled={session.status !== "created"}
-                    >
-                      Add user
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+          <label>
+            Faction name
+            <input
+              type="text"
+              value={factionNames[user.id] ?? ""}
+              onChange={(event) =>
+                setFactionNames((currentFactionNames) => ({
+                  ...currentFactionNames,
+                  [user.id]: event.target.value
+                }))
+              }
+              disabled={session.status !== "created"}
+            />
+          </label>
+
+          <label>
+            Start system
+            <select
+              value={selectedStartSystemIds[user.id] ?? ""}
+              onChange={(event) =>
+                setSelectedStartSystemIds((currentSelectedStartSystemIds) => ({
+                  ...currentSelectedStartSystemIds,
+                  [user.id]: Number(event.target.value)
+                }))
+              }
+              disabled={session.status !== "created"}
+            >
+              <option value="">Select start system</option>
+
+              {startSystems.map((system) => {
+  const isSelectedByAnotherUser = isStartSystemSelectedByAnotherUser(
+    system.id,
+    user.id
+  );
+
+  return (
+    <option
+      key={system.id}
+      value={system.id}
+      disabled={system.is_occupied || isSelectedByAnotherUser}
+    >
+      #{system.id} — {system.name}
+      {system.is_occupied && system.occupied_by_faction
+        ? ` / ${system.occupied_by_faction}`
+        : ""}
+      {!system.is_occupied && isSelectedByAnotherUser
+        ? " / selected"
+        : ""}
+    </option>
+  );
+})}
+            </select>
+          </label>
+
+          <button
+            onClick={() => handleAddUser(user)}
+            disabled={session.status !== "created"}
+          >
+            Add user
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
 
           <section className="game-panel">
             <h2>Map systems</h2>

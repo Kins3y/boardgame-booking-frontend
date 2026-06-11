@@ -59,3 +59,13 @@ export type SessionOverviewItem = {
   players_count: number;
   players: SessionOverviewPlayer[];
 };
+
+export type StartSystemOption = {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  is_occupied: boolean;
+  occupied_by_player_id: number | null;
+  occupied_by_faction: string | null;
+};

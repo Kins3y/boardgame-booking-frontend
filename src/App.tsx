@@ -12,14 +12,23 @@ import "./App.css";
 export default function App() {
   const location = useLocation();
 
-  const shouldShowHomeButton = location.pathname !== "/";
+  const isLoginPage = location.pathname === "/login";
+  const isHomePage = location.pathname === "/";
+  const isRegisterPage = location.pathname === "/register";
+
+  const shouldShowNavigationButton = !isLoginPage && !isHomePage;
+
+  const navigationButtonTarget = isRegisterPage ? "/login" : "/";
+  const navigationButtonText = isRegisterPage
+    ? "Back to Login"
+    : "Back to Home page";
 
   return (
     <div className="app-shell">
-      {shouldShowHomeButton && (
+      {shouldShowNavigationButton && (
         <nav className="global-navigation">
-          <Link to="/" className="global-home-button">
-            Return to Home page
+          <Link to={navigationButtonTarget} className="global-home-button">
+            {navigationButtonText}
           </Link>
         </nav>
       )}
