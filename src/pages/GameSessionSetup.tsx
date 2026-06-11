@@ -8,7 +8,8 @@ import {
   getFullSession,
   getSessionStartSystems,
   removePlayerFromSession,
-  startGameSession
+  startGameSession,
+  updateGameSessionName
 } from "../api/gameApi";
 import type {
   AvailableUser,
@@ -36,8 +37,12 @@ export default function GameSessionSetup() {
   >({});
 
   const [factionNames, setFactionNames] = useState<Record<number, string>>({});
+  const [sessionName, setSessionName] = useState<string>("");
+
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSavingSessionName, setIsSavingSessionName] =
+    useState<boolean>(false);
 
   const numericSessionId = Number(sessionId);
 
@@ -78,6 +83,7 @@ export default function GameSessionSetup() {
       const civilizationsData = await getCivilizations();
 
       setSession(sessionData);
+      setSessionName(sessionData.name);
       setAvailableUsers(usersData);
       setStartSystems(startSystemsData);
       setCivilizations(civilizationsData);
@@ -221,6 +227,57 @@ export default function GameSessionSetup() {
     loadSession();
   }, [sessionId]);
 
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    if (session.status !== "created") {
+      return;
+    }
+
+    const trimmedSessionName = sessionName.trim();
+
+    if (trimmedSessionName === session.name) {
+      return;
+    }
+
+    if (trimmedSessionName.length < 3 || trimmedSessionName.length > 60) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsSavingSessionName(true);
+        setError("");
+
+        const updatedSession = await updateGameSessionName(
+          session.id,
+          trimmedSessionName
+        );
+
+        setSession((currentSession) => {
+          if (!currentSession) {
+            return currentSession;
+          }
+
+          return {
+            ...currentSession,
+            name: updatedSession.name
+          };
+        });
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update session name"
+        );
+      } finally {
+        setIsSavingSessionName(false);
+      }
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [sessionName, session?.id, session?.name, session?.status]);
+
   return (
     <div className="game-page">
       <header className="game-header">
@@ -242,7 +299,20 @@ export default function GameSessionSetup() {
       {session && (
         <>
           <section className="game-panel">
-            <h2>{session.name}</h2>
+            <label className="session-name-editor">
+              Session name
+              <input
+                type="text"
+                placeholder="Enter Session's name"
+                value={sessionName}
+                onChange={(event) => setSessionName(event.target.value)}
+                disabled={session.status !== "created"}
+              />
+            </label>
+
+            {isSavingSessionName && (
+              <span className="action-hint">Saving session name...</span>
+            )}
 
             <div className="session-info">
               <span>Session ID: {session.id}</span>
@@ -253,29 +323,29 @@ export default function GameSessionSetup() {
             </div>
 
             <div className="game-actions setup-actions">
-  <button
-    className="setup-action-button"
-    onClick={handleStartSession}
-    disabled={session.status !== "created"}
-  >
-    Start session
-  </button>
+              <button
+                className="setup-action-button"
+                onClick={handleStartSession}
+                disabled={session.status !== "created"}
+              >
+                Start session
+              </button>
 
-  {session.status === "created" && (
-    <button
-      className="setup-action-button danger-button cancel-setup-button"
-      onClick={handleCancelSetup}
-    >
-      Cancel setup
-    </button>
-  )}
+              {session.status === "created" && (
+                <button
+                  className="setup-action-button danger-button cancel-setup-button"
+                  onClick={handleCancelSetup}
+                >
+                  Cancel setup
+                </button>
+              )}
 
-  {session.status !== "created" && (
-    <span className="action-hint">
-      This session has already been started or finished.
-    </span>
-  )}
-</div>
+              {session.status !== "created" && (
+                <span className="action-hint">
+                  This session has already been started or finished.
+                </span>
+              )}
+            </div>
           </section>
 
           <section className="game-panel">

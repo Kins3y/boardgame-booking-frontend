@@ -1,57 +1,75 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   addPlayerToSession,
+  deleteCreatedSession,
   getAvailableUsers,
+  getCivilizations,
   getFullSession,
-  startGameSession
+  getSessionStartSystems,
+  removePlayerFromSession,
+  startGameSession,
+  updateGameSessionName
 } from "../api/gameApi";
-import type { AvailableUser, FullGameSession } from "../types/game";
+import type {
+  AvailableUser,
+  Civilization,
+  FullGameSession,
+  StartSystemOption
+} from "../types/game";
 import "./GameSession.css";
 
-export default function GameSession() {
-  const [sessionIdInput, setSessionIdInput] = useState<string>("5");
+export default function GameSessionSetup() {
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
+
   const [session, setSession] = useState<FullGameSession | null>(null);
   const [availableUsers, setAvailableUsers] = useState<AvailableUser[]>([]);
+  const [startSystems, setStartSystems] = useState<StartSystemOption[]>([]);
+  const [civilizations, setCivilizations] = useState<Civilization[]>([]);
+
+  const [selectedStartSystemIds, setSelectedStartSystemIds] = useState<
+    Record<number, number>
+  >({});
+
+  const [selectedCivilizationIds, setSelectedCivilizationIds] = useState<
+    Record<number, number>
+  >({});
+
+  const [factionNames, setFactionNames] = useState<Record<number, string>>({});
+  const [sessionName, setSessionName] = useState<string>("");
+
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSavingSessionName, setIsSavingSessionName] =
+    useState<boolean>(false);
 
-  function handleSessionIdChange(value: string) {
-    const onlyDigits = value.replace(/\D/g, "");
+  const numericSessionId = Number(sessionId);
 
-    if (onlyDigits === "") {
-      setSessionIdInput("");
-      return;
-    }
-
-    const numericValue = Number(onlyDigits);
-
-    if (numericValue > 999999999) {
-      setSessionIdInput("999999999");
-      return;
-    }
-
-    setSessionIdInput(onlyDigits);
+  function isStartSystemSelectedByAnotherUser(
+    systemId: number,
+    currentUserId: number
+  ): boolean {
+    return Object.entries(selectedStartSystemIds).some(
+      ([userId, selectedSystemId]) =>
+        Number(userId) !== currentUserId && selectedSystemId === systemId
+    );
   }
 
-  function getSessionId(): number | null {
-    if (sessionIdInput === "") {
-      return null;
-    }
-
-    const sessionId = Number(sessionIdInput);
-
-    if (!Number.isInteger(sessionId) || sessionId < 1 || sessionId > 999999999) {
-      return null;
-    }
-
-    return sessionId;
+  function isCivilizationSelectedByAnotherUser(
+    civilizationId: number,
+    currentUserId: number
+  ): boolean {
+    return Object.entries(selectedCivilizationIds).some(
+      ([userId, selectedCivilizationId]) =>
+        Number(userId) !== currentUserId &&
+        selectedCivilizationId === civilizationId
+    );
   }
 
   async function loadSession() {
-    const sessionId = getSessionId();
-
-    if (sessionId === null) {
-      setError("Session ID must be a positive integer from 1 to 999999999");
+    if (!Number.isInteger(numericSessionId) || numericSessionId < 1) {
+      setError("Invalid session ID");
       return;
     }
 
@@ -59,104 +77,221 @@ export default function GameSession() {
       setIsLoading(true);
       setError("");
 
-      const sessionData = await getFullSession(sessionId);
-      const usersData = await getAvailableUsers(sessionId);
+      const sessionData = await getFullSession(numericSessionId);
+      const usersData = await getAvailableUsers(numericSessionId);
+      const startSystemsData = await getSessionStartSystems(numericSessionId);
+      const civilizationsData = await getCivilizations();
 
       setSession(sessionData);
+      setSessionName(sessionData.name);
       setAvailableUsers(usersData);
+      setStartSystems(startSystemsData);
+      setCivilizations(civilizationsData);
+
+      setFactionNames((currentFactionNames) => {
+        const nextFactionNames = { ...currentFactionNames };
+
+        for (const user of usersData) {
+          if (!nextFactionNames[user.id]) {
+            nextFactionNames[user.id] = user.nickname;
+          }
+        }
+
+        return nextFactionNames;
+      });
     } catch (err) {
       setSession(null);
       setAvailableUsers([]);
-      setError(err instanceof Error ? err.message : "Failed to load game session");
+      setStartSystems([]);
+      setCivilizations([]);
+      setError(err instanceof Error ? err.message : "Failed to load session");
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleStartSession() {
-    const sessionId = getSessionId();
-
-    if (sessionId === null) {
-      setError("Session ID must be a positive integer from 1 to 999999999");
-      return;
-    }
-
-    try {
-      setError("");
-      await startGameSession(sessionId);
-      await loadSession();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start session");
-    }
-  }
-
   async function handleAddUser(user: AvailableUser) {
-    const sessionId = getSessionId();
-
-    if (sessionId === null) {
-      setError("Session ID must be a positive integer from 1 to 999999999");
+    if (!session) {
       return;
     }
 
-    const factionName = window.prompt(
-      `Enter faction name for ${user.nickname}:`,
-      user.nickname
-    );
+    const factionName = factionNames[user.id]?.trim();
+    const civilizationId = selectedCivilizationIds[user.id];
+    const startSystemId = selectedStartSystemIds[user.id];
 
     if (!factionName) {
+      setError(`Enter faction name for ${user.nickname}`);
       return;
     }
 
-    const startSystemIdValue = window.prompt(
-      `Enter start system ID for ${user.nickname}:`
-    );
-
-    if (!startSystemIdValue) {
+    if (!civilizationId) {
+      setError(`Select civilization for ${user.nickname}`);
       return;
     }
 
-    const startSystemId = Number(startSystemIdValue);
-
-    if (Number.isNaN(startSystemId) || !Number.isInteger(startSystemId) || startSystemId < 1) {
-      setError("Start system ID must be a positive integer");
+    if (!startSystemId) {
+      setError(`Select start system for ${user.nickname}`);
       return;
     }
 
     try {
       setError("");
-      await addPlayerToSession(sessionId, user.id, factionName, startSystemId);
+
+      await addPlayerToSession(
+        session.id,
+        user.id,
+        civilizationId,
+        factionName,
+        startSystemId
+      );
+
+      setSelectedStartSystemIds((currentSelectedStartSystemIds) => {
+        const nextSelectedStartSystemIds = { ...currentSelectedStartSystemIds };
+        delete nextSelectedStartSystemIds[user.id];
+        return nextSelectedStartSystemIds;
+      });
+
+      setSelectedCivilizationIds((currentSelectedCivilizationIds) => {
+        const nextSelectedCivilizationIds = {
+          ...currentSelectedCivilizationIds
+        };
+
+        delete nextSelectedCivilizationIds[user.id];
+
+        return nextSelectedCivilizationIds;
+      });
+
       await loadSession();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add player");
     }
   }
 
+  async function handleRemovePlayer(sessionPlayerId: number) {
+    if (!session) {
+      return;
+    }
+
+    const confirmed = window.confirm("Remove this player from session?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      await removePlayerFromSession(session.id, sessionPlayerId);
+      await loadSession();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove player");
+    }
+  }
+
+  async function handleCancelSetup() {
+    if (!session) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Cancel setup and delete this created session?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      await deleteCreatedSession(session.id);
+      navigate("/game/sessions");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete session");
+    }
+  }
+
+  async function handleStartSession() {
+    if (!session) {
+      return;
+    }
+
+    try {
+      setError("");
+      await startGameSession(session.id);
+      navigate(`/game/sessions/${session.id}/play`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start session");
+    }
+  }
+
   useEffect(() => {
     loadSession();
-  }, []);
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!session) {
+      return;
+    }
+
+    if (session.status !== "created") {
+      return;
+    }
+
+    const trimmedSessionName = sessionName.trim();
+
+    if (trimmedSessionName === session.name) {
+      return;
+    }
+
+    if (trimmedSessionName.length < 3 || trimmedSessionName.length > 60) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsSavingSessionName(true);
+        setError("");
+
+        const updatedSession = await updateGameSessionName(
+          session.id,
+          trimmedSessionName
+        );
+
+        setSession((currentSession) => {
+          if (!currentSession) {
+            return currentSession;
+          }
+
+          return {
+            ...currentSession,
+            name: updatedSession.name
+          };
+        });
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update session name"
+        );
+      } finally {
+        setIsSavingSessionName(false);
+      }
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [sessionName, session?.id, session?.name, session?.status]);
 
   return (
     <div className="game-page">
       <header className="game-header">
         <div>
-          <h1>ARCHONT</h1>
-          <p>Game session visual screen</p>
+          <h1>Session setup</h1>
+          <p>
+            Add players, choose civilizations, assign starting systems, then
+            start the game.
+          </p>
         </div>
 
-        <div className="session-loader">
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            placeholder="Session ID"
-            value={sessionIdInput}
-            onChange={(event) => handleSessionIdChange(event.target.value)}
-          />
-
-          <button onClick={loadSession} disabled={sessionIdInput === "" || isLoading}>
-            {isLoading ? "Loading..." : "Load session"}
-          </button>
-        </div>
+        <button onClick={loadSession} disabled={isLoading}>
+          {isLoading ? "Loading..." : "Refresh"}
+        </button>
       </header>
 
       {error && <div className="game-error">{error}</div>}
@@ -164,7 +299,20 @@ export default function GameSession() {
       {session && (
         <>
           <section className="game-panel">
-            <h2>{session.name}</h2>
+            <label className="session-name-editor">
+              Session name
+              <input
+                type="text"
+                placeholder="Enter Session's name"
+                value={sessionName}
+                onChange={(event) => setSessionName(event.target.value)}
+                disabled={session.status !== "created"}
+              />
+            </label>
+
+            {isSavingSessionName && (
+              <span className="action-hint">Saving session name...</span>
+            )}
 
             <div className="session-info">
               <span>Session ID: {session.id}</span>
@@ -174,63 +322,71 @@ export default function GameSession() {
               <span>Map ID: {session.map_id}</span>
             </div>
 
-            <div className="game-actions">
+            <div className="game-actions setup-actions">
               <button
+                className="setup-action-button"
                 onClick={handleStartSession}
                 disabled={session.status !== "created"}
               >
                 Start session
               </button>
 
+              {session.status === "created" && (
+                <button
+                  className="setup-action-button danger-button cancel-setup-button"
+                  onClick={handleCancelSetup}
+                >
+                  Cancel setup
+                </button>
+              )}
+
               {session.status !== "created" && (
                 <span className="action-hint">
-                  Players can be added only before the session starts
+                  This session has already been started or finished.
                 </span>
               )}
             </div>
           </section>
 
           <section className="game-panel">
-            <h2>Players</h2>
+            <h2>Players in this session</h2>
 
-            <div className="players-grid">
-              {session.players.map((player) => (
-                <div className="player-card" key={player.id}>
-                  <h3>{player.faction_name}</h3>
-
-                  <p>Session Player ID: {player.id}</p>
-                  <p>User ID: {player.user_id}</p>
-                  <p>Start System ID: {player.start_system_id}</p>
-
-                  <div className="resources">
-                    <span>Matter: {player.matter}</span>
-                    <span>Energy: {player.energy}</span>
-                    <span>Data: {player.data}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="game-panel">
-            <h2>Available Users</h2>
-
-            {availableUsers.length === 0 ? (
-              <p>No users available outside active sessions.</p>
+            {session.players.length === 0 ? (
+              <p>No players added yet.</p>
             ) : (
-              <div className="available-users-grid">
-                {availableUsers.map((user) => (
-                  <div className="available-user-card" key={user.id}>
-                    <strong>{user.nickname}</strong>
-                    <span>User ID: {user.id}</span>
-                    <span>{user.email}</span>
+              <div className="players-grid">
+                {session.players.map((player) => (
+                  <div className="player-card" key={player.id}>
+                    <h3>{player.faction_name}</h3>
 
-                    <button
-                      onClick={() => handleAddUser(user)}
-                      disabled={session.status !== "created"}
-                    >
-                      Add user
-                    </button>
+                    <p>Player: {player.nickname ?? `User ${player.user_id}`}</p>
+
+                    <p>
+                      Civilization:{" "}
+                      {player.civilization_name ?? "Not selected"}
+                    </p>
+
+                    <p>
+                      Start system:{" "}
+                      {player.start_system_name ??
+                        player.start_system_id ??
+                        "Not selected"}
+                    </p>
+
+                    <div className="resources">
+                      <span>Matter: {player.matter}</span>
+                      <span>Energy: {player.energy}</span>
+                      <span>Data: {player.data}</span>
+                    </div>
+
+                    {session.status === "created" && (
+                      <button
+                        className="remove-player-button"
+                        onClick={() => handleRemovePlayer(player.id)}
+                      >
+                        Remove player
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -238,13 +394,169 @@ export default function GameSession() {
           </section>
 
           <section className="game-panel">
+            <h2>Available users</h2>
+
+            {availableUsers.length === 0 ? (
+              <p>No available users outside active sessions.</p>
+            ) : (
+              <div className="available-users-grid">
+                {availableUsers.map((user) => {
+                  const selectedCivilization = civilizations.find(
+                    (civilization) =>
+                      civilization.id === selectedCivilizationIds[user.id]
+                  );
+
+                  return (
+                    <div className="available-user-card" key={user.id}>
+                      <strong>{user.nickname}</strong>
+
+                      <label>
+                        Faction name
+                        <input
+                          type="text"
+                          value={factionNames[user.id] ?? ""}
+                          onChange={(event) =>
+                            setFactionNames((currentFactionNames) => ({
+                              ...currentFactionNames,
+                              [user.id]: event.target.value
+                            }))
+                          }
+                          disabled={session.status !== "created"}
+                        />
+                      </label>
+
+                      <label>
+                        Civilization
+                        <select
+                          value={selectedCivilizationIds[user.id] ?? ""}
+                          onChange={(event) =>
+                            setSelectedCivilizationIds(
+                              (currentSelectedCivilizationIds) => ({
+                                ...currentSelectedCivilizationIds,
+                                [user.id]: Number(event.target.value)
+                              })
+                            )
+                          }
+                          disabled={session.status !== "created"}
+                        >
+                          <option value="">Select civilization</option>
+
+                          {civilizations.map((civilization) => {
+                            const isSelectedByAnotherUser =
+                              isCivilizationSelectedByAnotherUser(
+                                civilization.id,
+                                user.id
+                              );
+
+                            return (
+                              <option
+                                key={civilization.id}
+                                value={civilization.id}
+                                disabled={isSelectedByAnotherUser}
+                              >
+                                {civilization.name}
+                                {isSelectedByAnotherUser ? " / selected" : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </label>
+
+                      {selectedCivilization && (
+                        <div className="civilization-preview">
+                          <strong>{selectedCivilization.name}</strong>
+
+                          {selectedCivilization.lore_description && (
+                            <p>{selectedCivilization.lore_description}</p>
+                          )}
+
+                          <div className="resources">
+                            <span>
+                              Matter: {selectedCivilization.starting_matter}
+                            </span>
+                            <span>
+                              Energy: {selectedCivilization.starting_energy}
+                            </span>
+                            <span>
+                              Data: {selectedCivilization.starting_data}
+                            </span>
+                          </div>
+
+                          <p>
+                            <strong>
+                              {selectedCivilization.ability_name}:
+                            </strong>{" "}
+                            {selectedCivilization.ability_description}
+                          </p>
+                        </div>
+                      )}
+
+                      <label>
+                        Start system
+                        <select
+                          value={selectedStartSystemIds[user.id] ?? ""}
+                          onChange={(event) =>
+                            setSelectedStartSystemIds(
+                              (currentSelectedStartSystemIds) => ({
+                                ...currentSelectedStartSystemIds,
+                                [user.id]: Number(event.target.value)
+                              })
+                            )
+                          }
+                          disabled={session.status !== "created"}
+                        >
+                          <option value="">Select start system</option>
+
+                          {startSystems.map((system) => {
+                            const isSelectedByAnotherUser =
+                              isStartSystemSelectedByAnotherUser(
+                                system.id,
+                                user.id
+                              );
+
+                            return (
+                              <option
+                                key={system.id}
+                                value={system.id}
+                                disabled={
+                                  system.is_occupied || isSelectedByAnotherUser
+                                }
+                              >
+                                #{system.id} — {system.name}
+                                {system.is_occupied &&
+                                system.occupied_by_faction
+                                  ? ` / ${system.occupied_by_faction}`
+                                  : ""}
+                                {!system.is_occupied && isSelectedByAnotherUser
+                                  ? " / selected"
+                                  : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </label>
+
+                      <button
+                        onClick={() => handleAddUser(user)}
+                        disabled={session.status !== "created"}
+                      >
+                        Add user
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <section className="game-panel">
             <h2>Systems</h2>
 
-            <div className="systems-grid">
-              {session.systems.map((system) => {
-                const buildings = system.buildings ?? [];
-
-                return (
+            {session.systems.length === 0 ? (
+              <p>No systems created for this session yet.</p>
+            ) : (
+              <div className="systems-grid">
+                {session.systems.map((system) => (
                   <div
                     className={
                       system.owner_player_id
@@ -255,33 +567,15 @@ export default function GameSession() {
                   >
                     <h3>{system.system_name}</h3>
 
-                    <p>System ID: {system.system_id}</p>
-
                     {system.owner_faction ? (
                       <p>Owner: {system.owner_faction}</p>
                     ) : (
                       <p>Owner: neutral system</p>
                     )}
-
-                    <div className="buildings">
-                      <strong>Buildings:</strong>
-
-                      {buildings.length === 0 ? (
-                        <p>No buildings</p>
-                      ) : (
-                        <ul>
-                          {buildings.map((building) => (
-                            <li key={building.id}>
-                              {building.building_type} #{building.id}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         </>
       )}

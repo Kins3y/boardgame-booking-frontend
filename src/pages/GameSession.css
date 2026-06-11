@@ -278,6 +278,37 @@
   cursor: not-allowed;
 }
 
+.session-name-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 420px;
+  margin-bottom: 16px;
+
+  color: #c6cbea;
+  font-size: 14px;
+}
+
+.session-name-editor input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #343b5f;
+
+  background: #101426;
+  color: #f2f4ff;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.session-name-editor input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .game-page {
     padding: 16px;

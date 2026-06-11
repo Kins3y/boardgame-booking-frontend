@@ -184,3 +184,24 @@ export async function deleteCreatedSession(sessionId: number): Promise<void> {
     throw new Error(await getErrorMessage(response));
   }
 }
+
+export async function updateGameSessionName(
+  sessionId: number,
+  name: string
+): Promise<GameSessionSummary> {
+  const response = await fetch(`${API_URL}/game/sessions/${sessionId}/name`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      name
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
+}

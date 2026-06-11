@@ -15,10 +15,7 @@ export default function Home() {
       setIsCreatingSession(true);
       setError("");
 
-      const now = new Date();
-      const sessionName = `Session ${now.toLocaleString()}`;
-
-      const newSession = await createGameSession(1, sessionName);
+      const newSession = await createGameSession(1, "Untitled session");
 
       navigate(`/game/sessions/${newSession.id}/setup`);
     } catch (err) {
