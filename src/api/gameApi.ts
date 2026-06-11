@@ -158,3 +158,29 @@ export async function getCivilizations(): Promise<Civilization[]> {
 
   return response.json();
 }
+
+export async function removePlayerFromSession(
+  sessionId: number,
+  sessionPlayerId: number
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/players/${sessionPlayerId}`,
+    {
+      method: "DELETE"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+}
+
+export async function deleteCreatedSession(sessionId: number): Promise<void> {
+  const response = await fetch(`${API_URL}/game/sessions/${sessionId}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+}

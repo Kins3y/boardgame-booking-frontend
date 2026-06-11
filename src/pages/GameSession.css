@@ -250,6 +250,34 @@
   color: #f2f4ff;
 }
 
+.danger-button,
+.remove-player-button {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+
+  background: #ff6b8a;
+  color: #2a0f17;
+}
+
+.game-actions .danger-button {
+  margin-top: 0;
+}
+
+.danger-button:hover,
+.remove-player-button:hover {
+  background: #ff8aa3;
+}
+
+.danger-button:disabled,
+.remove-player-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .game-page {
     padding: 16px;

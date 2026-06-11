@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   addPlayerToSession,
+  deleteCreatedSession,
   getAvailableUsers,
   getCivilizations,
   getFullSession,
   getSessionStartSystems,
+  removePlayerFromSession,
   startGameSession
 } from "../api/gameApi";
 import type {
@@ -144,14 +146,60 @@ export default function GameSessionSetup() {
       });
 
       setSelectedCivilizationIds((currentSelectedCivilizationIds) => {
-        const nextSelectedCivilizationIds = { ...currentSelectedCivilizationIds };
+        const nextSelectedCivilizationIds = {
+          ...currentSelectedCivilizationIds
+        };
+
         delete nextSelectedCivilizationIds[user.id];
+
         return nextSelectedCivilizationIds;
       });
 
       await loadSession();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add player");
+    }
+  }
+
+  async function handleRemovePlayer(sessionPlayerId: number) {
+    if (!session) {
+      return;
+    }
+
+    const confirmed = window.confirm("Remove this player from session?");
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      await removePlayerFromSession(session.id, sessionPlayerId);
+      await loadSession();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove player");
+    }
+  }
+
+  async function handleCancelSetup() {
+    if (!session) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Cancel setup and delete this created session?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      await deleteCreatedSession(session.id);
+      navigate("/game/sessions");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete session");
     }
   }
 
@@ -178,7 +226,10 @@ export default function GameSessionSetup() {
       <header className="game-header">
         <div>
           <h1>Session setup</h1>
-          <p>Add players, choose civilizations, assign starting systems, then start the game.</p>
+          <p>
+            Add players, choose civilizations, assign starting systems, then
+            start the game.
+          </p>
         </div>
 
         <button onClick={loadSession} disabled={isLoading}>
@@ -201,20 +252,30 @@ export default function GameSessionSetup() {
               <span>Map ID: {session.map_id}</span>
             </div>
 
-            <div className="game-actions">
-              <button
-                onClick={handleStartSession}
-                disabled={session.status !== "created"}
-              >
-                Start
-              </button>
+            <div className="game-actions setup-actions">
+  <button
+    className="setup-action-button"
+    onClick={handleStartSession}
+    disabled={session.status !== "created"}
+  >
+    Start session
+  </button>
 
-              {session.status !== "created" && (
-                <span className="action-hint">
-                  This session has already been started or finished.
-                </span>
-              )}
-            </div>
+  {session.status === "created" && (
+    <button
+      className="setup-action-button danger-button cancel-setup-button"
+      onClick={handleCancelSetup}
+    >
+      Cancel setup
+    </button>
+  )}
+
+  {session.status !== "created" && (
+    <span className="action-hint">
+      This session has already been started or finished.
+    </span>
+  )}
+</div>
           </section>
 
           <section className="game-panel">
@@ -229,10 +290,12 @@ export default function GameSessionSetup() {
                     <h3>{player.faction_name}</h3>
 
                     <p>Player: {player.nickname ?? `User ${player.user_id}`}</p>
+
                     <p>
                       Civilization:{" "}
                       {player.civilization_name ?? "Not selected"}
                     </p>
+
                     <p>
                       Start system:{" "}
                       {player.start_system_name ??
@@ -245,6 +308,15 @@ export default function GameSessionSetup() {
                       <span>Energy: {player.energy}</span>
                       <span>Data: {player.data}</span>
                     </div>
+
+                    {session.status === "created" && (
+                      <button
+                        className="remove-player-button"
+                        onClick={() => handleRemovePlayer(player.id)}
+                      >
+                        Remove player
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -267,8 +339,6 @@ export default function GameSessionSetup() {
                   return (
                     <div className="available-user-card" key={user.id}>
                       <strong>{user.nickname}</strong>
-                      <span>User ID: {user.id}</span>
-                      <span>{user.email}</span>
 
                       <label>
                         Faction name
@@ -337,11 +407,15 @@ export default function GameSessionSetup() {
                             <span>
                               Energy: {selectedCivilization.starting_energy}
                             </span>
-                            <span>Data: {selectedCivilization.starting_data}</span>
+                            <span>
+                              Data: {selectedCivilization.starting_data}
+                            </span>
                           </div>
 
                           <p>
-                            <strong>{selectedCivilization.ability_name}:</strong>{" "}
+                            <strong>
+                              {selectedCivilization.ability_name}:
+                            </strong>{" "}
                             {selectedCivilization.ability_description}
                           </p>
                         </div>
@@ -406,29 +480,32 @@ export default function GameSessionSetup() {
           </section>
 
           <section className="game-panel">
-            <h2>Map systems</h2>
+            <h2>Systems</h2>
 
-            <div className="systems-grid">
-              {session.systems.map((system) => (
-                <div
-                  className={
-                    system.owner_player_id
-                      ? "system-card owned"
-                      : "system-card neutral"
-                  }
-                  key={system.system_id}
-                >
-                  <h3>{system.system_name}</h3>
-                  <p>System ID: {system.system_id}</p>
+            {session.systems.length === 0 ? (
+              <p>No systems created for this session yet.</p>
+            ) : (
+              <div className="systems-grid">
+                {session.systems.map((system) => (
+                  <div
+                    className={
+                      system.owner_player_id
+                        ? "system-card owned"
+                        : "system-card neutral"
+                    }
+                    key={system.system_id}
+                  >
+                    <h3>{system.system_name}</h3>
 
-                  {system.owner_faction ? (
-                    <p>Owner: {system.owner_faction}</p>
-                  ) : (
-                    <p>Owner: neutral system</p>
-                  )}
-                </div>
-              ))}
-            </div>
+                    {system.owner_faction ? (
+                      <p>Owner: {system.owner_faction}</p>
+                    ) : (
+                      <p>Owner: neutral system</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </>
       )}
