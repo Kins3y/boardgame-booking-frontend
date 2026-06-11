@@ -134,11 +134,16 @@
 .session-player-row {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   background: #20263f;
+}
+
+.session-player-row strong {
+  color: #f2f4ff;
+  font-size: 14px;
 }
 
 .session-player-row span {

@@ -225,6 +225,31 @@
   white-space: nowrap;
 }
 
+.civilization-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  margin-top: 8px;
+  padding: 12px;
+
+  background: #101426;
+  border: 1px solid #343b5f;
+  border-radius: 10px;
+
+  color: #c6cbea;
+  font-size: 14px;
+}
+
+.civilization-preview p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.civilization-preview strong {
+  color: #f2f4ff;
+}
+
 @media (max-width: 768px) {
   .game-page {
     padding: 16px;

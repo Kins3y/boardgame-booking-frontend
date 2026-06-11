@@ -2,6 +2,7 @@ import type {
   AvailableUser,
   FullGameSession,
   SessionOverviewItem,
+  Civilization,
   StartSystemOption
 } from "../types/game";
 
@@ -82,6 +83,7 @@ export async function getAvailableUsers(
 export async function addPlayerToSession(
   sessionId: number,
   userId: number,
+  civilizationId: number,
   factionName: string,
   startSystemId: number
 ): Promise<void> {
@@ -92,6 +94,7 @@ export async function addPlayerToSession(
     },
     body: JSON.stringify({
       user_id: userId,
+      civilization_id: civilizationId,
       faction_name: factionName,
       start_system_id: startSystemId
     })
@@ -138,6 +141,16 @@ export async function getSessionStartSystems(
   const response = await fetch(
     `${API_URL}/game/sessions/${sessionId}/start-systems`
   );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
+}
+
+export async function getCivilizations(): Promise<Civilization[]> {
+  const response = await fetch(`${API_URL}/game/civilizations/`);
 
   if (!response.ok) {
     throw new Error(await getErrorMessage(response));

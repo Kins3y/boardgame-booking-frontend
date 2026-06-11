@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  finishGameSession,
-  getSessionsOverview
-} from "../api/gameApi";
+import { finishGameSession, getSessionsOverview } from "../api/gameApi";
 import type { SessionOverviewItem } from "../types/game";
 import "./SessionsList.css";
 
@@ -49,9 +46,7 @@ export default function SessionsList() {
   }
 
   async function handleFinishSession(sessionId: number) {
-    const confirmed = window.confirm(
-      `Finish session #${sessionId}?`
-    );
+    const confirmed = window.confirm(`Finish session #${sessionId}?`);
 
     if (!confirmed) {
       return;
@@ -87,7 +82,7 @@ export default function SessionsList() {
       <header className="sessions-header">
         <div>
           <h1>Sessions list</h1>
-          <p>Search, filter, inspect players, and finish active sessions.</p>
+          <p>Search, filter, inspect civilizations, and finish active sessions.</p>
         </div>
 
         <button onClick={loadSessions} disabled={isLoading}>
@@ -132,7 +127,7 @@ export default function SessionsList() {
               <th>Name</th>
               <th>Status</th>
               <th>Round</th>
-              <th>Players</th>
+              <th>Players / Civilizations</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -175,15 +170,11 @@ export default function SessionsList() {
                             key={player.session_player_id}
                           >
                             <strong>
-                              {player.faction_name}
+                              {player.nickname ?? `User #${player.user_id}`}
                             </strong>
 
                             <span>
-                              User: {player.nickname ?? `#${player.user_id}`}
-                            </span>
-
-                            <span>
-                              Start system: {player.start_system_id ?? "none"}
+                              {player.civilization_name ?? "No civilization selected"}
                             </span>
                           </div>
                         ))}
@@ -193,13 +184,21 @@ export default function SessionsList() {
 
                   <td>
                     <div className="session-actions-cell">
-                      <Link to={`/game/sessions/${session.id}/setup`}>
-                        <button>Setup</button>
-                      </Link>
+                      {session.status === "created" && (
+                        <Link to={`/game/sessions/${session.id}/setup`}>
+                          <button>Setup</button>
+                        </Link>
+                      )}
 
-                      <Link to={`/game/sessions/${session.id}/play`}>
-                        <button>Play</button>
-                      </Link>
+                      {session.status === "started" && (
+                        <Link to={`/game/sessions/${session.id}/play`}>
+                          <button>Play</button>
+                        </Link>
+                      )}
+
+                      {session.status === "finished" && (
+                        <span className="muted-text">Finished</span>
+                      )}
 
                       {ACTIVE_STATUSES.includes(session.status) && (
                         <button

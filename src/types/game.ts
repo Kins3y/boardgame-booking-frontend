@@ -2,11 +2,21 @@ export type SessionPlayer = {
   id: number;
   session_id: number;
   user_id: number;
+
+  nickname: string | null;
+  email: string | null;
+
+  civilization_id: number | null;
+  civilization_name: string | null;
+
   faction_name: string;
+
   matter: number;
   energy: number;
   data: number;
+
   start_system_id: number | null;
+  start_system_name: string | null;
 };
 
 export type SessionBuilding = {
@@ -46,6 +56,10 @@ export type SessionOverviewPlayer = {
   user_id: number;
   nickname: string | null;
   email: string | null;
+
+  civilization_id: number | null;
+  civilization_name: string | null;
+
   faction_name: string;
   start_system_id: number | null;
 };
@@ -68,4 +82,19 @@ export type StartSystemOption = {
   is_occupied: boolean;
   occupied_by_player_id: number | null;
   occupied_by_faction: string | null;
+};
+
+export type Civilization = {
+  id: number;
+  name: string;
+  slug: string;
+  short_description: string;
+  lore_description: string | null;
+  starting_matter: number;
+  starting_energy: number;
+  starting_data: number;
+  ability_name: string;
+  ability_description: string;
+  mechanic_key: string;
+  is_active: boolean;
 };
