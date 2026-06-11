@@ -3,7 +3,8 @@ import type {
   FullGameSession,
   SessionOverviewItem,
   Civilization,
-  StartSystemOption
+  StartSystemOption,
+  BuildingType
 } from "../types/game";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -204,4 +205,30 @@ export async function updateGameSessionName(
   }
 
   return response.json();
+}
+
+export async function buildBuilding(
+  sessionId: number,
+  sessionPlayerId: number,
+  systemId: number,
+  buildingType: BuildingType
+): Promise<void> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/buildings/build`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        session_player_id: sessionPlayerId,
+        system_id: systemId,
+        building_type: buildingType
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
 }

@@ -22,12 +22,17 @@ export type SessionPlayer = {
 export type SessionBuilding = {
   id: number;
   building_type: string;
+  building_name?: string;
+  system_id?: number;
+  system_name?: string | null;
   owner_player_id: number;
 };
 
 export type SessionSystem = {
   system_id: number;
   system_name: string;
+  x?: number;
+  y?: number;
   owner_player_id: number | null;
   owner_faction: string | null;
 
@@ -98,3 +103,5 @@ export type Civilization = {
   mechanic_key: string;
   is_active: boolean;
 };
+
+export type BuildingType = "mine" | "power_plant" | "storage";
