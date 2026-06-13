@@ -53,10 +53,6 @@ export default function Home() {
           <button style={{ width: "100%" }}>Sessions list</button>
         </Link>
 
-        <Link to="/game/session">
-          <button style={{ width: "100%" }}>Open game session</button>
-        </Link>
-
         <div style={{ marginTop: "24px" }}>
           <button onClick={logout}>Logout</button>
         </div>

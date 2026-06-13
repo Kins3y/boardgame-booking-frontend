@@ -232,3 +232,62 @@ export async function buildBuilding(
     throw new Error(await getErrorMessage(response));
   }
 }
+
+export async function nextRound(
+  sessionId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/next-round`,
+    {
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+export async function packColonyIntoArk(
+  sessionId: number,
+  unitId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/units/${unitId}/pack-into-ark`,
+    {
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+export async function colonizeSystemWithArk(
+  sessionId: number,
+  unitId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/units/${unitId}/colonize`,
+    {
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}

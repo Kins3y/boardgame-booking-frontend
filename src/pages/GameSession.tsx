@@ -46,6 +46,13 @@ export default function GameSessionSetup() {
 
   const numericSessionId = Number(sessionId);
 
+  const visibleAvailableUsers = session
+    ? availableUsers.filter(
+        (user) =>
+          !session.players.some((player) => player.user_id === user.id)
+      )
+    : availableUsers;
+
   function isStartSystemSelectedByAnotherUser(
     systemId: number,
     currentUserId: number
@@ -377,6 +384,7 @@ export default function GameSessionSetup() {
                       <span>Matter: {player.matter}</span>
                       <span>Energy: {player.energy}</span>
                       <span>Data: {player.data}</span>
+                      <span>Food: {player.food}</span>
                     </div>
 
                     {session.status === "created" && (
@@ -396,11 +404,11 @@ export default function GameSessionSetup() {
           <section className="game-panel">
             <h2>Available users</h2>
 
-            {availableUsers.length === 0 ? (
+            {visibleAvailableUsers.length === 0 ? (
               <p>No available users outside active sessions.</p>
             ) : (
               <div className="available-users-grid">
-                {availableUsers.map((user) => {
+                {visibleAvailableUsers.map((user) => {
                   const selectedCivilization = civilizations.find(
                     (civilization) =>
                       civilization.id === selectedCivilizationIds[user.id]
@@ -479,6 +487,9 @@ export default function GameSessionSetup() {
                             </span>
                             <span>
                               Data: {selectedCivilization.starting_data}
+                            </span>
+                            <span>
+                              Food: {selectedCivilization.starting_food}
                             </span>
                           </div>
 

@@ -14,6 +14,7 @@ export type SessionPlayer = {
   matter: number;
   energy: number;
   data: number;
+  food: number;
 
   start_system_id: number | null;
   start_system_name: string | null;
@@ -28,6 +29,23 @@ export type SessionBuilding = {
   owner_player_id: number;
 };
 
+export type SessionUnit = {
+  id: number;
+  unit_type: string;
+  state: string;
+  system_id: number;
+  owner_player_id: number;
+
+  attack: number;
+  defense: number;
+
+  current_hp: number | null;
+  max_hp: number | null;
+
+  food_upkeep: number;
+  is_foundation: boolean;
+};
+
 export type SessionSystem = {
   system_id: number;
   system_name: string;
@@ -37,6 +55,7 @@ export type SessionSystem = {
   owner_faction: string | null;
 
   buildings?: SessionBuilding[];
+  units?: SessionUnit[];
 };
 
 export type FullGameSession = {

@@ -678,3 +678,138 @@
     grid-template-columns: 1fr;
   }
 }
+
+.map-units-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.map-unit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  text-align: left;
+}
+
+.map-unit-card strong {
+  font-size: 12px;
+}
+
+.map-unit-card small {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.map-colony-status {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.system-overview-panel {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+}
+
+.system-overview-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.system-overview-header h2 {
+  margin: 0 0 4px;
+}
+
+.system-overview-header p {
+  margin: 0;
+}
+
+.system-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.system-overview-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.system-overview-block h3 {
+  margin: 0;
+}
+
+.overview-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.overview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--social-bg);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.overview-card:hover {
+  border-color: var(--accent-border);
+}
+
+.overview-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.overview-card strong {
+  color: var(--text-h);
+}
+
+.overview-card span {
+  font-size: 13px;
+}
+
+.overview-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.overview-card-details p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.overview-card-details button {
+  margin-top: 6px;
+}
+
+@media (max-width: 900px) {
+  .system-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
