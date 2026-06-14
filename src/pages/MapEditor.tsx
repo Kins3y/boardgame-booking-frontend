@@ -1,4 +1,10 @@
-import { useMemo, useState, type MouseEvent } from "react";
+import {
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type MouseEvent
+} from "react";
 import { createEditorMap } from "../api/gameApi";
 import type {
   MapEditorConnection,
@@ -18,6 +24,37 @@ function createSystemName(index: number): string {
 
 function createClientId(): string {
   return `system-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function normalizeIntegerInput(
+  rawValue: string,
+  fallbackValue: number,
+  min: number,
+  max: number
+): number {
+  const digitsOnly = rawValue.replace(/\D/g, "");
+
+  if (!digitsOnly) {
+    return min;
+  }
+
+  const withoutLeadingZeroes = digitsOnly.replace(/^0+(?=\d)/, "");
+  const parsedValue = Number(withoutLeadingZeroes);
+
+  if (Number.isNaN(parsedValue)) {
+    return fallbackValue;
+  }
+
+  return Math.min(
+    max,
+    Math.max(min, parsedValue)
+  );
+}
+
+function handleNumericInputFocus(
+  event: FocusEvent<HTMLInputElement>
+) {
+  event.target.select();
 }
 
 function getConnectionKey(connection: MapEditorConnection): string {
@@ -41,8 +78,11 @@ function getSystemIcon(system: MapEditorSystem): string {
 export default function MapEditor() {
   const [mapName, setMapName] = useState<string>("New Archont Map");
   const [playersCount, setPlayersCount] = useState<number>(2);
-  const [gridWidth, setGridWidth] = useState<number>(20);
-  const [gridHeight, setGridHeight] = useState<number>(20);
+  const [gridWidthInput, setGridWidthInput] = useState<string>("20");
+  const [gridHeightInput, setGridHeightInput] = useState<string>("20");
+
+  const gridWidth = getGridDimensionValue(gridWidthInput);
+  const gridHeight = getGridDimensionValue(gridHeightInput);
 
   const [mode, setMode] = useState<EditorMode>("select");
 
@@ -230,6 +270,56 @@ export default function MapEditor() {
     );
   }
 
+  function moveSelectedSystem(nextX: number, nextY: number) {
+  if (!selectedSystemId) {
+    return;
+  }
+
+  if (gridWidth === 0 || gridHeight === 0) {
+  setError("Grid must have width and height greater than 0 before moving systems");
+  return;
+}
+
+  const boundedX = Math.min(
+  gridWidth - 1,
+  Math.max(0, nextX)
+);
+
+const boundedY = Math.min(
+  gridHeight - 1,
+  Math.max(0, nextY)
+);
+
+  const positionIsOccupied = systems.some(
+    (system) =>
+      system.client_id !== selectedSystemId &&
+      system.x === boundedX &&
+      system.y === boundedY
+  );
+
+  if (positionIsOccupied) {
+    setError("Another system already occupies this position");
+    return;
+  }
+
+  setSystems((currentSystems) =>
+    currentSystems.map((system) => {
+      if (system.client_id !== selectedSystemId) {
+        return system;
+      }
+
+      return {
+        ...system,
+        x: boundedX,
+        y: boundedY
+      };
+    })
+  );
+
+  setError("");
+  setSuccessMessage("");
+}
+
   function updateSelectedConnection(
     updates: Partial<MapEditorConnection>
   ) {
@@ -250,6 +340,45 @@ export default function MapEditor() {
       })
     );
   }
+
+  function normalizeGridDimensionInput(rawValue: string): string {
+  const digitsOnly = rawValue.replace(/\D/g, "");
+
+  if (!digitsOnly) {
+    return "";
+  }
+
+  const withoutLeadingZeroes = digitsOnly.replace(/^0+(?=\d)/, "");
+  const parsedValue = Number(withoutLeadingZeroes);
+
+  if (Number.isNaN(parsedValue)) {
+    return "";
+  }
+
+  return String(
+    Math.min(
+      99,
+      Math.max(0, parsedValue)
+    )
+  );
+}
+
+function getGridDimensionValue(rawValue: string): number {
+  if (!rawValue.trim()) {
+    return 0;
+  }
+
+  const parsedValue = Number(rawValue);
+
+  if (Number.isNaN(parsedValue)) {
+    return 0;
+  }
+
+  return Math.min(
+    99,
+    Math.max(0, parsedValue)
+  );
+}
 
   function deleteSelectedSystem() {
     if (!selectedSystemId) {
@@ -291,6 +420,10 @@ export default function MapEditor() {
   function validateBeforeSave(): string | null {
     if (!mapName.trim()) {
       return "Map name is required";
+    }
+
+    if (gridWidth < 5 || gridHeight < 5) {
+    return "Grid size must be at least 5x5 before saving";
     }
 
     if (systems.length === 0) {
@@ -352,8 +485,8 @@ export default function MapEditor() {
   function handleResetEditor() {
     setMapName("New Archont Map");
     setPlayersCount(2);
-    setGridWidth(20);
-    setGridHeight(20);
+    setGridWidthInput("20");
+    setGridHeightInput("20");
     setSystems([]);
     setConnections([]);
     setSelectedSystemId(null);
@@ -424,23 +557,33 @@ export default function MapEditor() {
             <label>
               Width
               <input
-                type="number"
-                min={5}
-                max={99}
-                value={gridWidth}
-                onChange={(event) => setGridWidth(Number(event.target.value))}
-              />
+  type="text"
+  inputMode="numeric"
+  placeholder="0"
+  value={gridWidthInput}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    setGridWidthInput(
+      normalizeGridDimensionInput(event.target.value)
+    )
+  }
+/>
             </label>
 
             <label>
               Height
               <input
-                type="number"
-                min={5}
-                max={99}
-                value={gridHeight}
-                onChange={(event) => setGridHeight(Number(event.target.value))}
-              />
+  type="text"
+  inputMode="numeric"
+  placeholder="0"
+  value={gridHeightInput}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    setGridHeightInput(
+      normalizeGridDimensionInput(event.target.value)
+    )
+  }
+/>
             </label>
           </div>
 
@@ -654,71 +797,130 @@ export default function MapEditor() {
                 </label>
               )}
 
-              <div className="map-editor-coordinate-row">
-                <span>X: {selectedSystem.x}</span>
-                <span>Y: {selectedSystem.y}</span>
-              </div>
+              <div className="map-editor-grid-size">
+  <label>
+    X position
+    <input
+      type="text"
+      inputMode="numeric"
+      value={String(selectedSystem.x)}
+      onFocus={handleNumericInputFocus}
+      onChange={(event: ChangeEvent<HTMLInputElement>) =>
+        moveSelectedSystem(
+          normalizeIntegerInput(
+            event.target.value,
+            selectedSystem.x,
+            0,
+            Math.max(0, gridWidth - 1)
+          ),
+          selectedSystem.y
+        )
+      }
+    />
+  </label>
+
+  <label>
+    Y position
+    <input
+      type="text"
+      inputMode="numeric"
+      value={String(selectedSystem.y)}
+      onFocus={handleNumericInputFocus}
+      onChange={(event: ChangeEvent<HTMLInputElement>) =>
+        moveSelectedSystem(
+          selectedSystem.x,
+          normalizeIntegerInput(
+            event.target.value,
+            selectedSystem.y,
+            0,
+            Math.max(0, gridHeight - 1)
+          )
+        )
+      }
+    />
+  </label>
+</div>
 
               <h3>Building slots</h3>
 
               <label>
                 Mine slots
                 <input
-                  type="number"
-                  min={0}
-                  max={9}
-                  value={selectedSystem.mineral_slots}
-                  onChange={(event) =>
-                    updateSelectedSystem({
-                      mineral_slots: Number(event.target.value)
-                    })
-                  }
-                />
+  type="text"
+  inputMode="numeric"
+  value={String(selectedSystem.mineral_slots)}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    updateSelectedSystem({
+      mineral_slots: normalizeIntegerInput(
+        event.target.value,
+        selectedSystem.mineral_slots,
+        0,
+        9
+      )
+    })
+  }
+/>
               </label>
 
               <label>
                 Power plant slots
                 <input
-                  type="number"
-                  min={0}
-                  max={9}
-                  value={selectedSystem.energy_slots}
-                  onChange={(event) =>
-                    updateSelectedSystem({
-                      energy_slots: Number(event.target.value)
-                    })
-                  }
-                />
+  type="text"
+  inputMode="numeric"
+  value={String(selectedSystem.energy_slots)}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    updateSelectedSystem({
+      energy_slots: normalizeIntegerInput(
+        event.target.value,
+        selectedSystem.energy_slots,
+        0,
+        9
+      )
+    })
+  }
+/>
               </label>
 
               <label>
                 Supply depot slots
                 <input
-                  type="number"
-                  min={0}
-                  max={9}
-                  value={selectedSystem.storage_slots}
-                  onChange={(event) =>
-                    updateSelectedSystem({
-                      storage_slots: Number(event.target.value)
-                    })
-                  }
-                />
+  type="text"
+  inputMode="numeric"
+  value={String(selectedSystem.storage_slots)}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    updateSelectedSystem({
+      storage_slots: normalizeIntegerInput(
+        event.target.value,
+        selectedSystem.storage_slots,
+        0,
+        9
+      )
+    })
+  }
+/>
               </label>
 
               <label>
                 Research center slots
                 <input
-                  type="number"
-                  min={0}
-                  max={9}
-                  value={selectedSystem.research_center_slots}
-                  onChange={(event) =>
-                    updateSelectedSystem({
-                      research_center_slots: Number(event.target.value)
-                    })
-                  }
-                />
+  type="text"
+  inputMode="numeric"
+  value={String(selectedSystem.research_center_slots)}
+  onFocus={handleNumericInputFocus}
+  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+    updateSelectedSystem({
+      research_center_slots: normalizeIntegerInput(
+        event.target.value,
+        selectedSystem.research_center_slots,
+        0,
+        9
+      )
+    })
+  }
+/>
               </label>
 
               <button
@@ -734,31 +936,35 @@ export default function MapEditor() {
             <div className="map-editor-selected-card">
               <h3>Connection</h3>
 
-              <label className="map-editor-checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedConnection.is_dangerous}
-                  onChange={(event) =>
-                    updateSelectedConnection({
-                      is_dangerous: event.target.checked
-                    })
-                  }
-                />
-                Dangerous corridor
-              </label>
+              <div className="map-editor-checkbox-group">
+  <label className="map-editor-checkbox-row">
+    <span>Dangerous corridor</span>
 
-              <label className="map-editor-checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedConnection.is_wraparound}
-                  onChange={(event) =>
-                    updateSelectedConnection({
-                      is_wraparound: event.target.checked
-                    })
-                  }
-                />
-                Wraparound through map edge
-              </label>
+    <input
+      type="checkbox"
+      checked={selectedConnection.is_dangerous}
+      onChange={(event) =>
+        updateSelectedConnection({
+          is_dangerous: event.target.checked
+        })
+      }
+    />
+  </label>
+
+  <label className="map-editor-checkbox-row">
+    <span>Wraparound through map edge</span>
+
+    <input
+      type="checkbox"
+      checked={selectedConnection.is_wraparound}
+      onChange={(event) =>
+        updateSelectedConnection({
+          is_wraparound: event.target.checked
+        })
+      }
+    />
+  </label>
+</div>
 
               <button
                 className="danger-button"

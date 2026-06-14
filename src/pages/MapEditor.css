@@ -281,3 +281,60 @@
   margin-top: 20px;
   color: #4f475c;
 }
+
+.map-editor-panel,
+.map-editor-panel * {
+  box-sizing: border-box;
+}
+
+.map-editor-panel input,
+.map-editor-panel select {
+  width: 100%;
+  min-width: 0;
+}
+
+.map-editor-grid-size {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1400px) {
+  .map-editor-grid-size {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.map-editor-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #ded9e8;
+  border-radius: 10px;
+  background: #faf9fc;
+}
+
+.map-editor-checkbox-row {
+  display: grid !important;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  color: #1f1b2d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.map-editor-checkbox-row + .map-editor-checkbox-row {
+  border-top: 1px solid #ded9e8;
+}
+
+.map-editor-checkbox-row span {
+  text-align: left;
+}
+
+.map-editor-checkbox-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  justify-self: end;
+}
