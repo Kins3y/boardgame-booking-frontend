@@ -1,11 +1,13 @@
-import { api } from "./client";
+import type { InternalAxiosRequestConfig } from "axios";
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+export function authHeader(
+  config: InternalAxiosRequestConfig
+): InternalAxiosRequestConfig {
+  const accessToken = localStorage.getItem("access_token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
   return config;
-});
+}

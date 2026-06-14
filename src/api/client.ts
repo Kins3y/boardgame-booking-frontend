@@ -1,50 +1,30 @@
-import axios from "axios";
-import { refreshAccessToken } from "./refreshToken";
+import axios, {
+  AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig
+} from "axios";
 
-export const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+const API_URL = import.meta.env.VITE_API_URL;
+
+export const apiClient = axios.create({
+  baseURL: API_URL
 });
 
-// =========================
-// REQUEST INTERCEPTOR
-// =========================
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    const accessToken = localStorage.getItem("access_token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
-
-// =========================
-// RESPONSE INTERCEPTOR
-// =========================
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const newToken = await refreshAccessToken();
-
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-        return api(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-
-        window.location.href = "/login";
-
-        return Promise.reject(refreshError);
-      }
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    return Promise.reject(error);
+    return config;
   }
 );
+
+apiClient.interceptors.response.use(
+  (response: AxiosResponse): AxiosResponse => response,
+  (error: AxiosError) => Promise.reject(error)
+);
+
+export const api = apiClient;

@@ -117,6 +117,7 @@ export type Civilization = {
   starting_matter: number;
   starting_energy: number;
   starting_data: number;
+  starting_food: number;
   ability_name: string;
   ability_description: string;
   mechanic_key: string;

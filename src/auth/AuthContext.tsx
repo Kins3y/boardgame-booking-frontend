@@ -1,5 +1,11 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { api } from "../api/client";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode
+} from "react";
+import { apiClient } from "../api/client";
 
 type User = {
   id: number;
@@ -16,11 +22,16 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // 🔐 восстановление сессии при старте
+  function logout() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setUser(null);
+  }
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
 
@@ -29,11 +40,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    api
-      .get("/auth/me", {
+    apiClient
+      .get<User>("/auth/me", {
         headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       })
       .then((res) => {
         setUser(res.data);
@@ -46,29 +57,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
-  // 🔐 login (единственный источник установки user)
-  const login = async (accessToken: string) => {
+  async function login(accessToken: string): Promise<void> {
     localStorage.setItem("access_token", accessToken);
 
     try {
-      const res = await api.get("/auth/me", {
+      const res = await apiClient.get<User>("/auth/me", {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+          Authorization: `Bearer ${accessToken}`
+        }
       });
 
       setUser(res.data);
-    } catch (e) {
+    } catch {
       logout();
     }
-  };
-
-  // 🚪 logout
-  const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    setUser(null);
-  };
+  }
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
