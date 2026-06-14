@@ -18,7 +18,8 @@ export default function App() {
   const isHomePage = location.pathname === "/";
   const isRegisterPage = location.pathname === "/register";
 
-  const shouldShowNavigationButton = !isLoginPage && !isHomePage;
+  const shouldShowNavigationButton =
+  !isLoginPage && !isHomePage && !isRegisterPage;
 
   const navigationButtonTarget = isRegisterPage ? "/login" : "/";
   const navigationButtonText = isRegisterPage

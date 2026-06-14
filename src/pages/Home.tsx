@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import "./MarketingPages.css";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -10,35 +11,49 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: "32px" }}>
-      <h1>Home page</h1>
+    <div className="archont-page">
+      <section className="archont-home-card">
+        <div className="archont-home-header">
+          <div className="archont-home-user">
+            COMMAND NODE · {user?.nickname ?? "Player"}
+          </div>
 
-      <p>Welcome {user?.nickname}</p>
+          <h1>ARCHONT</h1>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          maxWidth: "220px"
-        }}
-      >
-        <button onClick={handleStartSession}>
-          Start session
-        </button>
-
-        <Link to="/game/sessions">
-          <button style={{ width: "100%" }}>Sessions list</button>
-        </Link>
-
-        <Link to="/map-editor">
-          <button style={{ width: "100%" }}>Map editor</button>
-        </Link>
-
-        <div style={{ marginTop: "24px" }}>
-          <button onClick={logout}>Logout</button>
+          <p>
+            Build civilizations, fight for ancient archives, control routes
+            across the galaxy and awaken the Archont before your rivals do.
+          </p>
         </div>
-      </div>
+
+        <div className="archont-home-actions">
+          <button
+            className="archont-primary-button"
+            onClick={handleStartSession}
+          >
+            Start new session
+          </button>
+
+          <Link to="/game/sessions">
+            <button className="archont-secondary-button">
+              Sessions list
+            </button>
+          </Link>
+
+          <Link to="/map-editor">
+            <button className="archont-secondary-button">
+              Map editor
+            </button>
+          </Link>
+
+          <button
+            className="archont-danger-button"
+            onClick={logout}
+          >
+            Logout
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
