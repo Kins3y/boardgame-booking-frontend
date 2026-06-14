@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import {
   buildBuilding,
   colonizeSystemWithArk,
+  getEditorMap,
   getFullSession,
   nextRound,
   packColonyIntoArk
@@ -10,6 +11,7 @@ import {
 import type {
   BuildingType,
   FullGameSession,
+  MapEditorSavedMap,
   SessionBuilding,
   SessionPlayer,
   SessionSystem,
@@ -226,32 +228,126 @@ function getBuildingsForPlayer(
 
 function getSystemPosition(
   system: SessionSystem,
-  systems: SessionSystem[]
+  mapDetails: MapEditorSavedMap | null
 ): { left: string; top: string } {
-  const xValues = systems.map((item) => item.x ?? 0);
-  const yValues = systems.map((item) => item.y ?? 0);
+  const gridWidth = Math.max(1, mapDetails?.grid_width ?? 20);
+  const gridHeight = Math.max(1, mapDetails?.grid_height ?? 20);
 
-  const minX = Math.min(...xValues);
-  const maxX = Math.max(...xValues);
-  const minY = Math.min(...yValues);
-  const maxY = Math.max(...yValues);
-
-  const normalizedX =
-    maxX === minX ? 50 : 8 + (((system.x ?? 0) - minX) / (maxX - minX)) * 84;
-
-  const normalizedY =
-    maxY === minY ? 50 : 8 + (((system.y ?? 0) - minY) / (maxY - minY)) * 84;
+  const left = (((system.x ?? 0) + 0.5) / gridWidth) * 100;
+  const top = (((system.y ?? 0) + 0.5) / gridHeight) * 100;
 
   return {
-    left: `${normalizedX}%`,
-    top: `${normalizedY}%`
+    left: `${left}%`,
+    top: `${top}%`
   };
+}
+
+function getSystemPoint(
+  system: SessionSystem,
+  mapDetails: MapEditorSavedMap | null
+): { x: number; y: number } {
+  const gridWidth = Math.max(1, mapDetails?.grid_width ?? 20);
+  const gridHeight = Math.max(1, mapDetails?.grid_height ?? 20);
+
+  return {
+    x: (((system.x ?? 0) + 0.5) / gridWidth) * 100,
+    y: (((system.y ?? 0) + 0.5) / gridHeight) * 100
+  };
+}
+
+type MapPoint = {
+  x: number;
+  y: number;
+};
+
+type MapLineSegment = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+};
+
+function getWraparoundLineSegments(
+  fromPoint: MapPoint,
+  toPoint: MapPoint
+): MapLineSegment[] {
+  const deltaX = Math.abs(toPoint.x - fromPoint.x);
+  const deltaY = Math.abs(toPoint.y - fromPoint.y);
+
+  const shouldWrapHorizontally = deltaX >= deltaY;
+
+  if (shouldWrapHorizontally) {
+    if (fromPoint.x < toPoint.x) {
+      return [
+        {
+          x1: fromPoint.x,
+          y1: fromPoint.y,
+          x2: 0,
+          y2: fromPoint.y
+        },
+        {
+          x1: 100,
+          y1: toPoint.y,
+          x2: toPoint.x,
+          y2: toPoint.y
+        }
+      ];
+    }
+
+    return [
+      {
+        x1: fromPoint.x,
+        y1: fromPoint.y,
+        x2: 100,
+        y2: fromPoint.y
+      },
+      {
+        x1: 0,
+        y1: toPoint.y,
+        x2: toPoint.x,
+        y2: toPoint.y
+      }
+    ];
+  }
+
+  if (fromPoint.y < toPoint.y) {
+    return [
+      {
+        x1: fromPoint.x,
+        y1: fromPoint.y,
+        x2: fromPoint.x,
+        y2: 0
+      },
+      {
+        x1: toPoint.x,
+        y1: 100,
+        x2: toPoint.x,
+        y2: toPoint.y
+      }
+    ];
+  }
+
+  return [
+    {
+      x1: fromPoint.x,
+      y1: fromPoint.y,
+      x2: fromPoint.x,
+      y2: 100
+    },
+    {
+      x1: toPoint.x,
+      y1: 0,
+      x2: toPoint.x,
+      y2: toPoint.y
+    }
+  ];
 }
 
 export default function GamePlay() {
   const { sessionId } = useParams();
 
   const [session, setSession] = useState<FullGameSession | null>(null);
+  const [mapDetails, setMapDetails] = useState<MapEditorSavedMap | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
   const [selectedBuildingType, setSelectedBuildingType] =
     useState<BuildingType>("mine");
@@ -317,8 +413,10 @@ export default function GamePlay() {
       setError("");
 
       const sessionData = await getFullSession(numericSessionId);
+const loadedMapDetails = await getEditorMap(sessionData.map_id);
 
-      setSession(sessionData);
+setSession(sessionData);
+setMapDetails(loadedMapDetails);
 
       if (!selectedPlayerId && sessionData.players.length > 0) {
         const firstPlayer = sessionData.players[0];
@@ -331,9 +429,10 @@ export default function GamePlay() {
         setSelectedSystemId(firstControlledSystem?.system_id ?? null);
       }
     } catch (err) {
-      setSession(null);
-      setError(err instanceof Error ? err.message : "Failed to load game");
-    } finally {
+  setSession(null);
+  setMapDetails(null);
+  setError(err instanceof Error ? err.message : "Failed to load game");
+} finally {
       setIsLoading(false);
     }
   }
@@ -464,6 +563,52 @@ export default function GamePlay() {
     loadSession();
   }, [sessionId]);
 
+  function getSessionSystemById(systemId: number): SessionSystem | undefined {
+  return session?.systems.find((system) => system.system_id === systemId);
+}
+
+function getMapSystemDetailsById(systemId: number) {
+  return mapDetails?.systems.find((system) => system.id === systemId);
+}
+
+function getGameplaySystemVisualClass(systemId: number): string {
+  const mapSystem = getMapSystemDetailsById(systemId);
+
+  if (!mapSystem) {
+    return "system-visual-normal";
+  }
+
+  if (mapSystem.system_type === "start") {
+    return "system-visual-start";
+  }
+
+  if (mapSystem.system_type === "archive") {
+    const archiveLevel = mapSystem.archive_level ?? 1;
+
+    return `system-visual-archive archive-level-${archiveLevel}`;
+  }
+
+  return "system-visual-normal";
+}
+
+function getSystemTypeLabel(systemId: number): string | null {
+  const mapSystem = getMapSystemDetailsById(systemId);
+
+  if (!mapSystem) {
+    return null;
+  }
+
+  if (mapSystem.system_type === "start") {
+    return "START";
+  }
+
+  if (mapSystem.system_type === "archive") {
+    return `ARCHIVE ${mapSystem.archive_level ?? 1}`;
+  }
+
+  return null;
+}
+
   return (
     <div className="game-page game-simulation-page">
       <header className="game-header">
@@ -551,51 +696,141 @@ export default function GamePlay() {
                 <div>
                   <h2>Galactic map</h2>
                   <p>
-                    Select any system to open its overview. The map only shows
-                    colony and ark presence.
-                  </p>
+  Select any system to open its overview. Corridors show safe, dangerous and
+  wraparound routes.
+</p>
                 </div>
               </div>
 
-              <div className="galaxy-map">
-                {session.systems.map((system) => {
-                  const position = getSystemPosition(system, session.systems);
-                  const isSelected = system.system_id === selectedSystemId;
-                  const isControlledBySelectedPlayer =
-                    system.owner_player_id === selectedPlayerId;
+              <div className="galaxy-map enhanced-galaxy-map">
+  <svg
+    className="game-map-connections"
+    viewBox="0 0 100 100"
+    preserveAspectRatio="none"
+  >
+    {(mapDetails?.connections ?? []).map((connection) => {
+  const fromSystem = getSessionSystemById(connection.from_system_id);
+  const toSystem = getSessionSystemById(connection.to_system_id);
 
-                  return (
-                    <button
-                      key={system.system_id}
-                      className={[
-                        "map-system-node",
-                        system.owner_player_id ? "owned" : "neutral",
-                        isSelected ? "selected" : "",
-                        isControlledBySelectedPlayer ? "selectable" : ""
-                      ].join(" ")}
-                      style={{
-                        left: position.left,
-                        top: position.top
-                      }}
-                      onClick={() => {
-                        setSelectedSystemId(system.system_id);
-                        setSelectedStructureKey(null);
-                        setSelectedUnitId(null);
-                      }}
-                    >
-                      <strong>{system.system_name}</strong>
+  if (!fromSystem || !toSystem) {
+    return null;
+  }
 
-                      <span>
-                        {system.owner_faction ? system.owner_faction : "Neutral"}
-                      </span>
+  const fromPoint = getSystemPoint(fromSystem, mapDetails);
+  const toPoint = getSystemPoint(toSystem, mapDetails);
 
-                      <span className="map-colony-status">
-                        {getSystemColonyMapStatus(system)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+  if (connection.is_wraparound) {
+    const segments = getWraparoundLineSegments(fromPoint, toPoint);
+
+    return (
+      <g key={connection.id}>
+        {segments.map((segment, index) => (
+          <line
+            key={`${connection.id}-${index}`}
+            x1={segment.x1}
+            y1={segment.y1}
+            x2={segment.x2}
+            y2={segment.y2}
+            className={[
+              "game-map-connection",
+              connection.is_dangerous ? "dangerous" : "safe",
+              "wraparound"
+            ].join(" ")}
+          />
+        ))}
+      </g>
+    );
+  }
+
+  return (
+    <line
+      key={connection.id}
+      x1={fromPoint.x}
+      y1={fromPoint.y}
+      x2={toPoint.x}
+      y2={toPoint.y}
+      className={[
+        "game-map-connection",
+        connection.is_dangerous ? "dangerous" : "safe"
+      ].join(" ")}
+    />
+  );
+})}
+  </svg>
+
+  {session.systems.map((system) => {
+    const position = getSystemPosition(system, mapDetails);
+    const isSelected = system.system_id === selectedSystemId;
+    const isControlledBySelectedPlayer =
+      system.owner_player_id === selectedPlayerId;
+
+    const buildingsCount = system.buildings?.length ?? 0;
+    const unitsCount = system.units?.length ?? 0;
+
+    const systemVisualClass = getGameplaySystemVisualClass(system.system_id);
+    const systemTypeLabel = getSystemTypeLabel(system.system_id);
+
+    return (
+      <button
+  key={system.system_id}
+  className={[
+    "map-system-node",
+    "compact-map-system-node",
+    system.owner_player_id ? "owned" : "neutral",
+    systemVisualClass,
+    isSelected ? "selected" : "",
+    isControlledBySelectedPlayer ? "selectable" : ""
+  ].join(" ")}
+  style={{
+    left: position.left,
+    top: position.top
+  }}
+  title={`${system.system_name} · ${
+    system.owner_faction ? system.owner_faction : "Neutral"
+  }`}
+  onClick={() => {
+    setSelectedSystemId(system.system_id);
+    setSelectedStructureKey(null);
+    setSelectedUnitId(null);
+  }}
+>
+  {systemTypeLabel && (
+    <span className="compact-system-type-badge">
+      {systemTypeLabel}
+    </span>
+  )}
+
+  <span className="compact-system-title">
+    {system.system_name}
+  </span>
+
+  <span className="compact-system-owner">
+    {system.owner_faction ? system.owner_faction : "Neutral"}
+  </span>
+
+  <span className="compact-system-icons">
+    <span title="Colony / Ark status">
+      {getSystemColonyMapStatus(system)}
+    </span>
+
+    {buildingsCount > 0 && (
+      <span title="Buildings">🏗 {buildingsCount}</span>
+    )}
+
+    {unitsCount > 0 && (
+      <span title="Units">⚙ {unitsCount}</span>
+    )}
+  </span>
+</button>
+    );
+  })}
+</div>
+
+<div className="game-map-legend">
+    <span className="legend-line-safe">Safe corridor</span>
+    <span className="legend-line-dangerous">Dangerous corridor</span>
+    <span className="legend-line-wraparound">Wraparound corridor</span>
+  </div>
 
               {selectedSystem && (
                 <section className="system-overview-panel">
