@@ -1,13 +1,22 @@
 import {
+  useEffect,
   useMemo,
   useState,
   type ChangeEvent,
   type FocusEvent,
   type MouseEvent
 } from "react";
-import { createEditorMap } from "../api/gameApi";
+import {
+  createEditorMap,
+  deleteEditorMap,
+  getEditorMap,
+  getEditorMaps,
+  updateEditorMap
+} from "../api/gameApi";
 import type {
   MapEditorConnection,
+  MapEditorMapSummary,
+  MapEditorSavedMap,
   MapEditorSavePayload,
   MapEditorSystem,
   MapEditorSystemType
@@ -45,15 +54,41 @@ function normalizeIntegerInput(
     return fallbackValue;
   }
 
-  return Math.min(
-    max,
-    Math.max(min, parsedValue)
-  );
+  return Math.min(max, Math.max(min, parsedValue));
 }
 
-function handleNumericInputFocus(
-  event: FocusEvent<HTMLInputElement>
-) {
+function normalizeGridDimensionInput(rawValue: string): string {
+  const digitsOnly = rawValue.replace(/\D/g, "");
+
+  if (!digitsOnly) {
+    return "";
+  }
+
+  const withoutLeadingZeroes = digitsOnly.replace(/^0+(?=\d)/, "");
+  const parsedValue = Number(withoutLeadingZeroes);
+
+  if (Number.isNaN(parsedValue)) {
+    return "";
+  }
+
+  return String(Math.min(99, Math.max(0, parsedValue)));
+}
+
+function getGridDimensionValue(rawValue: string): number {
+  if (!rawValue.trim()) {
+    return 0;
+  }
+
+  const parsedValue = Number(rawValue);
+
+  if (Number.isNaN(parsedValue)) {
+    return 0;
+  }
+
+  return Math.min(99, Math.max(0, parsedValue));
+}
+
+function handleNumericInputFocus(event: FocusEvent<HTMLInputElement>) {
   event.target.select();
 }
 
@@ -75,14 +110,55 @@ function getSystemIcon(system: MapEditorSystem): string {
   return "⭐";
 }
 
+function convertSavedMapToEditorSystems(
+  savedMap: MapEditorSavedMap
+): MapEditorSystem[] {
+  return savedMap.systems.map((system) => ({
+    client_id: String(system.id),
+    name: system.name,
+    x: system.x,
+    y: system.y,
+    system_type: system.system_type,
+    archive_level: system.archive_level,
+    mineral_slots: system.mineral_slots,
+    energy_slots: system.energy_slots,
+    storage_slots: system.storage_slots,
+    research_center_slots: system.research_center_slots
+  }));
+}
+
+function convertSavedMapToEditorConnections(
+  savedMap: MapEditorSavedMap
+): MapEditorConnection[] {
+  return savedMap.connections.map((connection) => ({
+    from_client_id: String(connection.from_system_id),
+    to_client_id: String(connection.to_system_id),
+    is_dangerous: connection.is_dangerous,
+    is_wraparound: connection.is_wraparound
+  }));
+}
+
 export default function MapEditor() {
   const [mapName, setMapName] = useState<string>("New Archont Map");
   const [playersCount, setPlayersCount] = useState<number>(2);
+
   const [gridWidthInput, setGridWidthInput] = useState<string>("20");
   const [gridHeightInput, setGridHeightInput] = useState<string>("20");
 
   const gridWidth = getGridDimensionValue(gridWidthInput);
   const gridHeight = getGridDimensionValue(gridHeightInput);
+
+  const [savedMaps, setSavedMaps] = useState<MapEditorMapSummary[]>([]);
+  const [selectedSavedMapId, setSelectedSavedMapId] = useState<number | null>(
+    null
+  );
+  const [editingMapId, setEditingMapId] = useState<number | null>(null);
+
+  const [isLoadingSavedMaps, setIsLoadingSavedMaps] =
+    useState<boolean>(false);
+  const [isLoadingMapForEdit, setIsLoadingMapForEdit] =
+    useState<boolean>(false);
+  const [isDeletingMap, setIsDeletingMap] = useState<boolean>(false);
 
   const [mode, setMode] = useState<EditorMode>("select");
 
@@ -129,6 +205,13 @@ export default function MapEditor() {
     (system) => system.system_type === "archive"
   ).length;
 
+  const boardWidth = gridWidth * CELL_SIZE;
+  const boardHeight = gridHeight * CELL_SIZE;
+
+  useEffect(() => {
+    loadSavedMaps();
+  }, []);
+
   function getSystemAtPosition(
     x: number,
     y: number
@@ -138,6 +221,107 @@ export default function MapEditor() {
 
   function getSystemById(clientId: string): MapEditorSystem | undefined {
     return systems.find((system) => system.client_id === clientId);
+  }
+
+  async function loadSavedMaps() {
+    try {
+      setIsLoadingSavedMaps(true);
+      setError("");
+
+      const loadedMaps = await getEditorMaps();
+      const activeMaps = loadedMaps.filter((map) => map.is_active);
+
+      setSavedMaps(activeMaps);
+
+      if (activeMaps.length > 0 && selectedSavedMapId === null) {
+        setSelectedSavedMapId(activeMaps[0].id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load saved maps");
+    } finally {
+      setIsLoadingSavedMaps(false);
+    }
+  }
+
+  async function openSavedMap(mapId: number) {
+    try {
+      setIsLoadingMapForEdit(true);
+      setError("");
+      setSuccessMessage("");
+
+      const savedMap = await getEditorMap(mapId);
+
+      setEditingMapId(savedMap.id);
+      setSelectedSavedMapId(savedMap.id);
+
+      setMapName(savedMap.name);
+      setPlayersCount(savedMap.players_count);
+
+      setGridWidthInput(String(savedMap.grid_width));
+      setGridHeightInput(String(savedMap.grid_height));
+
+      setSystems(convertSavedMapToEditorSystems(savedMap));
+      setConnections(convertSavedMapToEditorConnections(savedMap));
+
+      setSelectedSystemId(null);
+      setSelectedConnectionKey(null);
+      setConnectFromId(null);
+      setMode("select");
+
+      setSuccessMessage(`Map "${savedMap.name}" opened for editing`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to open map");
+    } finally {
+      setIsLoadingMapForEdit(false);
+    }
+  }
+
+  function handleResetEditor() {
+    setMapName("New Archont Map");
+    setPlayersCount(2);
+    setGridWidthInput("20");
+    setGridHeightInput("20");
+    setSystems([]);
+    setConnections([]);
+    setSelectedSystemId(null);
+    setSelectedConnectionKey(null);
+    setConnectFromId(null);
+    setMode("select");
+    setEditingMapId(null);
+    setError("");
+    setSuccessMessage("");
+  }
+
+  async function handleDeleteOpenedMap() {
+    if (editingMapId === null) {
+      setError("Open a saved map before deleting");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Delete this map? This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setIsDeletingMap(true);
+      setError("");
+      setSuccessMessage("");
+
+      await deleteEditorMap(editingMapId);
+
+      setSuccessMessage("Map deleted successfully");
+
+      handleResetEditor();
+      await loadSavedMaps();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete map");
+    } finally {
+      setIsDeletingMap(false);
+    }
   }
 
   function handleGridCellClick(x: number, y: number) {
@@ -236,9 +420,7 @@ export default function MapEditor() {
     setConnectFromId(null);
   }
 
-  function updateSelectedSystem(
-    updates: Partial<MapEditorSystem>
-  ) {
+  function updateSelectedSystem(updates: Partial<MapEditorSystem>) {
     if (!selectedSystemId) {
       return;
     }
@@ -271,58 +453,51 @@ export default function MapEditor() {
   }
 
   function moveSelectedSystem(nextX: number, nextY: number) {
-  if (!selectedSystemId) {
-    return;
+    if (!selectedSystemId) {
+      return;
+    }
+
+    if (gridWidth === 0 || gridHeight === 0) {
+      setError(
+        "Grid must have width and height greater than 0 before moving systems"
+      );
+      return;
+    }
+
+    const boundedX = Math.min(gridWidth - 1, Math.max(0, nextX));
+    const boundedY = Math.min(gridHeight - 1, Math.max(0, nextY));
+
+    const positionIsOccupied = systems.some(
+      (system) =>
+        system.client_id !== selectedSystemId &&
+        system.x === boundedX &&
+        system.y === boundedY
+    );
+
+    if (positionIsOccupied) {
+      setError("Another system already occupies this position");
+      return;
+    }
+
+    setSystems((currentSystems) =>
+      currentSystems.map((system) => {
+        if (system.client_id !== selectedSystemId) {
+          return system;
+        }
+
+        return {
+          ...system,
+          x: boundedX,
+          y: boundedY
+        };
+      })
+    );
+
+    setError("");
+    setSuccessMessage("");
   }
 
-  if (gridWidth === 0 || gridHeight === 0) {
-  setError("Grid must have width and height greater than 0 before moving systems");
-  return;
-}
-
-  const boundedX = Math.min(
-  gridWidth - 1,
-  Math.max(0, nextX)
-);
-
-const boundedY = Math.min(
-  gridHeight - 1,
-  Math.max(0, nextY)
-);
-
-  const positionIsOccupied = systems.some(
-    (system) =>
-      system.client_id !== selectedSystemId &&
-      system.x === boundedX &&
-      system.y === boundedY
-  );
-
-  if (positionIsOccupied) {
-    setError("Another system already occupies this position");
-    return;
-  }
-
-  setSystems((currentSystems) =>
-    currentSystems.map((system) => {
-      if (system.client_id !== selectedSystemId) {
-        return system;
-      }
-
-      return {
-        ...system,
-        x: boundedX,
-        y: boundedY
-      };
-    })
-  );
-
-  setError("");
-  setSuccessMessage("");
-}
-
-  function updateSelectedConnection(
-    updates: Partial<MapEditorConnection>
-  ) {
+  function updateSelectedConnection(updates: Partial<MapEditorConnection>) {
     if (!selectedConnectionKey) {
       return;
     }
@@ -341,54 +516,13 @@ const boundedY = Math.min(
     );
   }
 
-  function normalizeGridDimensionInput(rawValue: string): string {
-  const digitsOnly = rawValue.replace(/\D/g, "");
-
-  if (!digitsOnly) {
-    return "";
-  }
-
-  const withoutLeadingZeroes = digitsOnly.replace(/^0+(?=\d)/, "");
-  const parsedValue = Number(withoutLeadingZeroes);
-
-  if (Number.isNaN(parsedValue)) {
-    return "";
-  }
-
-  return String(
-    Math.min(
-      99,
-      Math.max(0, parsedValue)
-    )
-  );
-}
-
-function getGridDimensionValue(rawValue: string): number {
-  if (!rawValue.trim()) {
-    return 0;
-  }
-
-  const parsedValue = Number(rawValue);
-
-  if (Number.isNaN(parsedValue)) {
-    return 0;
-  }
-
-  return Math.min(
-    99,
-    Math.max(0, parsedValue)
-  );
-}
-
   function deleteSelectedSystem() {
     if (!selectedSystemId) {
       return;
     }
 
     setSystems((currentSystems) =>
-      currentSystems.filter(
-        (system) => system.client_id !== selectedSystemId
-      )
+      currentSystems.filter((system) => system.client_id !== selectedSystemId)
     );
 
     setConnections((currentConnections) =>
@@ -423,7 +557,7 @@ function getGridDimensionValue(rawValue: string): number {
     }
 
     if (gridWidth < 5 || gridHeight < 5) {
-    return "Grid size must be at least 5x5 before saving";
+      return "Grid size must be at least 5x5 before saving";
     }
 
     if (systems.length === 0) {
@@ -432,6 +566,18 @@ function getGridDimensionValue(rawValue: string): number {
 
     if (systems.length > 99) {
       return "Map cannot contain more than 99 systems";
+    }
+
+    const outsideSystem = systems.find(
+      (system) =>
+        system.x < 0 ||
+        system.y < 0 ||
+        system.x >= gridWidth ||
+        system.y >= gridHeight
+    );
+
+    if (outsideSystem) {
+      return `System "${outsideSystem.name}" is outside the grid`;
     }
 
     if (startSystemsCount !== playersCount) {
@@ -445,6 +591,25 @@ function getGridDimensionValue(rawValue: string): number {
     return null;
   }
 
+  function buildSavePayload(
+    payloadName: string,
+    payloadSystems: MapEditorSystem[],
+    payloadConnections: MapEditorConnection[]
+  ): MapEditorSavePayload {
+    return {
+      name: payloadName,
+      players_count: playersCount,
+      grid_width: gridWidth,
+      grid_height: gridHeight,
+      systems: payloadSystems.map((system) => ({
+        ...system,
+        archive_level:
+          system.system_type === "archive" ? system.archive_level ?? 1 : null
+      })),
+      connections: payloadConnections
+    };
+  }
+
   async function handleSaveMap() {
     const validationError = validateBeforeSave();
 
@@ -454,18 +619,72 @@ function getGridDimensionValue(rawValue: string): number {
       return;
     }
 
-    const payload: MapEditorSavePayload = {
-      name: mapName.trim(),
-      players_count: playersCount,
-      grid_width: gridWidth,
-      grid_height: gridHeight,
-      systems: systems.map((system) => ({
+    const payload = buildSavePayload(mapName.trim(), systems, connections);
+
+    try {
+      setIsSaving(true);
+      setError("");
+      setSuccessMessage("");
+
+      if (editingMapId === null) {
+        const savedMap = await createEditorMap(payload);
+
+        setEditingMapId(savedMap.id);
+        setSelectedSavedMapId(savedMap.id);
+        setSuccessMessage(`Map saved successfully. Map ID: ${savedMap.id}`);
+      } else {
+        const updatedMap = await updateEditorMap(editingMapId, payload);
+
+        setSuccessMessage(`Map "${updatedMap.name}" updated successfully`);
+      }
+
+      await loadSavedMaps();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save map");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleSaveAsNewMap() {
+    const validationError = validateBeforeSave();
+
+    if (validationError) {
+      setError(validationError);
+      setSuccessMessage("");
+      return;
+    }
+
+    const oldIdToNewId = new Map<string, string>();
+
+    const copiedSystems = systems.map((system) => {
+      const newClientId = createClientId();
+
+      oldIdToNewId.set(system.client_id, newClientId);
+
+      return {
         ...system,
-        archive_level:
-          system.system_type === "archive" ? system.archive_level ?? 1 : null
-      })),
-      connections
-    };
+        client_id: newClientId
+      };
+    });
+
+    const copiedConnections = connections.map((connection) => ({
+      from_client_id:
+        oldIdToNewId.get(connection.from_client_id) ??
+        connection.from_client_id,
+      to_client_id:
+        oldIdToNewId.get(connection.to_client_id) ?? connection.to_client_id,
+      is_dangerous: connection.is_dangerous,
+      is_wraparound: connection.is_wraparound
+    }));
+
+    const copiedMapName = `${mapName.trim()} Copy`;
+
+    const payload = buildSavePayload(
+      copiedMapName,
+      copiedSystems,
+      copiedConnections
+    );
 
     try {
       setIsSaving(true);
@@ -474,31 +693,24 @@ function getGridDimensionValue(rawValue: string): number {
 
       const savedMap = await createEditorMap(payload);
 
-      setSuccessMessage(`Map saved successfully. Map ID: ${savedMap.id}`);
+      setEditingMapId(savedMap.id);
+      setSelectedSavedMapId(savedMap.id);
+      setMapName(savedMap.name);
+      setSystems(convertSavedMapToEditorSystems(savedMap));
+      setConnections(convertSavedMapToEditorConnections(savedMap));
+      setSelectedSystemId(null);
+      setSelectedConnectionKey(null);
+      setConnectFromId(null);
+
+      setSuccessMessage(`Map saved as new map. Map ID: ${savedMap.id}`);
+
+      await loadSavedMaps();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save map");
+      setError(err instanceof Error ? err.message : "Failed to save map as new");
     } finally {
       setIsSaving(false);
     }
   }
-
-  function handleResetEditor() {
-    setMapName("New Archont Map");
-    setPlayersCount(2);
-    setGridWidthInput("20");
-    setGridHeightInput("20");
-    setSystems([]);
-    setConnections([]);
-    setSelectedSystemId(null);
-    setSelectedConnectionKey(null);
-    setConnectFromId(null);
-    setMode("select");
-    setError("");
-    setSuccessMessage("");
-  }
-
-  const boardWidth = gridWidth * CELL_SIZE;
-  const boardHeight = gridHeight * CELL_SIZE;
 
   return (
     <div className="map-editor-page">
@@ -509,14 +721,34 @@ function getGridDimensionValue(rawValue: string): number {
         </div>
 
         <div className="map-editor-header-actions">
-          <button onClick={handleResetEditor}>Reset</button>
+          <button onClick={handleResetEditor}>New map</button>
+
+          {editingMapId !== null && (
+            <button onClick={handleSaveAsNewMap} disabled={isSaving}>
+              Save as new
+            </button>
+          )}
+
+          {editingMapId !== null && (
+            <button
+              className="danger-button"
+              onClick={handleDeleteOpenedMap}
+              disabled={isDeletingMap}
+            >
+              {isDeletingMap ? "Deleting..." : "Delete map"}
+            </button>
+          )}
 
           <button
             className="primary-button"
             onClick={handleSaveMap}
             disabled={isSaving}
           >
-            {isSaving ? "Saving..." : "Save map"}
+            {isSaving
+              ? "Saving..."
+              : editingMapId === null
+                ? "Save map"
+                : "Update map"}
           </button>
         </div>
       </header>
@@ -529,6 +761,53 @@ function getGridDimensionValue(rawValue: string): number {
 
       <section className="map-editor-layout">
         <aside className="map-editor-panel">
+          <h2>Saved maps</h2>
+
+          <div className="map-editor-saved-maps">
+            <select
+              value={selectedSavedMapId ?? ""}
+              onChange={(event) =>
+                setSelectedSavedMapId(Number(event.target.value))
+              }
+              disabled={isLoadingSavedMaps || savedMaps.length === 0}
+            >
+              {savedMaps.length === 0 && (
+                <option value="">
+                  {isLoadingSavedMaps ? "Loading maps..." : "No saved maps"}
+                </option>
+              )}
+
+              {savedMaps.map((savedMap) => (
+                <option key={savedMap.id} value={savedMap.id}>
+                  #{savedMap.id} · {savedMap.name} · {savedMap.players_count}P
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={() => {
+                if (selectedSavedMapId !== null) {
+                  openSavedMap(selectedSavedMapId);
+                }
+              }}
+              disabled={
+                selectedSavedMapId === null ||
+                isLoadingMapForEdit ||
+                savedMaps.length === 0
+              }
+            >
+              {isLoadingMapForEdit ? "Opening..." : "Open selected map"}
+            </button>
+
+            {editingMapId !== null && (
+              <div className="map-editor-editing-badge">
+                Editing map ID: {editingMapId}
+              </div>
+            )}
+          </div>
+
+          <hr className="map-editor-panel-divider" />
+
           <h2>Map settings</h2>
 
           <label>
@@ -557,33 +836,33 @@ function getGridDimensionValue(rawValue: string): number {
             <label>
               Width
               <input
-  type="text"
-  inputMode="numeric"
-  placeholder="0"
-  value={gridWidthInput}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    setGridWidthInput(
-      normalizeGridDimensionInput(event.target.value)
-    )
-  }
-/>
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                value={gridWidthInput}
+                onFocus={handleNumericInputFocus}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setGridWidthInput(
+                    normalizeGridDimensionInput(event.target.value)
+                  )
+                }
+              />
             </label>
 
             <label>
               Height
               <input
-  type="text"
-  inputMode="numeric"
-  placeholder="0"
-  value={gridHeightInput}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    setGridHeightInput(
-      normalizeGridDimensionInput(event.target.value)
-    )
-  }
-/>
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                value={gridHeightInput}
+                onFocus={handleNumericInputFocus}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setGridHeightInput(
+                    normalizeGridDimensionInput(event.target.value)
+                  )
+                }
+              />
             </label>
           </div>
 
@@ -728,9 +1007,9 @@ function getGridDimensionValue(rawValue: string): number {
                             event.stopPropagation();
 
                             handleSystemClick(
-  system,
-  event as unknown as MouseEvent<HTMLButtonElement>
-);
+                              system,
+                              event as unknown as MouseEvent<HTMLButtonElement>
+                            );
                           }}
                         >
                           <span>{getSystemIcon(system)}</span>
@@ -798,135 +1077,132 @@ function getGridDimensionValue(rawValue: string): number {
               )}
 
               <div className="map-editor-grid-size">
-  <label>
-    X position
-    <input
-      type="text"
-      inputMode="numeric"
-      value={String(selectedSystem.x)}
-      onFocus={handleNumericInputFocus}
-      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-        moveSelectedSystem(
-          normalizeIntegerInput(
-            event.target.value,
-            selectedSystem.x,
-            0,
-            Math.max(0, gridWidth - 1)
-          ),
-          selectedSystem.y
-        )
-      }
-    />
-  </label>
+                <label>
+                  X position
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={String(selectedSystem.x)}
+                    onFocus={handleNumericInputFocus}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      moveSelectedSystem(
+                        normalizeIntegerInput(
+                          event.target.value,
+                          selectedSystem.x,
+                          0,
+                          Math.max(0, gridWidth - 1)
+                        ),
+                        selectedSystem.y
+                      )
+                    }
+                  />
+                </label>
 
-  <label>
-    Y position
-    <input
-      type="text"
-      inputMode="numeric"
-      value={String(selectedSystem.y)}
-      onFocus={handleNumericInputFocus}
-      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-        moveSelectedSystem(
-          selectedSystem.x,
-          normalizeIntegerInput(
-            event.target.value,
-            selectedSystem.y,
-            0,
-            Math.max(0, gridHeight - 1)
-          )
-        )
-      }
-    />
-  </label>
-</div>
+                <label>
+                  Y position
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={String(selectedSystem.y)}
+                    onFocus={handleNumericInputFocus}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      moveSelectedSystem(
+                        selectedSystem.x,
+                        normalizeIntegerInput(
+                          event.target.value,
+                          selectedSystem.y,
+                          0,
+                          Math.max(0, gridHeight - 1)
+                        )
+                      )
+                    }
+                  />
+                </label>
+              </div>
 
               <h3>Building slots</h3>
 
               <label>
                 Mine slots
                 <input
-  type="text"
-  inputMode="numeric"
-  value={String(selectedSystem.mineral_slots)}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    updateSelectedSystem({
-      mineral_slots: normalizeIntegerInput(
-        event.target.value,
-        selectedSystem.mineral_slots,
-        0,
-        9
-      )
-    })
-  }
-/>
+                  type="text"
+                  inputMode="numeric"
+                  value={String(selectedSystem.mineral_slots)}
+                  onFocus={handleNumericInputFocus}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    updateSelectedSystem({
+                      mineral_slots: normalizeIntegerInput(
+                        event.target.value,
+                        selectedSystem.mineral_slots,
+                        0,
+                        9
+                      )
+                    })
+                  }
+                />
               </label>
 
               <label>
                 Power plant slots
                 <input
-  type="text"
-  inputMode="numeric"
-  value={String(selectedSystem.energy_slots)}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    updateSelectedSystem({
-      energy_slots: normalizeIntegerInput(
-        event.target.value,
-        selectedSystem.energy_slots,
-        0,
-        9
-      )
-    })
-  }
-/>
+                  type="text"
+                  inputMode="numeric"
+                  value={String(selectedSystem.energy_slots)}
+                  onFocus={handleNumericInputFocus}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    updateSelectedSystem({
+                      energy_slots: normalizeIntegerInput(
+                        event.target.value,
+                        selectedSystem.energy_slots,
+                        0,
+                        9
+                      )
+                    })
+                  }
+                />
               </label>
 
               <label>
                 Supply depot slots
                 <input
-  type="text"
-  inputMode="numeric"
-  value={String(selectedSystem.storage_slots)}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    updateSelectedSystem({
-      storage_slots: normalizeIntegerInput(
-        event.target.value,
-        selectedSystem.storage_slots,
-        0,
-        9
-      )
-    })
-  }
-/>
+                  type="text"
+                  inputMode="numeric"
+                  value={String(selectedSystem.storage_slots)}
+                  onFocus={handleNumericInputFocus}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    updateSelectedSystem({
+                      storage_slots: normalizeIntegerInput(
+                        event.target.value,
+                        selectedSystem.storage_slots,
+                        0,
+                        9
+                      )
+                    })
+                  }
+                />
               </label>
 
               <label>
                 Research center slots
                 <input
-  type="text"
-  inputMode="numeric"
-  value={String(selectedSystem.research_center_slots)}
-  onFocus={handleNumericInputFocus}
-  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-    updateSelectedSystem({
-      research_center_slots: normalizeIntegerInput(
-        event.target.value,
-        selectedSystem.research_center_slots,
-        0,
-        9
-      )
-    })
-  }
-/>
+                  type="text"
+                  inputMode="numeric"
+                  value={String(selectedSystem.research_center_slots)}
+                  onFocus={handleNumericInputFocus}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    updateSelectedSystem({
+                      research_center_slots: normalizeIntegerInput(
+                        event.target.value,
+                        selectedSystem.research_center_slots,
+                        0,
+                        9
+                      )
+                    })
+                  }
+                />
               </label>
 
-              <button
-                className="danger-button"
-                onClick={deleteSelectedSystem}
-              >
+              <button className="danger-button" onClick={deleteSelectedSystem}>
                 Delete system
               </button>
             </div>
@@ -937,34 +1213,34 @@ function getGridDimensionValue(rawValue: string): number {
               <h3>Connection</h3>
 
               <div className="map-editor-checkbox-group">
-  <label className="map-editor-checkbox-row">
-    <span>Dangerous corridor</span>
+                <label className="map-editor-checkbox-row">
+                  <span>Dangerous corridor</span>
 
-    <input
-      type="checkbox"
-      checked={selectedConnection.is_dangerous}
-      onChange={(event) =>
-        updateSelectedConnection({
-          is_dangerous: event.target.checked
-        })
-      }
-    />
-  </label>
+                  <input
+                    type="checkbox"
+                    checked={selectedConnection.is_dangerous}
+                    onChange={(event) =>
+                      updateSelectedConnection({
+                        is_dangerous: event.target.checked
+                      })
+                    }
+                  />
+                </label>
 
-  <label className="map-editor-checkbox-row">
-    <span>Wraparound through map edge</span>
+                <label className="map-editor-checkbox-row">
+                  <span>Wraparound through map edge</span>
 
-    <input
-      type="checkbox"
-      checked={selectedConnection.is_wraparound}
-      onChange={(event) =>
-        updateSelectedConnection({
-          is_wraparound: event.target.checked
-        })
-      }
-    />
-  </label>
-</div>
+                  <input
+                    type="checkbox"
+                    checked={selectedConnection.is_wraparound}
+                    onChange={(event) =>
+                      updateSelectedConnection({
+                        is_wraparound: event.target.checked
+                      })
+                    }
+                  />
+                </label>
+              </div>
 
               <button
                 className="danger-button"

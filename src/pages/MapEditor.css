@@ -338,3 +338,27 @@
   margin: 0;
   justify-self: end;
 }
+
+.map-editor-saved-maps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-editor-editing-badge {
+  padding: 10px;
+  border: 1px solid #ded9e8;
+  border-radius: 8px;
+  background: #faf9fc;
+  color: #1f1b2d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.map-editor-panel-divider {
+  width: 100%;
+  height: 1px;
+  margin: 4px 0;
+  border: 0;
+  background: #ded9e8;
+}

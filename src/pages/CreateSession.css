@@ -1,0 +1,252 @@
+.create-session-page {
+  padding: 32px;
+}
+
+.create-session-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.create-session-header h1 {
+  margin: 0;
+  color: #1f1b2d;
+}
+
+.create-session-header p {
+  margin-top: 14px;
+  color: #4f475c;
+}
+
+.create-session-error {
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e57373;
+  border-radius: 8px;
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.create-session-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 520px) minmax(520px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.create-session-panel,
+.create-session-preview-panel {
+  padding: 20px;
+  border: 1px solid #ded9e8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.create-session-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.create-session-panel,
+.create-session-panel *,
+.create-session-preview-panel,
+.create-session-preview-panel * {
+  box-sizing: border-box;
+}
+
+.create-session-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #1f1b2d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.create-session-panel input,
+.create-session-panel select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #cfc9dc;
+  border-radius: 8px;
+}
+
+.selected-map-card {
+  padding: 14px;
+  border: 1px solid #ded9e8;
+  border-radius: 10px;
+  background: #faf9fc;
+}
+
+.selected-map-card h2 {
+  margin: 0 0 10px;
+  color: #1f1b2d;
+  font-size: 18px;
+}
+
+.selected-map-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #4f475c;
+  font-size: 14px;
+}
+
+.create-session-empty-state {
+  padding: 14px;
+  border: 1px dashed #cfc9dc;
+  border-radius: 10px;
+  background: #faf9fc;
+  color: #4f475c;
+}
+
+.create-session-empty-state p {
+  margin-top: 0;
+}
+
+.create-session-submit {
+  font-weight: 700;
+}
+
+.map-preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.map-preview-header h2 {
+  margin: 0;
+  color: #1f1b2d;
+}
+
+.map-preview-header p {
+  margin: 8px 0 0;
+  color: #4f475c;
+  font-size: 14px;
+}
+
+.map-preview-board {
+  position: relative;
+  overflow: hidden;
+  height: 460px;
+  border: 1px solid #ded9e8;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at center, rgba(123, 44, 255, 0.16), transparent 58%),
+    linear-gradient(135deg, #10101a, #19162a);
+}
+
+.map-preview-connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.map-preview-connection {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 3;
+}
+
+.map-preview-connection.safe {
+  stroke: rgba(120, 200, 255, 0.8);
+}
+
+.map-preview-connection.dangerous {
+  stroke: rgba(255, 99, 99, 0.9);
+  stroke-dasharray: 6 5;
+}
+
+.map-preview-connection.wraparound {
+  stroke-width: 5;
+}
+
+.map-preview-system {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translate(-50%, -50%);
+  max-width: 150px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(48, 48, 68, 0.96);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.map-preview-system.start {
+  background: rgba(48, 92, 58, 0.96);
+}
+
+.map-preview-system.archive {
+  background: rgba(77, 59, 120, 0.96);
+}
+
+.map-preview-system-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-preview-system-name {
+  overflow: hidden;
+  max-width: 105px;
+  text-overflow: ellipsis;
+}
+
+.map-preview-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #4f475c;
+  font-size: 13px;
+}
+
+.legend-safe::before,
+.legend-dangerous::before {
+  content: "";
+  display: inline-block;
+  width: 22px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 999px;
+}
+
+.legend-safe::before {
+  background: rgba(120, 200, 255, 0.9);
+}
+
+.legend-dangerous::before {
+  background: rgba(255, 99, 99, 0.9);
+}
+
+.map-preview-empty {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  border: 1px dashed #cfc9dc;
+  border-radius: 12px;
+  background: #faf9fc;
+  color: #4f475c;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .create-session-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-preview-board {
+    height: 360px;
+  }
+}
