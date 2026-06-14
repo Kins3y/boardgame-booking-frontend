@@ -7,6 +7,7 @@ import GameSession from "./pages/GameSession";
 import GameSessionSetup from "./pages/GameSessionSetup";
 import GamePlay from "./pages/GamePlay";
 import SessionsList from "./pages/SessionsList";
+import MapEditor from "./pages/MapEditor";
 import "./App.css";
 
 export default function App() {
@@ -73,6 +74,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/map-editor"
+  element={
+    <ProtectedRoute>
+      <MapEditor />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/game/sessions/:sessionId/play"

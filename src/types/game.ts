@@ -125,3 +125,68 @@ export type Civilization = {
 };
 
 export type BuildingType = "mine" | "power_plant" | "storage";
+
+export type MapEditorSystemType = "normal" | "start" | "archive";
+
+export type MapEditorSystem = {
+  client_id: string;
+  name: string;
+  x: number;
+  y: number;
+  system_type: MapEditorSystemType;
+  archive_level: number | null;
+  mineral_slots: number;
+  energy_slots: number;
+  storage_slots: number;
+  research_center_slots: number;
+};
+
+export type MapEditorConnection = {
+  from_client_id: string;
+  to_client_id: string;
+  is_dangerous: boolean;
+  is_wraparound: boolean;
+};
+
+export type MapEditorSavePayload = {
+  name: string;
+  players_count: number;
+  grid_width: number;
+  grid_height: number;
+  systems: MapEditorSystem[];
+  connections: MapEditorConnection[];
+};
+
+export type MapEditorSavedSystem = MapEditorSystem & {
+  id: number;
+  is_start: boolean;
+  is_archive: boolean;
+};
+
+export type MapEditorSavedConnection = {
+  id: number;
+  from_system_id: number;
+  to_system_id: number;
+  is_dangerous: boolean;
+  is_wraparound: boolean;
+};
+
+export type MapEditorSavedMap = {
+  id: number;
+  name: string;
+  players_count: number;
+  grid_width: number;
+  grid_height: number;
+  is_active: boolean;
+  systems: MapEditorSavedSystem[];
+  connections: MapEditorSavedConnection[];
+};
+
+export type MapEditorMapSummary = {
+  id: number;
+  name: string;
+  players_count: number;
+  grid_width: number;
+  grid_height: number;
+  is_active: boolean;
+};

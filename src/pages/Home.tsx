@@ -38,25 +38,29 @@ export default function Home() {
       )}
 
       <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          maxWidth: "220px"
-        }}
-      >
-        <button onClick={handleCreateSession} disabled={isCreatingSession}>
-          {isCreatingSession ? "Creating..." : "Start session"}
-        </button>
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    maxWidth: "220px"
+  }}
+>
+  <button onClick={handleCreateSession} disabled={isCreatingSession}>
+    {isCreatingSession ? "Creating..." : "Start session"}
+  </button>
 
-        <Link to="/game/sessions">
-          <button style={{ width: "100%" }}>Sessions list</button>
-        </Link>
+  <Link to="/game/sessions">
+    <button style={{ width: "100%" }}>Sessions list</button>
+  </Link>
 
-        <div style={{ marginTop: "24px" }}>
-          <button onClick={logout}>Logout</button>
-        </div>
-      </div>
+  <Link to="/map-editor">
+    <button style={{ width: "100%" }}>Map editor</button>
+  </Link>
+
+  <div style={{ marginTop: "24px" }}>
+    <button onClick={logout}>Logout</button>
+  </div>
+</div>
     </div>
   );
 }

@@ -4,7 +4,10 @@ import type {
   SessionOverviewItem,
   Civilization,
   StartSystemOption,
-  BuildingType
+  BuildingType,
+  MapEditorMapSummary,
+  MapEditorSavePayload,
+  MapEditorSavedMap
 } from "../types/game";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -290,4 +293,63 @@ export async function colonizeSystemWithArk(
   const data = await response.json();
 
   return data.session;
+}
+
+export async function getEditorMaps(): Promise<MapEditorMapSummary[]> {
+  const response = await fetch(`${API_URL}/game/maps/editor/`);
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
+}
+
+export async function createEditorMap(
+  payload: MapEditorSavePayload
+): Promise<MapEditorSavedMap> {
+  const response = await fetch(`${API_URL}/game/maps/editor/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
+}
+
+export async function getEditorMap(
+  mapId: number
+): Promise<MapEditorSavedMap> {
+  const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`);
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
+}
+
+export async function updateEditorMap(
+  mapId: number,
+  payload: MapEditorSavePayload
+): Promise<MapEditorSavedMap> {
+  const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  return response.json();
 }
