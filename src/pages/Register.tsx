@@ -4,6 +4,34 @@ import { api } from "../api/client";
 import PasswordInput from "../components/PasswordInput";
 import "./MarketingPages.css";
 
+type RegisterFieldErrors = {
+  email?: string;
+  nickname?: string;
+  password?: string;
+  passwordConfirm?: string;
+};
+
+function getApiErrorDetail(error: unknown): string {
+  const possibleError = error as {
+    response?: {
+      data?: {
+        detail?: string | Array<{ msg?: string }>;
+      };
+    };
+  };
+
+  const detail = possibleError.response?.data?.detail;
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => item.msg)
+      .filter(Boolean)
+      .join(". ");
+  }
+
+  return detail ?? "";
+}
+
 export default function Register() {
   const navigate = useNavigate();
 
@@ -12,38 +40,58 @@ export default function Register() {
   const [password, setPassword] = useState<string>("");
   const [passwordConfirm, setPasswordConfirm] = useState<string>("");
 
+  const [fieldErrors, setFieldErrors] = useState<RegisterFieldErrors>({});
+
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  async function handleRegister(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function validateRegisterForm(): boolean {
+    const nextErrors: RegisterFieldErrors = {};
 
     const trimmedEmail = email.trim();
     const trimmedNickname = nickname.trim();
 
     if (!trimmedEmail) {
-      setError("Email is required.");
-      return;
+      nextErrors.email = "Email is required.";
     }
 
     if (!trimmedNickname) {
-      setError("Nickname is required.");
-      return;
+      nextErrors.nickname = "Nickname is required.";
+    } else if (!/^[A-Za-z0-9_]{3,32}$/.test(trimmedNickname)) {
+      nextErrors.nickname =
+        "Nickname may contain only Latin letters, numbers and underscore. Spaces are not allowed.";
     }
 
     if (password.length < 8) {
-      setError("Password must contain at least 8 characters.");
+      nextErrors.password = "Password must contain at least 8 characters.";
+    }
+
+    if (!passwordConfirm) {
+      nextErrors.passwordConfirm = "Repeat password is required.";
+    } else if (password !== passwordConfirm) {
+      nextErrors.passwordConfirm = "Passwords do not match.";
+    }
+
+    setFieldErrors(nextErrors);
+
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  async function handleRegister(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!validateRegisterForm()) {
+      setError("");
       return;
     }
 
-    if (password !== passwordConfirm) {
-      setError("Passwords do not match.");
-      return;
-    }
+    const trimmedEmail = email.trim();
+    const trimmedNickname = nickname.trim();
 
     try {
       setIsSubmitting(true);
       setError("");
+      setFieldErrors({});
 
       await api.post("/user/create/", {
         email: trimmedEmail,
@@ -56,8 +104,35 @@ export default function Register() {
     } catch (err) {
       console.error("Register error", err);
 
+      const detail = getApiErrorDetail(err);
+      const normalizedDetail = detail.toLowerCase();
+
+      if (normalizedDetail.includes("email")) {
+        setFieldErrors({
+          email: detail || "Email is invalid or already registered."
+        });
+        setError("");
+        return;
+      }
+
+      if (normalizedDetail.includes("nickname")) {
+        setFieldErrors({
+          nickname: detail || "Nickname is invalid or already registered."
+        });
+        setError("");
+        return;
+      }
+
+      if (normalizedDetail.includes("password")) {
+        setFieldErrors({
+          password: detail || "Password is invalid."
+        });
+        setError("");
+        return;
+      }
+
       setError(
-        "Registration failed. Check fields or try another nickname/email."
+        detail || "Registration failed. Check fields or try another nickname/email."
       );
     } finally {
       setIsSubmitting(false);
@@ -99,47 +174,112 @@ export default function Register() {
           <form className="archont-form" onSubmit={handleRegister}>
             {error && <div className="archont-error">{error}</div>}
 
-            <label className="archont-field">
+            <label
+              className={`archont-field ${
+                fieldErrors.email ? "has-error" : ""
+              }`}
+            >
               Email
               <input
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setFieldErrors((currentErrors) => ({
+                    ...currentErrors,
+                    email: undefined
+                  }));
+                }}
                 placeholder="commander@archont.net"
                 autoComplete="email"
               />
+              {fieldErrors.email && (
+                <span className="archont-field-error">
+                  {fieldErrors.email}
+                </span>
+              )}
             </label>
 
-            <label className="archont-field">
+            <label
+              className={`archont-field ${
+                fieldErrors.nickname ? "has-error" : ""
+              }`}
+            >
               Nickname
               <input
                 value={nickname}
-                onChange={(event) => setNickname(event.target.value)}
+                onChange={(event) => {
+                  setNickname(event.target.value);
+                  setFieldErrors((currentErrors) => ({
+                    ...currentErrors,
+                    nickname: undefined
+                  }));
+                }}
                 placeholder="Your commander name"
                 autoComplete="nickname"
               />
+              {fieldErrors.nickname ? (
+                <span className="archont-field-error">
+                  {fieldErrors.nickname}
+                </span>
+              ) : (
+                <span className="archont-field-error">
+                  Use Latin letters, numbers or underscore. Spaces are not
+                  allowed.
+                </span>
+              )}
             </label>
 
-            <label className="archont-field">
+            <label
+              className={`archont-field ${
+                fieldErrors.password ? "has-error" : ""
+              }`}
+            >
               Password
               <PasswordInput
                 value={password}
-                onChange={setPassword}
+                onChange={(value) => {
+                  setPassword(value);
+                  setFieldErrors((currentErrors) => ({
+                    ...currentErrors,
+                    password: undefined
+                  }));
+                }}
                 placeholder="Create password"
                 autoComplete="new-password"
                 preventClipboard
               />
+              {fieldErrors.password && (
+                <span className="archont-field-error">
+                  {fieldErrors.password}
+                </span>
+              )}
             </label>
 
-            <label className="archont-field">
+            <label
+              className={`archont-field ${
+                fieldErrors.passwordConfirm ? "has-error" : ""
+              }`}
+            >
               Repeat password
               <PasswordInput
                 value={passwordConfirm}
-                onChange={setPasswordConfirm}
+                onChange={(value) => {
+                  setPasswordConfirm(value);
+                  setFieldErrors((currentErrors) => ({
+                    ...currentErrors,
+                    passwordConfirm: undefined
+                  }));
+                }}
                 placeholder="Repeat password"
                 autoComplete="new-password"
                 preventClipboard
               />
+              {fieldErrors.passwordConfirm && (
+                <span className="archont-field-error">
+                  {fieldErrors.passwordConfirm}
+                </span>
+              )}
             </label>
 
             <button

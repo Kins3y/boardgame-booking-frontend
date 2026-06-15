@@ -195,6 +195,20 @@
   color: #ffffff;
 }
 
+.profile-form label.has-error input {
+  border-color: #e5485d;
+  background: #fff7f8;
+  box-shadow: 0 0 0 4px rgba(229, 72, 93, 0.1);
+}
+
+.profile-field-error {
+  margin-top: 2px;
+  color: #c92a3a;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 @media (max-width: 800px) {
   .profile-card {
     padding: 82px 24px 24px;
