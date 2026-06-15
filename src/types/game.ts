@@ -18,6 +18,9 @@ export type SessionPlayer = {
 
   start_system_id: number | null;
   start_system_name: string | null;
+
+  command_points_left: number;
+  has_passed: boolean;
 };
 
 export type SessionBuilding = {
@@ -64,6 +67,12 @@ export type FullGameSession = {
   name: string;
   status: string;
   current_round: number;
+
+  play_mode: string;
+  round_phase: string;
+  current_player_id: number | null;
+  current_turn_index: number;
+
   players_count: number;
   players: SessionPlayer[];
   systems: SessionSystem[];
@@ -86,6 +95,9 @@ export type SessionOverviewPlayer = {
 
   faction_name: string;
   start_system_id: number | null;
+
+  command_points_left?: number;
+  has_passed?: boolean;
 };
 
 export type SessionOverviewItem = {
@@ -94,6 +106,12 @@ export type SessionOverviewItem = {
   name: string;
   status: string;
   current_round: number;
+
+  play_mode?: string;
+  round_phase?: string;
+  current_player_id?: number | null;
+  current_turn_index?: number;
+
   players_count: number;
   players: SessionOverviewPlayer[];
 };

@@ -271,6 +271,44 @@ export async function nextRound(
   return data.session;
 }
 
+export async function endTurn(
+  sessionId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/end-turn`,
+    {
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+export async function passTurn(
+  sessionId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/pass`,
+    {
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
 export async function packColonyIntoArk(
   sessionId: number,
   unitId: number

@@ -1210,6 +1210,188 @@
   z-index: 12;
 }
 
+.hotseat-turn-panel {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+
+.turn-kicker {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.turn-current-player-card {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(244, 243, 236, 0.45);
+}
+
+.turn-current-player-card span {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.turn-current-player-card strong {
+  color: var(--text-h);
+  font-size: 18px;
+}
+
+.turn-current-player-card small {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.turn-command-points {
+  margin-top: 6px;
+  color: var(--accent);
+  font-weight: 900;
+}
+
+.turn-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.turn-actions button {
+  min-width: 110px;
+}
+
+.turn-current-player-card {
+  color: #08060d;
+  background: #ffffff;
+  border: 1px solid rgba(170, 59, 255, 0.28);
+  box-shadow: 0 12px 28px rgba(8, 6, 13, 0.08);
+}
+
+.turn-current-player-card span {
+  color: #6b6375;
+}
+
+.turn-current-player-card strong {
+  color: #08060d;
+}
+
+.turn-current-player-card small {
+  color: #4f4859;
+}
+
+.turn-command-points {
+  color: #7b21d8;
+  background: rgba(170, 59, 255, 0.1);
+  border: 1px solid rgba(170, 59, 255, 0.24);
+  border-radius: 999px;
+  padding: 6px 10px;
+  width: fit-content;
+}
+
+.acting-player-card {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid rgba(170, 59, 255, 0.26);
+  border-radius: 16px;
+  background: #ffffff;
+  color: #08060d;
+  box-shadow: 0 10px 24px rgba(8, 6, 13, 0.06);
+}
+
+.acting-player-card span {
+  color: #6b6375;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.acting-player-card strong {
+  color: #08060d;
+  font-size: 16px;
+}
+
+.acting-player-card small {
+  color: #7b21d8;
+  font-weight: 900;
+}
+
+.inline-action-error {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(229, 72, 93, 0.24);
+  border-radius: 10px;
+  color: #c92a3a;
+  background: #fff7f8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.round-flow-hint {
+  max-width: 280px;
+  color: #6b6375;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.player-card-turn-state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.player-pass-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 3px 8px;
+  border: 1px solid rgba(229, 72, 93, 0.32);
+  border-radius: 999px;
+  color: #c92a3a;
+  background: #fff7f8;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 900px) {
+  .round-flow-hint {
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 900px) {
+  .hotseat-turn-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .turn-actions {
+    justify-content: stretch;
+  }
+
+  .turn-actions button {
+    flex: 1;
+  }
+}
+
 @media (max-width: 1200px) {
   .enhanced-galaxy-map {
     min-height: 620px;

@@ -3,10 +3,11 @@ import { useParams } from "react-router-dom";
 import {
   buildBuilding,
   colonizeSystemWithArk,
+  endTurn,
   getEditorMap,
   getFullSession,
-  nextRound,
-  packColonyIntoArk
+  packColonyIntoArk,
+  passTurn
 } from "../api/gameApi";
 import type {
   BuildingType,
@@ -20,6 +21,62 @@ import type {
 import "./GameSession.css";
 
 const UNIT_ACTION_ENERGY_COST = 3;
+const COMMAND_POINTS_PER_ROUND = 3;
+
+type ResourceCost = {
+  matter?: number;
+  energy?: number;
+  data?: number;
+  food?: number;
+};
+
+const BUILDING_COSTS: Record<BuildingType, ResourceCost> = {
+  mine: {
+    matter: 6,
+    energy: 2
+  },
+  power_plant: {
+    matter: 6,
+    energy: 3
+  },
+  storage: {
+    matter: 3,
+    energy: 2
+  }
+};
+
+function getResourceShortageMessage(
+  player: SessionPlayer | null,
+  cost: ResourceCost
+): string | null {
+  if (!player) {
+    return "No active player selected.";
+  }
+
+  const missingResources: string[] = [];
+
+  if ((cost.matter ?? 0) > player.matter) {
+    missingResources.push(`matter: need ${cost.matter}, have ${player.matter}`);
+  }
+
+  if ((cost.energy ?? 0) > player.energy) {
+    missingResources.push(`energy: need ${cost.energy}, have ${player.energy}`);
+  }
+
+  if ((cost.data ?? 0) > player.data) {
+    missingResources.push(`data: need ${cost.data}, have ${player.data}`);
+  }
+
+  if ((cost.food ?? 0) > player.food) {
+    missingResources.push(`food: need ${cost.food}, have ${player.food}`);
+  }
+
+  if (missingResources.length === 0) {
+    return null;
+  }
+
+  return `Not enough resources — ${missingResources.join(", ")}.`;
+}
 
 const BUILDING_OPTIONS: {
   type: BuildingType;
@@ -144,8 +201,8 @@ function getBuildingDisplayName(building: SessionBuilding): string {
 
 function getUnitDisplayName(unit: SessionUnit): string {
   if (unit.unit_type === "colony" && unit.state === "deployed") {
-  return unit.is_foundation ? "Foundation Colony" : "Colony";
-}
+    return unit.is_foundation ? "Foundation Colony" : "Colony";
+  }
 
   if (unit.unit_type === "colony" && unit.state === "ark") {
     return "Ark";
@@ -358,33 +415,37 @@ export default function GamePlay() {
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
 
   const [error, setError] = useState<string>("");
+  const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
-  const [isEndingRound, setIsEndingRound] = useState<boolean>(false);
+  const [isTurnActionLoading, setIsTurnActionLoading] =
+    useState<boolean>(false);
   const [isUnitActionLoading, setIsUnitActionLoading] =
     useState<boolean>(false);
 
   const numericSessionId = Number(sessionId);
 
-  const selectedPlayer = useMemo(() => {
-    if (!session || selectedPlayerId === null) {
+  const currentPlayer = useMemo(() => {
+    if (!session || session.current_player_id === null) {
       return null;
     }
 
     return (
-      session.players.find((player) => player.id === selectedPlayerId) ?? null
+      session.players.find(
+        (player) => player.id === session.current_player_id
+      ) ?? null
     );
-  }, [session, selectedPlayerId]);
+  }, [session]);
 
   const controlledSystems = useMemo(() => {
-    if (!session || selectedPlayerId === null) {
+    if (!session || !currentPlayer) {
       return [];
     }
 
     return session.systems.filter(
-      (system) => system.owner_player_id === selectedPlayerId
+      (system) => system.owner_player_id === currentPlayer.id
     );
-  }, [session, selectedPlayerId]);
+  }, [session, currentPlayer]);
 
   const selectedSystem = useMemo(() => {
     if (!session || selectedSystemId === null) {
@@ -399,8 +460,13 @@ export default function GamePlay() {
 
   const canBuildInSelectedSystem =
     Boolean(selectedSystem) &&
-    Boolean(selectedPlayerId) &&
-    selectedSystem?.owner_player_id === selectedPlayerId;
+    Boolean(currentPlayer) &&
+    selectedSystem?.owner_player_id === currentPlayer?.id;
+
+  const selectedBuildingResourceError = getResourceShortageMessage(
+    currentPlayer,
+    BUILDING_COSTS[selectedBuildingType]
+  );
 
   async function loadSession() {
     if (!Number.isInteger(numericSessionId) || numericSessionId < 1) {
@@ -411,28 +477,36 @@ export default function GamePlay() {
     try {
       setIsLoading(true);
       setError("");
+      setActionErrors({});
 
       const sessionData = await getFullSession(numericSessionId);
-const loadedMapDetails = await getEditorMap(sessionData.map_id);
+      const loadedMapDetails = await getEditorMap(sessionData.map_id);
 
-setSession(sessionData);
-setMapDetails(loadedMapDetails);
+      setSession(sessionData);
+      setMapDetails(loadedMapDetails);
 
-      if (!selectedPlayerId && sessionData.players.length > 0) {
-        const firstPlayer = sessionData.players[0];
-        setSelectedPlayerId(firstPlayer.id);
+      const playerToSelect =
+        sessionData.players.find(
+          (player) => player.id === sessionData.current_player_id
+        ) ?? sessionData.players[0];
+
+      if (playerToSelect) {
+        setSelectedPlayerId(playerToSelect.id);
 
         const firstControlledSystem = sessionData.systems.find(
-          (system) => system.owner_player_id === firstPlayer.id
+          (system) => system.owner_player_id === playerToSelect.id
         );
 
         setSelectedSystemId(firstControlledSystem?.system_id ?? null);
+      } else {
+        setSelectedPlayerId(null);
+        setSelectedSystemId(null);
       }
     } catch (err) {
-  setSession(null);
-  setMapDetails(null);
-  setError(err instanceof Error ? err.message : "Failed to load game");
-} finally {
+      setSession(null);
+      setMapDetails(null);
+      setError(err instanceof Error ? err.message : "Failed to load game");
+    } finally {
       setIsLoading(false);
     }
   }
@@ -442,56 +516,120 @@ setMapDetails(loadedMapDetails);
       return;
     }
 
-    if (!selectedPlayerId) {
-      setError("Select player");
+    if (!currentPlayer) {
+      setActionErrors({
+        build: "No current player is active."
+      });
       return;
     }
 
     if (!selectedSystemId) {
-      setError("Select controlled system");
+      setActionErrors({
+        build: "Select a controlled system."
+      });
       return;
     }
 
     if (!canBuildInSelectedSystem) {
-      setError("Selected player does not control this system");
+      setActionErrors({
+        build: "You can build only in the current player's systems."
+      });
+      return;
+    }
+
+    if (selectedBuildingResourceError) {
+      setActionErrors({
+        build: selectedBuildingResourceError
+      });
       return;
     }
 
     try {
       setIsBuilding(true);
       setError("");
+      setActionErrors({});
 
       await buildBuilding(
         session.id,
-        selectedPlayerId,
+        currentPlayer.id,
         selectedSystemId,
         selectedBuildingType
       );
 
       await loadSession();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to build building");
+      setActionErrors({
+        build: err instanceof Error ? err.message : "Failed to build building"
+      });
     } finally {
       setIsBuilding(false);
     }
   }
 
-  async function handleNextRound() {
+  function selectCurrentPlayerFromSession(updatedSession: FullGameSession) {
+    const nextCurrentPlayer =
+      updatedSession.players.find(
+        (player) => player.id === updatedSession.current_player_id
+      ) ?? updatedSession.players[0];
+
+    if (!nextCurrentPlayer) {
+      setSelectedPlayerId(null);
+      setSelectedSystemId(null);
+      setSelectedStructureKey(null);
+      setSelectedUnitId(null);
+      return;
+    }
+
+    setSelectedPlayerId(nextCurrentPlayer.id);
+
+    const firstControlledSystem = updatedSession.systems.find(
+      (system) => system.owner_player_id === nextCurrentPlayer.id
+    );
+
+    setSelectedSystemId(firstControlledSystem?.system_id ?? null);
+    setSelectedStructureKey(null);
+    setSelectedUnitId(null);
+  }
+
+  async function handleEndTurn() {
     if (!session) {
       return;
     }
 
     try {
-      setIsEndingRound(true);
+      setIsTurnActionLoading(true);
       setError("");
+      setActionErrors({});
 
-      const updatedSession = await nextRound(session.id);
+      const updatedSession = await endTurn(session.id);
 
       setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start next round");
+      setError(err instanceof Error ? err.message : "Failed to end turn");
     } finally {
-      setIsEndingRound(false);
+      setIsTurnActionLoading(false);
+    }
+  }
+
+  async function handlePassTurn() {
+    if (!session) {
+      return;
+    }
+
+    try {
+      setIsTurnActionLoading(true);
+      setError("");
+      setActionErrors({});
+
+      const updatedSession = await passTurn(session.id);
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to pass");
+    } finally {
+      setIsTurnActionLoading(false);
     }
   }
 
@@ -500,22 +638,39 @@ setMapDetails(loadedMapDetails);
       return;
     }
 
-    if (unit.owner_player_id !== selectedPlayerId) {
-      setError("Select the owner player to control this colony");
+    const actionErrorKey = `unit-${unit.id}`;
+
+    if (!currentPlayer || unit.owner_player_id !== currentPlayer.id) {
+      setActionErrors({
+        [actionErrorKey]: "Only the current player can control this colony."
+      });
+      return;
+    }
+
+    const resourceError = getResourceShortageMessage(currentPlayer, {
+      energy: UNIT_ACTION_ENERGY_COST
+    });
+
+    if (resourceError) {
+      setActionErrors({
+        [actionErrorKey]: resourceError
+      });
       return;
     }
 
     try {
       setIsUnitActionLoading(true);
       setError("");
+      setActionErrors({});
 
       const updatedSession = await packColonyIntoArk(session.id, unit.id);
 
       setSession(updatedSession);
-      setSelectedStructureKey(null);
-      setSelectedUnitId(unit.id);
+      selectCurrentPlayerFromSession(updatedSession);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to launch ark");
+      setActionErrors({
+        [actionErrorKey]: err instanceof Error ? err.message : "Failed to launch ark"
+      });
     } finally {
       setIsUnitActionLoading(false);
     }
@@ -526,22 +681,39 @@ setMapDetails(loadedMapDetails);
       return;
     }
 
-    if (unit.owner_player_id !== selectedPlayerId) {
-      setError("Select the owner player to control this ark");
+    const actionErrorKey = `unit-${unit.id}`;
+
+    if (!currentPlayer || unit.owner_player_id !== currentPlayer.id) {
+      setActionErrors({
+        [actionErrorKey]: "Only the current player can control this ark."
+      });
+      return;
+    }
+
+    const resourceError = getResourceShortageMessage(currentPlayer, {
+      energy: UNIT_ACTION_ENERGY_COST
+    });
+
+    if (resourceError) {
+      setActionErrors({
+        [actionErrorKey]: resourceError
+      });
       return;
     }
 
     try {
       setIsUnitActionLoading(true);
       setError("");
+      setActionErrors({});
 
       const updatedSession = await colonizeSystemWithArk(session.id, unit.id);
 
       setSession(updatedSession);
-      setSelectedUnitId(null);
-      setSelectedStructureKey(`colony-${unit.id}`);
+      selectCurrentPlayerFromSession(updatedSession);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to colonize system");
+      setActionErrors({
+        [actionErrorKey]: err instanceof Error ? err.message : "Failed to colonize system"
+      });
     } finally {
       setIsUnitActionLoading(false);
     }
@@ -564,50 +736,50 @@ setMapDetails(loadedMapDetails);
   }, [sessionId]);
 
   function getSessionSystemById(systemId: number): SessionSystem | undefined {
-  return session?.systems.find((system) => system.system_id === systemId);
-}
+    return session?.systems.find((system) => system.system_id === systemId);
+  }
 
-function getMapSystemDetailsById(systemId: number) {
-  return mapDetails?.systems.find((system) => system.id === systemId);
-}
+  function getMapSystemDetailsById(systemId: number) {
+    return mapDetails?.systems.find((system) => system.id === systemId);
+  }
 
-function getGameplaySystemVisualClass(systemId: number): string {
-  const mapSystem = getMapSystemDetailsById(systemId);
+  function getGameplaySystemVisualClass(systemId: number): string {
+    const mapSystem = getMapSystemDetailsById(systemId);
 
-  if (!mapSystem) {
+    if (!mapSystem) {
+      return "system-visual-normal";
+    }
+
+    if (mapSystem.system_type === "start") {
+      return "system-visual-start";
+    }
+
+    if (mapSystem.system_type === "archive") {
+      const archiveLevel = mapSystem.archive_level ?? 1;
+
+      return `system-visual-archive archive-level-${archiveLevel}`;
+    }
+
     return "system-visual-normal";
   }
 
-  if (mapSystem.system_type === "start") {
-    return "system-visual-start";
-  }
+  function getSystemTypeLabel(systemId: number): string | null {
+    const mapSystem = getMapSystemDetailsById(systemId);
 
-  if (mapSystem.system_type === "archive") {
-    const archiveLevel = mapSystem.archive_level ?? 1;
+    if (!mapSystem) {
+      return null;
+    }
 
-    return `system-visual-archive archive-level-${archiveLevel}`;
-  }
+    if (mapSystem.system_type === "start") {
+      return "START";
+    }
 
-  return "system-visual-normal";
-}
+    if (mapSystem.system_type === "archive") {
+      return `ARCHIVE ${mapSystem.archive_level ?? 1}`;
+    }
 
-function getSystemTypeLabel(systemId: number): string | null {
-  const mapSystem = getMapSystemDetailsById(systemId);
-
-  if (!mapSystem) {
     return null;
   }
-
-  if (mapSystem.system_type === "start") {
-    return "START";
-  }
-
-  if (mapSystem.system_type === "archive") {
-    return `ARCHIVE ${mapSystem.archive_level ?? 1}`;
-  }
-
-  return null;
-}
 
   return (
     <div className="game-page game-simulation-page">
@@ -637,12 +809,59 @@ function getSystemTypeLabel(systemId: number): string | null {
               </div>
             </div>
 
-            <button
-              onClick={handleNextRound}
-              disabled={isEndingRound || session.status !== "started"}
-            >
-              {isEndingRound ? "Processing..." : "Next round"}
-            </button>
+            <div className="round-flow-hint">
+              Round advances automatically after all players spend CP or pass.
+            </div>
+          </section>
+
+          <section className="game-panel hotseat-turn-panel">
+            <div>
+              <p className="turn-kicker">Hotseat mode</p>
+              <h2>Round {session.current_round}</h2>
+              <p className="action-hint">
+                Pass the device to the current player.
+              </p>
+            </div>
+
+            <div className="turn-current-player-card">
+              <span>Current player</span>
+              <strong>
+                {currentPlayer?.faction_name ?? "No active player"}
+              </strong>
+              <small>
+                {currentPlayer?.civilization_name ?? "No civilization"}
+              </small>
+              <div className="turn-command-points">
+                CP: {currentPlayer?.command_points_left ?? 0}/
+                {COMMAND_POINTS_PER_ROUND}
+              </div>
+            </div>
+
+            <div className="turn-actions">
+              <button
+                type="button"
+                onClick={handleEndTurn}
+                disabled={
+                  isTurnActionLoading ||
+                  session.status !== "started" ||
+                  !currentPlayer
+                }
+              >
+                {isTurnActionLoading ? "Processing..." : "End turn"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePassTurn}
+                disabled={
+                  isTurnActionLoading ||
+                  session.status !== "started" ||
+                  !currentPlayer
+                }
+              >
+                {isTurnActionLoading ? "Processing..." : "Pass"}
+              </button>
+            </div>
           </section>
 
           <section className="simulation-layout">
@@ -652,6 +871,8 @@ function getSystemTypeLabel(systemId: number): string | null {
               <div className="compact-players-list">
                 {session.players.map((player) => {
                   const isSelected = player.id === selectedPlayerId;
+                  const isCurrentPlayer =
+                    player.id === session.current_player_id;
                   const playerBuildings = getBuildingsForPlayer(
                     session,
                     player.id
@@ -670,7 +891,9 @@ function getSystemTypeLabel(systemId: number): string | null {
                       <div className="compact-player-header">
                         <strong>{player.faction_name}</strong>
                         <span>
-                          {player.civilization_name ?? "No civilization"}
+                          {isCurrentPlayer
+                            ? "Current turn"
+                            : player.civilization_name ?? "No civilization"}
                         </span>
                       </div>
 
@@ -684,6 +907,16 @@ function getSystemTypeLabel(systemId: number): string | null {
                       <div className="compact-player-meta">
                         <span>{player.nickname ?? `User ${player.user_id}`}</span>
                         <span>Buildings: {playerBuildings.length}</span>
+                        <span className="player-card-turn-state">
+                          <span>
+                            CP: {player.command_points_left}/
+                            {COMMAND_POINTS_PER_ROUND}
+                          </span>
+
+                          {player.has_passed && (
+                            <strong className="player-pass-badge">PASS</strong>
+                          )}
+                        </span>
                       </div>
                     </button>
                   );
@@ -883,8 +1116,13 @@ function getSystemTypeLabel(systemId: number): string | null {
                                 selectedStructureKey === structureKey;
                               const details = BUILDING_DETAILS.colony;
                               const canControl =
-                                colony.owner_player_id === selectedPlayerId &&
+                                colony.owner_player_id === currentPlayer?.id &&
                                 session.status === "started";
+                              const resourceError = getResourceShortageMessage(
+                                currentPlayer,
+                                { energy: UNIT_ACTION_ENERGY_COST }
+                              );
+                              const actionErrorKey = `unit-${colony.id}`;
 
                               return (
                                 <div
@@ -927,8 +1165,7 @@ function getSystemTypeLabel(systemId: number): string | null {
     isUnitActionLoading ||
     !canControl ||
     colony.is_foundation ||
-    !selectedPlayer ||
-    selectedPlayer.energy < UNIT_ACTION_ENERGY_COST
+    Boolean(resourceError)
   }
 >
   Launch Ark · {UNIT_ACTION_ENERGY_COST} ⚡
@@ -936,6 +1173,14 @@ function getSystemTypeLabel(systemId: number): string | null {
 {colony.is_foundation && (
   <p className="action-hint">
     Foundation Colony is the faction's primary settlement and cannot be launched as an ark.
+  </p>
+)}
+{resourceError && (
+  <p className="inline-action-error">{resourceError}</p>
+)}
+{actionErrors[actionErrorKey] && (
+  <p className="inline-action-error">
+    {actionErrors[actionErrorKey]}
   </p>
 )}
                                     </div>
@@ -1046,8 +1291,13 @@ function getSystemTypeLabel(systemId: number): string | null {
                             {visibleUnits.map((unit) => {
                               const isSelected = selectedUnitId === unit.id;
                               const canControl =
-                                unit.owner_player_id === selectedPlayerId &&
+                                unit.owner_player_id === currentPlayer?.id &&
                                 session.status === "started";
+                              const resourceError = getResourceShortageMessage(
+                                currentPlayer,
+                                { energy: UNIT_ACTION_ENERGY_COST }
+                              );
+                              const actionErrorKey = `unit-${unit.id}`;
 
                               return (
                                 <div
@@ -1094,15 +1344,25 @@ function getSystemTypeLabel(systemId: number): string | null {
                                             disabled={
                                               isUnitActionLoading ||
                                               !canControl ||
-                                              !selectedPlayer ||
-                                              selectedPlayer.energy <
-                                                UNIT_ACTION_ENERGY_COST
+                                              Boolean(resourceError)
                                             }
                                           >
                                             Colonize System ·{" "}
                                             {UNIT_ACTION_ENERGY_COST} ⚡
                                           </button>
                                         )}
+
+                                      {resourceError && (
+                                        <p className="inline-action-error">
+                                          {resourceError}
+                                        </p>
+                                      )}
+
+                                      {actionErrors[actionErrorKey] && (
+                                        <p className="inline-action-error">
+                                          {actionErrors[actionErrorKey]}
+                                        </p>
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -1119,41 +1379,15 @@ function getSystemTypeLabel(systemId: number): string | null {
 
             <aside className="simulation-sidebar build-sidebar">
               <h2>Construction</h2>
-
-              <label>
-                Player
-                <select
-                  value={selectedPlayerId ?? ""}
-                  onChange={(event) => {
-                    const value = event.target.value;
-
-                    if (!value) {
-                      setSelectedPlayerId(null);
-                      setSelectedSystemId(null);
-                      setSelectedStructureKey(null);
-                      setSelectedUnitId(null);
-                      return;
-                    }
-
-                    const playerId = Number(value);
-                    const player = session.players.find(
-                      (item) => item.id === playerId
-                    );
-
-                    if (player) {
-                      handleSelectPlayer(player);
-                    }
-                  }}
-                >
-                  <option value="">Select player</option>
-
-                  {session.players.map((player) => (
-                    <option key={player.id} value={player.id}>
-                      {player.faction_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="acting-player-card">
+                <span>Acting player</span>
+                <strong>{currentPlayer?.faction_name ?? "No active player"}</strong>
+                <small>
+                  {currentPlayer
+                    ? `CP: ${currentPlayer.command_points_left}/${COMMAND_POINTS_PER_ROUND}`
+                    : "No turn state"}
+                </small>
+              </div>
 
               <div className="building-buttons">
                 {BUILDING_OPTIONS.map((building) => (
@@ -1164,7 +1398,13 @@ function getSystemTypeLabel(systemId: number): string | null {
                         ? "building-option selected"
                         : "building-option"
                     }
-                    onClick={() => setSelectedBuildingType(building.type)}
+                    onClick={() => {
+                      setSelectedBuildingType(building.type);
+                      setActionErrors((currentErrors) => ({
+                        ...currentErrors,
+                        build: ""
+                      }));
+                    }}
                   >
                     <span className="building-icon">{building.icon}</span>
 
@@ -1187,8 +1427,12 @@ function getSystemTypeLabel(systemId: number): string | null {
                     setSelectedSystemId(value ? Number(value) : null);
                     setSelectedStructureKey(null);
                     setSelectedUnitId(null);
+                    setActionErrors((currentErrors) => ({
+                      ...currentErrors,
+                      build: ""
+                    }));
                   }}
-                  disabled={!selectedPlayer || controlledSystems.length === 0}
+                  disabled={!currentPlayer || controlledSystems.length === 0}
                 >
                   <option value="">Select system</option>
 
@@ -1202,7 +1446,7 @@ function getSystemTypeLabel(systemId: number): string | null {
 
               {controlledSystems.length === 0 && (
                 <p className="action-hint">
-                  Selected player does not control any systems.
+                  Current player does not control any systems.
                 </p>
               )}
 
@@ -1213,15 +1457,26 @@ function getSystemTypeLabel(systemId: number): string | null {
                 </p>
               )}
 
+              {selectedBuildingResourceError && (
+                <p className="inline-action-error">
+                  {selectedBuildingResourceError}
+                </p>
+              )}
+
+              {actionErrors.build && (
+                <p className="inline-action-error">{actionErrors.build}</p>
+              )}
+
               <button
                 className="build-submit-button"
                 onClick={handleBuildBuilding}
                 disabled={
                   isBuilding ||
                   session.status !== "started" ||
-                  !selectedPlayerId ||
+                  !currentPlayer ||
                   !selectedSystemId ||
-                  !canBuildInSelectedSystem
+                  !canBuildInSelectedSystem ||
+                  Boolean(selectedBuildingResourceError)
                 }
               >
                 {isBuilding ? "Building..." : "Build"}
