@@ -12,6 +12,22 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+function getAuthHeaders(hasJsonBody: boolean = false): Record<string, string> {
+  const headers: Record<string, string> = {};
+
+  if (hasJsonBody) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const token = localStorage.getItem("access_token");
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
 export type GameSessionSummary = {
   id: number;
   map_id: number;
@@ -296,7 +312,9 @@ export async function colonizeSystemWithArk(
 }
 
 export async function getEditorMaps(): Promise<MapEditorMapSummary[]> {
-  const response = await fetch(`${API_URL}/game/maps/editor/`);
+  const response = await fetch(`${API_URL}/game/maps/editor/`, {
+    headers: getAuthHeaders()
+  });
 
   if (!response.ok) {
     throw new Error(await getErrorMessage(response));
@@ -310,9 +328,7 @@ export async function createEditorMap(
 ): Promise<MapEditorSavedMap> {
   const response = await fetch(`${API_URL}/game/maps/editor/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: getAuthHeaders(true),
     body: JSON.stringify(payload)
   });
 
@@ -326,7 +342,9 @@ export async function createEditorMap(
 export async function getEditorMap(
   mapId: number
 ): Promise<MapEditorSavedMap> {
-  const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`);
+  const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`, {
+    headers: getAuthHeaders()
+  });
 
   if (!response.ok) {
     throw new Error(await getErrorMessage(response));
@@ -341,9 +359,7 @@ export async function updateEditorMap(
 ): Promise<MapEditorSavedMap> {
   const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: getAuthHeaders(true),
     body: JSON.stringify(payload)
   });
 
@@ -358,7 +374,8 @@ export async function deleteEditorMap(
   mapId: number
 ): Promise<void> {
   const response = await fetch(`${API_URL}/game/maps/editor/${mapId}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
