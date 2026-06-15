@@ -362,3 +362,15 @@
   border: 0;
   background: #ded9e8;
 }
+
+.map-editor-readonly-note {
+  max-width: 260px;
+  padding: 9px 12px;
+  border: 1px solid #ded9e8;
+  border-radius: 10px;
+  background: #faf9fc;
+  color: #4f475c;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}

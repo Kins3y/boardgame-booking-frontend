@@ -9,17 +9,21 @@ import GamePlay from "./pages/GamePlay";
 import SessionsList from "./pages/SessionsList";
 import MapEditor from "./pages/MapEditor";
 import CreateSession from "./pages/CreateSession";
+import { useAuth } from "./auth/AuthContext";
+import Profile from "./pages/Profile";
 import "./App.css";
 
 export default function App() {
   const location = useLocation();
+  const { user } = useAuth();
 
   const isLoginPage = location.pathname === "/login";
   const isHomePage = location.pathname === "/";
   const isRegisterPage = location.pathname === "/register";
+  const isProfilePage = location.pathname === "/profile";
 
   const shouldShowNavigationButton =
-  !isLoginPage && !isHomePage && !isRegisterPage;
+  !isLoginPage && !isHomePage && !isRegisterPage && !isProfilePage;
 
   const navigationButtonTarget = isRegisterPage ? "/login" : "/";
   const navigationButtonText = isRegisterPage
@@ -28,6 +32,11 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {user?.admin_badge && (
+  <div className="admin-top-badge">
+    {user.admin_badge}
+  </div>
+)}
       {shouldShowNavigationButton && (
         <nav className="global-navigation">
           <Link to={navigationButtonTarget} className="global-home-button">
@@ -40,6 +49,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
 
           <Route
             path="/"
@@ -49,6 +59,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <Profile />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
   path="/game/sessions/new"

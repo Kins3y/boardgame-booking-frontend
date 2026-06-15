@@ -13,6 +13,11 @@ export default function Home() {
   return (
     <div className="archont-page">
       <section className="archont-home-card">
+        <div className="archont-home-topbar">
+  <Link to="/profile" className="archont-profile-link">
+    Profile
+  </Link>
+</div>
         <div className="archont-home-header">
           <div className="archont-home-user">
             COMMAND NODE · {user?.nickname ?? "Player"}
@@ -27,6 +32,7 @@ export default function Home() {
         </div>
 
         <div className="archont-home-actions">
+
           <button
             className="archont-primary-button"
             onClick={handleStartSession}

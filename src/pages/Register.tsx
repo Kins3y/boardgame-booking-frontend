@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import PasswordInput from "../components/PasswordInput";
 import "./MarketingPages.css";
 
 export default function Register() {
@@ -9,27 +10,55 @@ export default function Register() {
   const [email, setEmail] = useState<string>("");
   const [nickname, setNickname] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [passwordConfirm, setPasswordConfirm] = useState<string>("");
 
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  async function handleRegister(event: React.FormEvent<HTMLFormElement>) {
+  async function handleRegister(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const trimmedEmail = email.trim();
+    const trimmedNickname = nickname.trim();
+
+    if (!trimmedEmail) {
+      setError("Email is required.");
+      return;
+    }
+
+    if (!trimmedNickname) {
+      setError("Nickname is required.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must contain at least 8 characters.");
+      return;
+    }
+
+    if (password !== passwordConfirm) {
+      setError("Passwords do not match.");
+      return;
+    }
 
     try {
       setIsSubmitting(true);
       setError("");
 
       await api.post("/user/create/", {
-        email,
-        nickname,
-        password
+        email: trimmedEmail,
+        nickname: trimmedNickname,
+        password,
+        password_confirm: passwordConfirm
       });
 
       navigate("/login");
     } catch (err) {
       console.error("Register error", err);
-      setError("Registration failed. Check fields or try another nickname/email.");
+
+      setError(
+        "Registration failed. Check fields or try another nickname/email."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -93,12 +122,23 @@ export default function Register() {
 
             <label className="archont-field">
               Password
-              <input
-                type="password"
+              <PasswordInput
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={setPassword}
                 placeholder="Create password"
                 autoComplete="new-password"
+                preventClipboard
+              />
+            </label>
+
+            <label className="archont-field">
+              Repeat password
+              <PasswordInput
+                value={passwordConfirm}
+                onChange={setPasswordConfirm}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                preventClipboard
               />
             </label>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import PasswordInput from "../components/PasswordInput";
 import "./MarketingPages.css";
 
 export default function Login() {
@@ -83,15 +84,14 @@ export default function Login() {
             </label>
 
             <label className="archont-field">
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter password"
-                autoComplete="current-password"
-              />
-            </label>
+  Password
+  <PasswordInput
+    value={password}
+    onChange={setPassword}
+    placeholder="Enter password"
+    autoComplete="current-password"
+  />
+</label>
 
             <button
               className="archont-primary-button"

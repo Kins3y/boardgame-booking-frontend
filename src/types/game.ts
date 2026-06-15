@@ -128,6 +128,8 @@ export type BuildingType = "mine" | "power_plant" | "storage";
 
 export type MapEditorSystemType = "normal" | "start" | "archive";
 
+export type MapVisibility = "private" | "public" | "official";
+
 export type MapEditorSystem = {
   client_id: string;
   name: string;
@@ -157,10 +159,17 @@ export type MapEditorSavePayload = {
   connections: MapEditorConnection[];
 };
 
-export type MapEditorSavedSystem = MapEditorSystem & {
+export type MapEditorSavedSystem = {
   id: number;
-  is_start: boolean;
-  is_archive: boolean;
+  name: string;
+  x: number;
+  y: number;
+  system_type: MapEditorSystemType;
+  archive_level: number | null;
+  mineral_slots: number;
+  energy_slots: number;
+  storage_slots: number;
+  research_center_slots: number;
 };
 
 export type MapEditorSavedConnection = {
@@ -171,17 +180,6 @@ export type MapEditorSavedConnection = {
   is_wraparound: boolean;
 };
 
-export type MapEditorSavedMap = {
-  id: number;
-  name: string;
-  players_count: number;
-  grid_width: number;
-  grid_height: number;
-  is_active: boolean;
-  systems: MapEditorSavedSystem[];
-  connections: MapEditorSavedConnection[];
-};
-
 export type MapEditorMapSummary = {
   id: number;
   name: string;
@@ -189,4 +187,23 @@ export type MapEditorMapSummary = {
   grid_width: number;
   grid_height: number;
   is_active: boolean;
+  visibility: MapVisibility;
+  is_owned_by_current_user: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+};
+
+export type MapEditorSavedMap = {
+  id: number;
+  name: string;
+  players_count: number;
+  grid_width: number;
+  grid_height: number;
+  is_active: boolean;
+  visibility: MapVisibility;
+  is_owned_by_current_user: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+  systems: MapEditorSavedSystem[];
+  connections: MapEditorSavedConnection[];
 };

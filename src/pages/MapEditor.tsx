@@ -24,6 +24,7 @@ import type {
 import "./MapEditor.css";
 
 type EditorMode = "select" | "add-system" | "connect";
+type MapVisibility = "private" | "public" | "official";
 
 const CELL_SIZE = 34;
 
@@ -110,6 +111,18 @@ function getSystemIcon(system: MapEditorSystem): string {
   return "⭐";
 }
 
+function getVisibilityLabel(visibility: MapVisibility): string {
+  if (visibility === "official") {
+    return "Official";
+  }
+
+  if (visibility === "public") {
+    return "Public";
+  }
+
+  return "Private";
+}
+
 function convertSavedMapToEditorSystems(
   savedMap: MapEditorSavedMap
 ): MapEditorSystem[] {
@@ -153,6 +166,12 @@ export default function MapEditor() {
     null
   );
   const [editingMapId, setEditingMapId] = useState<number | null>(null);
+
+  const [openedMapCanEdit, setOpenedMapCanEdit] = useState<boolean>(true);
+  const [openedMapCanDelete, setOpenedMapCanDelete] = useState<boolean>(true);
+  const [openedMapVisibility, setOpenedMapVisibility] =
+    useState<MapVisibility>("private");
+  const [openedMapIsMine, setOpenedMapIsMine] = useState<boolean>(true);
 
   const [isLoadingSavedMaps, setIsLoadingSavedMaps] =
     useState<boolean>(false);
@@ -223,6 +242,20 @@ export default function MapEditor() {
     return systems.find((system) => system.client_id === clientId);
   }
 
+  function applyOpenedMapPermissions(savedMap: MapEditorSavedMap) {
+    setOpenedMapCanEdit(savedMap.can_edit);
+    setOpenedMapCanDelete(savedMap.can_delete);
+    setOpenedMapVisibility(savedMap.visibility);
+    setOpenedMapIsMine(savedMap.is_owned_by_current_user);
+  }
+
+  function resetOpenedMapPermissions() {
+    setOpenedMapCanEdit(true);
+    setOpenedMapCanDelete(true);
+    setOpenedMapVisibility("private");
+    setOpenedMapIsMine(true);
+  }
+
   async function loadSavedMaps() {
     try {
       setIsLoadingSavedMaps(true);
@@ -254,6 +287,8 @@ export default function MapEditor() {
       setEditingMapId(savedMap.id);
       setSelectedSavedMapId(savedMap.id);
 
+      applyOpenedMapPermissions(savedMap);
+
       setMapName(savedMap.name);
       setPlayersCount(savedMap.players_count);
 
@@ -268,7 +303,7 @@ export default function MapEditor() {
       setConnectFromId(null);
       setMode("select");
 
-      setSuccessMessage(`Map "${savedMap.name}" opened for editing`);
+      setSuccessMessage(`Map "${savedMap.name}" opened`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to open map");
     } finally {
@@ -288,6 +323,7 @@ export default function MapEditor() {
     setConnectFromId(null);
     setMode("select");
     setEditingMapId(null);
+    resetOpenedMapPermissions();
     setError("");
     setSuccessMessage("");
   }
@@ -295,6 +331,11 @@ export default function MapEditor() {
   async function handleDeleteOpenedMap() {
     if (editingMapId === null) {
       setError("Open a saved map before deleting");
+      return;
+    }
+
+    if (!openedMapCanDelete) {
+      setError("You cannot delete this map");
       return;
     }
 
@@ -611,6 +652,12 @@ export default function MapEditor() {
   }
 
   async function handleSaveMap() {
+    if (editingMapId !== null && !openedMapCanEdit) {
+      setError("This map is read-only. Use Save as new to create your copy.");
+      setSuccessMessage("");
+      return;
+    }
+
     const validationError = validateBeforeSave();
 
     if (validationError) {
@@ -631,9 +678,13 @@ export default function MapEditor() {
 
         setEditingMapId(savedMap.id);
         setSelectedSavedMapId(savedMap.id);
+        applyOpenedMapPermissions(savedMap);
+
         setSuccessMessage(`Map saved successfully. Map ID: ${savedMap.id}`);
       } else {
         const updatedMap = await updateEditorMap(editingMapId, payload);
+
+        applyOpenedMapPermissions(updatedMap);
 
         setSuccessMessage(`Map "${updatedMap.name}" updated successfully`);
       }
@@ -701,6 +752,7 @@ export default function MapEditor() {
       setSelectedSystemId(null);
       setSelectedConnectionKey(null);
       setConnectFromId(null);
+      applyOpenedMapPermissions(savedMap);
 
       setSuccessMessage(`Map saved as new map. Map ID: ${savedMap.id}`);
 
@@ -729,7 +781,7 @@ export default function MapEditor() {
             </button>
           )}
 
-          {editingMapId !== null && (
+          {editingMapId !== null && openedMapCanDelete && (
             <button
               className="danger-button"
               onClick={handleDeleteOpenedMap}
@@ -742,7 +794,7 @@ export default function MapEditor() {
           <button
             className="primary-button"
             onClick={handleSaveMap}
-            disabled={isSaving}
+            disabled={isSaving || (editingMapId !== null && !openedMapCanEdit)}
           >
             {isSaving
               ? "Saving..."
@@ -750,6 +802,13 @@ export default function MapEditor() {
                 ? "Save map"
                 : "Update map"}
           </button>
+
+          {editingMapId !== null && !openedMapCanEdit && (
+            <div className="map-editor-readonly-note">
+              This map is read-only. Use “Save as new” to create your editable
+              copy.
+            </div>
+          )}
         </div>
       </header>
 
@@ -779,7 +838,9 @@ export default function MapEditor() {
 
               {savedMaps.map((savedMap) => (
                 <option key={savedMap.id} value={savedMap.id}>
-                  #{savedMap.id} · {savedMap.name} · {savedMap.players_count}P
+                  #{savedMap.id} · {savedMap.name} · {savedMap.players_count}P ·{" "}
+                  {getVisibilityLabel(savedMap.visibility)}
+                  {savedMap.is_owned_by_current_user ? " · Mine" : ""}
                 </option>
               ))}
             </select>
@@ -802,6 +863,10 @@ export default function MapEditor() {
             {editingMapId !== null && (
               <div className="map-editor-editing-badge">
                 Editing map ID: {editingMapId}
+                <br />
+                Visibility: {getVisibilityLabel(openedMapVisibility)}
+                <br />
+                {openedMapIsMine ? "Owned by you" : "Shared map"}
               </div>
             )}
           </div>
