@@ -374,6 +374,20 @@
   line-height: 1.35;
 }
 
+.archont-home-actions .archont-secondary-button,
+.archont-home-actions a.archont-secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.archont-home-actions {
+  align-items: center;
+}
+
 @media (max-width: 900px) {
   .archont-card {
     grid-template-columns: 1fr;

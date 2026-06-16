@@ -52,6 +52,10 @@ export default function Home() {
             </button>
           </Link>
 
+          <Link to="/patch-notes" className="archont-secondary-button">
+              Patch Notes
+          </Link>
+
           <button
             className="archont-danger-button"
             onClick={logout}

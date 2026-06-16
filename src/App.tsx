@@ -11,6 +11,7 @@ import MapEditor from "./pages/MapEditor";
 import CreateSession from "./pages/CreateSession";
 import { useAuth } from "./auth/AuthContext";
 import Profile from "./pages/Profile";
+import PatchNotes from "./pages/PatchNotes";
 import "./App.css";
 
 export default function App() {
@@ -21,22 +22,26 @@ export default function App() {
   const isHomePage = location.pathname === "/";
   const isRegisterPage = location.pathname === "/register";
   const isProfilePage = location.pathname === "/profile";
+  const isPatchNotesPage = location.pathname === "/patch-notes";
 
   const shouldShowNavigationButton =
-  !isLoginPage && !isHomePage && !isRegisterPage && !isProfilePage;
+    !isLoginPage &&
+    !isHomePage &&
+    !isRegisterPage &&
+    !isProfilePage &&
+    !isPatchNotesPage;
 
-  const navigationButtonTarget = isRegisterPage ? "/login" : "/";
-  const navigationButtonText = isRegisterPage
-    ? "Back to Login"
-    : "Back to Home page";
+  const navigationButtonTarget = "/";
+  const navigationButtonText = "Back to Home page";
 
   return (
     <div className="app-shell">
       {user?.admin_badge && (
-  <div className="admin-top-badge">
-    {user.admin_badge}
-  </div>
-)}
+        <div className="admin-top-badge">
+          {user.admin_badge}
+        </div>
+      )}
+
       {shouldShowNavigationButton && (
         <nav className="global-navigation">
           <Link to={navigationButtonTarget} className="global-home-button">
@@ -49,7 +54,8 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
+          <Route path="/patch-notes" element={<PatchNotes />} />
 
           <Route
             path="/"
@@ -61,22 +67,22 @@ export default function App() {
           />
 
           <Route
-  path="/profile"
-  element={
-    <ProtectedRoute>
-      <Profile />
-    </ProtectedRoute>
-  }
-/>
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
-  path="/game/sessions/new"
-  element={
-    <ProtectedRoute>
-      <CreateSession />
-    </ProtectedRoute>
-  }
-/>
+            path="/game/sessions/new"
+            element={
+              <ProtectedRoute>
+                <CreateSession />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/game/session"
@@ -106,13 +112,13 @@ export default function App() {
           />
 
           <Route
-  path="/map-editor"
-  element={
-    <ProtectedRoute>
-      <MapEditor />
-    </ProtectedRoute>
-  }
-/>
+            path="/map-editor"
+            element={
+              <ProtectedRoute>
+                <MapEditor />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/game/sessions/:sessionId/play"
