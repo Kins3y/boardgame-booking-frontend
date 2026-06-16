@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import PasswordInput from "../components/PasswordInput";
+import PixelSpaceBackground from "../components/PixelSpaceBackground";
 import "./MarketingPages.css";
 
 export default function Login() {
@@ -39,7 +40,8 @@ export default function Login() {
   }
 
   return (
-    <div className="archont-page">
+    <div className="archont-page archont-space-page">
+      <PixelSpaceBackground />
       <section className="archont-card">
         <div className="archont-hero">
           <div className="archont-logo">ARCHONT PROTOCOL</div>

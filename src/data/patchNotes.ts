@@ -162,5 +162,20 @@ export const patchNotes: PatchNote[] = [
       "The page is public and does not require authentication.",
       "Future versions can move patch notes into the backend and add an admin editor."
     ]
-  }
+  },
+  {
+    id: "animated-pixel-space-background-v2",
+    date: "2026-06-16",
+    type: "frontend",
+    title: "Animated pixel space background v2",
+    summary:
+      "The public entry pages received a more dynamic pixel-space background with stronger battle ambience.",
+    changes: [
+      "Added multiple background battle zones with small ship squadrons, missiles and pixel explosions.",
+      "Increased ship brightness and size so the battles are easier to read behind the foreground UI.",
+      "Reduced missile size so weapon fire feels sharper and less bulky.",
+      "Kept the animated background decorative and non-interactive so it does not affect gameplay controls."
+    ]
+  },
+
 ];

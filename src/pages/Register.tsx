@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import PasswordInput from "../components/PasswordInput";
+import PixelSpaceBackground from "../components/PixelSpaceBackground";
 import "./MarketingPages.css";
 
 type RegisterFieldErrors = {
@@ -140,7 +141,8 @@ export default function Register() {
   }
 
   return (
-    <div className="archont-page">
+    <div className="archont-page archont-space-page">
+      <PixelSpaceBackground />
       <section className="archont-card">
         <div className="archont-hero">
           <div className="archont-logo">NEW COMMANDER</div>

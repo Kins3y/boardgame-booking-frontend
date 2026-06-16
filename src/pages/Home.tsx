@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import PixelSpaceBackground from "../components/PixelSpaceBackground";
 import "./MarketingPages.css";
 
 export default function Home() {
@@ -11,13 +12,16 @@ export default function Home() {
   }
 
   return (
-    <div className="archont-page">
+    <div className="archont-page archont-home-page">
+      <PixelSpaceBackground />
+
       <section className="archont-home-card">
         <div className="archont-home-topbar">
-  <Link to="/profile" className="archont-profile-link">
-    Profile
-  </Link>
-</div>
+          <Link to="/profile" className="archont-profile-link">
+            Profile
+          </Link>
+        </div>
+
         <div className="archont-home-header">
           <div className="archont-home-user">
             COMMAND NODE · {user?.nickname ?? "Player"}
@@ -32,7 +36,6 @@ export default function Home() {
         </div>
 
         <div className="archont-home-actions">
-
           <button
             className="archont-primary-button"
             onClick={handleStartSession}
@@ -40,20 +43,16 @@ export default function Home() {
             Start new session
           </button>
 
-          <Link to="/game/sessions">
-            <button className="archont-secondary-button">
-              Sessions list
-            </button>
+          <Link to="/game/sessions" className="archont-secondary-button">
+            Sessions list
           </Link>
 
-          <Link to="/map-editor">
-            <button className="archont-secondary-button">
-              Map editor
-            </button>
+          <Link to="/map-editor" className="archont-secondary-button">
+            Map editor
           </Link>
 
           <Link to="/patch-notes" className="archont-secondary-button">
-              Patch Notes
+            Patch Notes
           </Link>
 
           <button
