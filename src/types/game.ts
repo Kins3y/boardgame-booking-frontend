@@ -33,6 +33,19 @@ export type SessionFleet = {
   units: SessionUnit[];
 };
 
+
+export type FleetOrderType = "move_defend";
+
+export type FleetCommandOrder = {
+  fleet_id: number;
+  order_type: FleetOrderType;
+  target_system_id: number;
+};
+
+export type FleetCommandPayload = {
+  orders: FleetCommandOrder[];
+};
+
 export type SessionPlayer = {
   id: number;
   session_id: number;
@@ -161,7 +174,14 @@ export type Civilization = {
   is_active: boolean;
 };
 
-export type BuildingType = "mine" | "power_plant" | "storage";
+export type BuildingType =
+  | "mine"
+  | "power_plant"
+  | "storage"
+  | "barracks"
+  | "spaceport";
+
+export type UnitType = "scout" | "marine" | "ark" | "frigate" | "cruiser";
 
 export type MapEditorSystemType = "normal" | "start" | "archive";
 

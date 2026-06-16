@@ -6,7 +6,9 @@ import {
   endTurn,
   getEditorMap,
   getFullSession,
+  issueFleetCommand,
   packColonyBuildingIntoArk,
+  produceUnitFromBuilding,
   passTurn
 } from "../api/gameApi";
 import type {
@@ -14,9 +16,11 @@ import type {
   FullGameSession,
   MapEditorSavedMap,
   SessionBuilding,
+  SessionFleet,
   SessionPlayer,
   SessionSystem,
-  SessionUnit
+  SessionUnit,
+  UnitType
 } from "../types/game";
 import "./GameSession.css";
 
@@ -42,6 +46,15 @@ const BUILDING_COSTS: Record<BuildingType, ResourceCost> = {
   storage: {
     matter: 3,
     energy: 2
+  },
+  barracks: {
+    matter: 8,
+    energy: 3
+  },
+  spaceport: {
+    matter: 10,
+    energy: 4,
+    data: 1
   }
 };
 
@@ -105,6 +118,20 @@ const BUILDING_OPTIONS: {
     icon: "📦",
     cost: "3 🧱 / 2 ⚡",
     income: "+1 🍞 / round"
+  },
+  {
+    type: "barracks",
+    name: "Barracks",
+    icon: "🛡️",
+    cost: "8 🧱 / 3 ⚡",
+    income: "Produces light units / Ark"
+  },
+  {
+    type: "spaceport",
+    name: "Spaceport",
+    icon: "🛰️",
+    cost: "10 🧱 / 4 ⚡ / 1 💾",
+    income: "Produces medium / heavy units"
   }
 ];
 
@@ -116,7 +143,8 @@ const BUILDING_DISPLAY_NAMES: Record<string, string> = {
   research_center: "Research Center",
   barracks: "Barracks",
   spaceport: "Spaceport",
-  orbital_defense: "Orbital Defense"
+  orbital_defense: "Orbital Defense",
+  colony: "Colony"
 };
 
 const BUILDING_DETAILS: Record<
@@ -161,15 +189,15 @@ const BUILDING_DETAILS: Record<
   },
   barracks: {
     income: "No direct income",
-    produces: ["Infantry", "Boarding units"],
-    technologies: ["Ground warfare"],
-    description: "Military production building."
+    produces: ["Scout Drone", "Marine Squad", "Ark"],
+    technologies: ["Light unit tactics", "Expansion logistics"],
+    description: "Light-unit and Ark production building."
   },
   spaceport: {
     income: "No direct income",
-    produces: ["Ark", "Fleet units", "Scouts"],
-    technologies: ["Movement", "Expansion"],
-    description: "Orbital production and movement infrastructure."
+    produces: ["Frigate", "Cruiser"],
+    technologies: ["Fleet warfare", "Heavy ship construction"],
+    description: "Orbital production building for medium and heavy fleet units."
   },
   orbital_defense: {
     income: "No direct income",
@@ -184,6 +212,90 @@ const BUILDING_DETAILS: Record<
     description: "A deployed colony makes the system colonized. It has no HP."
   }
 };
+
+type UnitProductionOption = {
+  unit_type: UnitType;
+  name: string;
+  icon: string;
+  producedBy: BuildingType;
+  costText: string;
+  statsText: string;
+  resourceCost: ResourceCost;
+};
+
+const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
+  {
+    unit_type: "scout",
+    name: "Scout Drone",
+    icon: "🛸",
+    producedBy: "barracks",
+    costText: "4 🧱 / 2 ⚡",
+    statsText: "ATK 1 · DEF 0 · HP 2",
+    resourceCost: {
+      matter: 4,
+      energy: 2
+    }
+  },
+  {
+    unit_type: "marine",
+    name: "Marine Squad",
+    icon: "🪖",
+    producedBy: "barracks",
+    costText: "5 🧱 / 2 ⚡",
+    statsText: "ATK 1 · DEF 1 · HP 3",
+    resourceCost: {
+      matter: 5,
+      energy: 2
+    }
+  },
+  {
+    unit_type: "ark",
+    name: "Ark",
+    icon: "🚀",
+    producedBy: "barracks",
+    costText: "8 🧱 / 6 ⚡ / 1 💾",
+    statsText: "ATK 0 · DEF 1 · HP 10 · non-combat",
+    resourceCost: {
+      matter: 8,
+      energy: 6,
+      data: 1
+    }
+  },
+  {
+    unit_type: "frigate",
+    name: "Frigate",
+    icon: "🚢",
+    producedBy: "spaceport",
+    costText: "8 🧱 / 5 ⚡ / 1 💾",
+    statsText: "ATK 2 · DEF 1 · HP 4",
+    resourceCost: {
+      matter: 8,
+      energy: 5,
+      data: 1
+    }
+  },
+  {
+    unit_type: "cruiser",
+    name: "Cruiser",
+    icon: "🛳️",
+    producedBy: "spaceport",
+    costText: "14 🧱 / 9 ⚡ / 2 💾",
+    statsText: "ATK 4 · DEF 2 · HP 8",
+    resourceCost: {
+      matter: 14,
+      energy: 9,
+      data: 2
+    }
+  }
+];
+
+function getProductionOptionsForBuilding(
+  buildingType: string
+): UnitProductionOption[] {
+  return UNIT_PRODUCTION_OPTIONS.filter(
+    (unitOption) => unitOption.producedBy === buildingType
+  );
+}
 
 function getBuildingDisplayName(building: SessionBuilding): string {
   if (building.building_name) {
@@ -423,6 +535,13 @@ export default function GamePlay() {
     null
   );
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+  const [selectedCommandFleetId, setSelectedCommandFleetId] =
+    useState<number | null>(null);
+  const [selectedCommandTargetSystemId, setSelectedCommandTargetSystemId] =
+    useState<number | null>(null);
+  const [stagedFleetOrders, setStagedFleetOrders] = useState<
+    Record<number, number>
+  >({});
 
   const [error, setError] = useState<string>("");
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
@@ -431,6 +550,9 @@ export default function GamePlay() {
   const [isTurnActionLoading, setIsTurnActionLoading] =
     useState<boolean>(false);
   const [isUnitActionLoading, setIsUnitActionLoading] =
+    useState<boolean>(false);
+  const [isProducingUnit, setIsProducingUnit] = useState<boolean>(false);
+  const [isFleetCommandLoading, setIsFleetCommandLoading] =
     useState<boolean>(false);
 
   const numericSessionId = Number(sessionId);
@@ -599,6 +721,9 @@ export default function GamePlay() {
     setSelectedSystemId(firstControlledSystem?.system_id ?? null);
     setSelectedStructureKey(null);
     setSelectedUnitId(null);
+    setSelectedCommandFleetId(null);
+    setSelectedCommandTargetSystemId(null);
+    setStagedFleetOrders({});
   }
 
   async function handleEndTurn() {
@@ -640,6 +765,57 @@ export default function GamePlay() {
       setError(err instanceof Error ? err.message : "Failed to pass");
     } finally {
       setIsTurnActionLoading(false);
+    }
+  }
+
+  async function handleProduceUnit(
+    building: SessionBuilding,
+    unitOption: UnitProductionOption
+  ) {
+    if (!session) {
+      return;
+    }
+
+    const actionErrorKey = `produce-${building.id}-${unitOption.unit_type}`;
+
+    if (!currentPlayer || building.owner_player_id !== currentPlayer.id) {
+      setActionErrors({
+        [actionErrorKey]: "Only the current player can use this production building."
+      });
+      return;
+    }
+
+    const resourceError = getResourceShortageMessage(
+      currentPlayer,
+      unitOption.resourceCost
+    );
+
+    if (resourceError) {
+      setActionErrors({
+        [actionErrorKey]: resourceError
+      });
+      return;
+    }
+
+    try {
+      setIsProducingUnit(true);
+      setError("");
+      setActionErrors({});
+
+      const updatedSession = await produceUnitFromBuilding(
+        session.id,
+        building.id,
+        unitOption.unit_type
+      );
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      setActionErrors({
+        [actionErrorKey]: err instanceof Error ? err.message : "Failed to produce unit"
+      });
+    } finally {
+      setIsProducingUnit(false);
     }
   }
 
@@ -741,6 +917,165 @@ export default function GamePlay() {
     }
   }
 
+  function handleSelectCommandFleet(fleetId: number) {
+    const fleet = currentPlayer?.fleets.find(
+      (candidate) => candidate.id === fleetId
+    );
+
+    setSelectedCommandFleetId(fleetId);
+
+    const firstConnectedSystem = fleet
+      ? getConnectedSystems(fleet.system_id)[0]
+      : null;
+
+    setSelectedCommandTargetSystemId(
+      firstConnectedSystem?.system_id ?? null
+    );
+
+    setActionErrors((current) => {
+      const next = { ...current };
+      delete next.fleetCommand;
+      return next;
+    });
+  }
+
+  function handleStageFleetOrder() {
+    if (!currentPlayer) {
+      setActionErrors({
+        fleetCommand: "No current player is active."
+      });
+      return;
+    }
+
+    const availableFleets = currentPlayer.fleets.filter(
+      (fleet) => !fleet.has_acted_this_round
+    );
+
+    const fleet =
+      availableFleets.find(
+        (candidate) => candidate.id === selectedCommandFleetId
+      ) ?? availableFleets[0];
+
+    if (!fleet) {
+      setActionErrors({
+        fleetCommand: "No ready fleets are available for this command."
+      });
+      return;
+    }
+
+    const connectedSystems = getConnectedSystems(fleet.system_id);
+    const targetSystemId =
+      selectedCommandTargetSystemId ??
+      connectedSystems[0]?.system_id ??
+      null;
+
+    if (!targetSystemId) {
+      setActionErrors({
+        fleetCommand: "The selected fleet has no connected target system."
+      });
+      return;
+    }
+
+    const isConnected = connectedSystems.some(
+      (system) => system.system_id === targetSystemId
+    );
+
+    if (!isConnected) {
+      setActionErrors({
+        fleetCommand: "Select a directly connected target system."
+      });
+      return;
+    }
+
+    setStagedFleetOrders((current) => ({
+      ...current,
+      [fleet.id]: targetSystemId
+    }));
+
+    const remainingFleet = availableFleets.find(
+      (candidate) =>
+        candidate.id !== fleet.id &&
+        stagedFleetOrders[candidate.id] === undefined
+    );
+
+    if (remainingFleet) {
+      const firstTarget = getConnectedSystems(remainingFleet.system_id)[0];
+      setSelectedCommandFleetId(remainingFleet.id);
+      setSelectedCommandTargetSystemId(firstTarget?.system_id ?? null);
+    }
+
+    setActionErrors((current) => {
+      const next = { ...current };
+      delete next.fleetCommand;
+      return next;
+    });
+  }
+
+  function handleRemoveStagedFleetOrder(fleetId: number) {
+    setStagedFleetOrders((current) => {
+      const next = { ...current };
+      delete next[fleetId];
+      return next;
+    });
+  }
+
+  function handleClearFleetCommand() {
+    setStagedFleetOrders({});
+    setActionErrors((current) => {
+      const next = { ...current };
+      delete next.fleetCommand;
+      return next;
+    });
+  }
+
+  async function handleExecuteFleetCommand() {
+    if (!session || !currentPlayer) {
+      return;
+    }
+
+    const orders = Object.entries(stagedFleetOrders).map(
+      ([fleetId, targetSystemId]) => ({
+        fleet_id: Number(fleetId),
+        order_type: "move_defend" as const,
+        target_system_id: Number(targetSystemId)
+      })
+    );
+
+    if (orders.length === 0) {
+      setActionErrors({
+        fleetCommand: "Add at least one fleet order before execution."
+      });
+      return;
+    }
+
+    if (currentPlayer.command_points_left <= 0) {
+      setActionErrors({
+        fleetCommand: "The current player has no command points left."
+      });
+      return;
+    }
+
+    try {
+      setIsFleetCommandLoading(true);
+      setError("");
+      setActionErrors({});
+
+      const updatedSession = await issueFleetCommand(session.id, {
+        orders
+      });
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      setActionErrors({
+        fleetCommand:
+          err instanceof Error ? err.message : "Failed to issue fleet command"
+      });
+    } finally {
+      setIsFleetCommandLoading(false);
+    }
+  }
+
   function handleSelectPlayer(player: SessionPlayer) {
     setSelectedPlayerId(player.id);
 
@@ -763,6 +1098,82 @@ export default function GamePlay() {
 
   function getMapSystemDetailsById(systemId: number) {
     return mapDetails?.systems.find((system) => system.id === systemId);
+  }
+
+  function getFleetOwner(fleet: SessionFleet): SessionPlayer | null {
+    return (
+      session?.players.find((player) => player.id === fleet.owner_player_id) ??
+      null
+    );
+  }
+
+  function getFleetsInSystem(systemId: number): SessionFleet[] {
+    if (!session) {
+      return [];
+    }
+
+    return session.players.flatMap((player) =>
+      (player.fleets ?? []).filter((fleet) => fleet.system_id === systemId)
+    );
+  }
+
+  function getConnectedSystems(systemId: number): SessionSystem[] {
+    if (!session || !mapDetails) {
+      return [];
+    }
+
+    const connectedSystemIds = new Set<number>();
+
+    for (const connection of mapDetails.connections ?? []) {
+      if (connection.from_system_id === systemId) {
+        connectedSystemIds.add(connection.to_system_id);
+      }
+
+      if (connection.to_system_id === systemId) {
+        connectedSystemIds.add(connection.from_system_id);
+      }
+    }
+
+    return session.systems.filter((system) =>
+      connectedSystemIds.has(system.system_id)
+    );
+  }
+
+  function getCorridorLabel(fromSystemId: number, toSystemId: number): string {
+    const connection = (mapDetails?.connections ?? []).find(
+      (candidate) =>
+        (candidate.from_system_id === fromSystemId &&
+          candidate.to_system_id === toSystemId) ||
+        (candidate.from_system_id === toSystemId &&
+          candidate.to_system_id === fromSystemId)
+    );
+
+    if (!connection) {
+      return "not connected";
+    }
+
+    if (connection.is_wraparound) {
+      return "wraparound · 2 danger cards";
+    }
+
+    if (connection.is_dangerous) {
+      return "dangerous · 1 danger card";
+    }
+
+    return "safe corridor";
+  }
+
+
+  function getFleetStatusText(fleet: SessionFleet): string {
+    if (fleet.is_defensive) {
+      return "Defensive position";
+    }
+
+    if (fleet.has_acted_this_round) {
+      return "Activated";
+    }
+
+    return "Ready";
   }
 
   function getGameplaySystemVisualClass(systemId: number): string {
@@ -802,6 +1213,51 @@ export default function GamePlay() {
 
     return null;
   }
+
+  const currentPlayerFleets = currentPlayer?.fleets ?? [];
+  const readyCommandFleets = currentPlayerFleets.filter(
+    (fleet) => !fleet.has_acted_this_round
+  );
+  const selectedCommandFleet =
+    readyCommandFleets.find(
+      (fleet) => fleet.id === selectedCommandFleetId
+    ) ?? readyCommandFleets[0] ?? null;
+  const selectedCommandConnectedSystems = selectedCommandFleet
+    ? getConnectedSystems(selectedCommandFleet.system_id)
+    : [];
+  const effectiveCommandTargetSystemId =
+    selectedCommandTargetSystemId ??
+    selectedCommandConnectedSystems[0]?.system_id ??
+    null;
+  const stagedCommandOrders = Object.entries(stagedFleetOrders)
+    .map(([fleetId, targetSystemId]) => {
+      const fleet = currentPlayerFleets.find(
+        (candidate) => candidate.id === Number(fleetId)
+      );
+      const targetSystem = getSessionSystemById(Number(targetSystemId));
+
+      if (!fleet || !targetSystem) {
+        return null;
+      }
+
+      return {
+        fleet,
+        targetSystem,
+        corridorLabel: getCorridorLabel(
+          fleet.system_id,
+          targetSystem.system_id
+        )
+      };
+    })
+    .filter(
+      (
+        order
+      ): order is {
+        fleet: SessionFleet;
+        targetSystem: SessionSystem;
+        corridorLabel: string;
+      } => order !== null
+    );
 
   return (
     <div className="game-page game-simulation-page">
@@ -1101,6 +1557,209 @@ export default function GamePlay() {
     <span className="legend-line-wraparound">Wraparound corridor</span>
   </div>
 
+              <section className="fleet-command-center">
+                <div className="fleet-command-center-header">
+                  <div>
+                    <span className="fleet-command-kicker">Fleet command</span>
+                    <h2>Issue coordinated orders</h2>
+                    <p>
+                      Add orders for any number of ready fleets, then execute the
+                      complete command for 1 CP.
+                    </p>
+                  </div>
+
+                  <div className="fleet-command-cost">
+                    <strong>1 CP</strong>
+                    <span>
+                      {currentPlayer
+                        ? `${currentPlayer.faction_name} · ${currentPlayer.command_points_left} CP left`
+                        : "No active player"}
+                    </span>
+                  </div>
+                </div>
+
+                {!currentPlayer && (
+                  <p className="action-hint">
+                    No current player is available to issue fleet orders.
+                  </p>
+                )}
+
+                {currentPlayer && currentPlayerFleets.length === 0 && (
+                  <p className="action-hint">
+                    The current player has no active fleets. Produce a unit or
+                    pack a Colony into an Ark first.
+                  </p>
+                )}
+
+                {currentPlayer && currentPlayerFleets.length > 0 && (
+                  <div className="fleet-command-workspace">
+                    <div className="fleet-command-builder">
+                      <div className="fleet-command-step">
+                        <span className="fleet-command-step-number">1</span>
+                        <label>
+                          Fleet
+                          <select
+                            value={selectedCommandFleet?.id ?? ""}
+                            onChange={(event) =>
+                              handleSelectCommandFleet(Number(event.target.value))
+                            }
+                            disabled={
+                              isFleetCommandLoading ||
+                              readyCommandFleets.length === 0
+                            }
+                          >
+                            {readyCommandFleets.map((fleet) => (
+                              <option key={fleet.id} value={fleet.id}>
+                                {fleet.name} · {fleet.system_name ?? `System ${fleet.system_id}`} · {fleet.units.length}/5
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="fleet-command-step">
+                        <span className="fleet-command-step-number">2</span>
+                        <label>
+                          Order
+                          <select value="move_defend" disabled>
+                            <option value="move_defend">
+                              Move → Defensive Position
+                            </option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="fleet-command-step">
+                        <span className="fleet-command-step-number">3</span>
+                        <label>
+                          Move target
+                          <select
+                            value={effectiveCommandTargetSystemId ?? ""}
+                            onChange={(event) =>
+                              setSelectedCommandTargetSystemId(
+                                Number(event.target.value)
+                              )
+                            }
+                            disabled={
+                              isFleetCommandLoading ||
+                              !selectedCommandFleet ||
+                              selectedCommandConnectedSystems.length === 0
+                            }
+                          >
+                            {selectedCommandConnectedSystems.map((system) => (
+                              <option
+                                key={system.system_id}
+                                value={system.system_id}
+                              >
+                                {system.system_name} · {getCorridorLabel(
+                                  selectedCommandFleet?.system_id ?? 0,
+                                  system.system_id
+                                )}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="fleet-command-add-button"
+                        onClick={handleStageFleetOrder}
+                        disabled={
+                          isFleetCommandLoading ||
+                          !selectedCommandFleet ||
+                          selectedCommandConnectedSystems.length === 0
+                        }
+                      >
+                        Add order
+                      </button>
+                    </div>
+
+                    <div className="fleet-command-summary">
+                      <div className="fleet-command-summary-header">
+                        <div>
+                          <h3>Prepared orders</h3>
+                          <span>{stagedCommandOrders.length} selected</span>
+                        </div>
+
+                        {stagedCommandOrders.length > 0 && (
+                          <button
+                            type="button"
+                            className="fleet-command-text-button"
+                            onClick={handleClearFleetCommand}
+                            disabled={isFleetCommandLoading}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      {stagedCommandOrders.length === 0 ? (
+                        <p className="action-hint">
+                          Add one or more fleet orders. The full package costs
+                          only 1 CP.
+                        </p>
+                      ) : (
+                        <div className="fleet-command-order-list">
+                          {stagedCommandOrders.map(
+                            ({ fleet, targetSystem, corridorLabel }) => (
+                              <div
+                                key={fleet.id}
+                                className="fleet-command-order-row"
+                              >
+                                <div>
+                                  <strong>{fleet.name}</strong>
+                                  <span>
+                                    {fleet.system_name ?? `System ${fleet.system_id}`}
+                                    {" → "}
+                                    {targetSystem.system_name}
+                                  </span>
+                                  <small>
+                                    Move → Defensive Position · {corridorLabel}
+                                  </small>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  aria-label={`Remove order for ${fleet.name}`}
+                                  onClick={() =>
+                                    handleRemoveStagedFleetOrder(fleet.id)
+                                  }
+                                  disabled={isFleetCommandLoading}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        className="fleet-command-execute-button"
+                        onClick={handleExecuteFleetCommand}
+                        disabled={
+                          isFleetCommandLoading ||
+                          stagedCommandOrders.length === 0 ||
+                          currentPlayer.command_points_left <= 0
+                        }
+                      >
+                        {isFleetCommandLoading
+                          ? "Executing command..."
+                          : "Execute Fleet Command · 1 CP"}
+                      </button>
+
+                      {actionErrors.fleetCommand && (
+                        <p className="inline-action-error">
+                          {actionErrors.fleetCommand}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </section>
+
               {selectedSystem && (
                 <section className="system-overview-panel">
                   <div className="system-overview-header">
@@ -1215,6 +1874,73 @@ export default function GamePlay() {
                                             : "No technologies yet"}
                                         </p>
 
+                                        {getProductionOptionsForBuilding(
+                                          buildingType
+                                        ).length > 0 && (
+                                          <div className="unit-production-panel">
+                                            <strong>Production</strong>
+
+                                            <div className="unit-production-list">
+                                              {getProductionOptionsForBuilding(
+                                                buildingType
+                                              ).map((unitOption) => {
+                                                const produceErrorKey = `produce-${firstBuilding.id}-${unitOption.unit_type}`;
+                                                const unitResourceError =
+                                                  getResourceShortageMessage(
+                                                    currentPlayer,
+                                                    unitOption.resourceCost
+                                                  );
+
+                                                return (
+                                                  <div
+                                                    key={unitOption.unit_type}
+                                                    className="unit-production-row"
+                                                  >
+                                                    <button
+                                                      type="button"
+                                                      onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        handleProduceUnit(
+                                                          firstBuilding,
+                                                          unitOption
+                                                        );
+                                                      }}
+                                                      disabled={
+                                                        isProducingUnit ||
+                                                        !canControl ||
+                                                        Boolean(unitResourceError)
+                                                      }
+                                                    >
+                                                      <span>{unitOption.icon}</span>
+                                                      <span>
+                                                        Produce {unitOption.name}
+                                                        <small>
+                                                          {unitOption.costText}
+                                                        </small>
+                                                        <small>
+                                                          {unitOption.statsText}
+                                                        </small>
+                                                      </span>
+                                                    </button>
+
+                                                    {unitResourceError && (
+                                                      <p className="inline-action-error">
+                                                        {unitResourceError}
+                                                      </p>
+                                                    )}
+
+                                                    {actionErrors[produceErrorKey] && (
+                                                      <p className="inline-action-error">
+                                                        {actionErrors[produceErrorKey]}
+                                                      </p>
+                                                    )}
+                                                  </div>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        )}
+
                                         {isColony && (
                                           <>
                                             <button
@@ -1261,6 +1987,85 @@ export default function GamePlay() {
                                 );
                               }
                             )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    <div className="system-overview-block">
+                      <h3>Fleets in system</h3>
+
+                      {(() => {
+                        if (!selectedSystem) {
+                          return null;
+                        }
+
+                        const fleets = getFleetsInSystem(
+                          selectedSystem.system_id
+                        );
+
+                        if (fleets.length === 0) {
+                          return (
+                            <p className="action-hint">
+                              No fleets in this system.
+                            </p>
+                          );
+                        }
+
+                        return (
+                          <div className="fleet-command-grid">
+                            {fleets.map((fleet) => {
+                              const owner = getFleetOwner(fleet);
+                              const canPrepareOrder =
+                                fleet.owner_player_id === currentPlayer?.id &&
+                                !fleet.has_acted_this_round &&
+                                session.status === "started";
+
+                              return (
+                                <div
+                                  key={fleet.id}
+                                  className="fleet-command-card"
+                                >
+                                  <div className="fleet-command-card-header">
+                                    <strong>{fleet.name}</strong>
+                                    <span>{getFleetStatusText(fleet)}</span>
+                                  </div>
+
+                                  <p>
+                                    Owner: {owner?.faction_name ?? "Unknown"}
+                                  </p>
+                                  <p>Units: {fleet.units.length}/5</p>
+
+                                  {fleet.units.length > 0 && (
+                                    <div className="fleet-unit-strip">
+                                      {fleet.units.map((unit) => (
+                                        <span key={unit.id}>
+                                          {getUnitDisplayName(unit)}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {canPrepareOrder && (
+                                    <button
+                                      type="button"
+                                      className="fleet-command-prepare-button"
+                                      onClick={() =>
+                                        handleSelectCommandFleet(fleet.id)
+                                      }
+                                    >
+                                      Prepare order
+                                    </button>
+                                  )}
+
+                                  {fleet.has_acted_this_round && (
+                                    <p className="action-hint">
+                                      This fleet has already acted this round.
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         );
                       })()}

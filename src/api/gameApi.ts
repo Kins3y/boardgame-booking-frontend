@@ -1,10 +1,12 @@
 import type {
   AvailableUser,
+  FleetCommandPayload,
   FullGameSession,
   SessionOverviewItem,
   Civilization,
   StartSystemOption,
   BuildingType,
+  UnitType,
   MapEditorMapSummary,
   MapEditorSavePayload,
   MapEditorSavedMap
@@ -344,6 +346,58 @@ export async function colonizeSystemWithArk(
     `${API_URL}/game/sessions/${sessionId}/units/${unitId}/colonize`,
     {
       method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+export async function issueFleetCommand(
+  sessionId: number,
+  payload: FleetCommandPayload
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/fleet-command`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+
+export async function produceUnitFromBuilding(
+  sessionId: number,
+  buildingId: number,
+  unitType: UnitType
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/buildings/${buildingId}/produce-unit`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        unit_type: unitType
+      })
     }
   );
 

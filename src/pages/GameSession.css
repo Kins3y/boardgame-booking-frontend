@@ -1402,6 +1402,350 @@
   color: rgba(201, 133, 255, 0.92);
 }
 
+
+/* Fleet Command v1 */
+.fleet-command-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.fleet-command-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.fleet-command-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fleet-command-card-header span {
+  font-size: 12px;
+  color: rgba(244, 243, 236, 0.72);
+}
+
+.fleet-unit-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fleet-unit-strip span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(170, 59, 255, 0.14);
+  color: rgba(244, 243, 236, 0.9);
+  font-size: 12px;
+}
+
+.fleet-command-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.fleet-command-actions label {
+  display: grid;
+  gap: 6px;
+  color: rgba(244, 243, 236, 0.72);
+  font-size: 12px;
+}
+
+.fleet-command-actions select {
+  width: 100%;
+}
+
+.unit-production-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.unit-production-list {
+  display: grid;
+  gap: 8px;
+}
+
+.unit-production-row {
+  display: grid;
+  gap: 6px;
+}
+
+.unit-production-row button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.unit-production-row button > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.unit-production-row small {
+  opacity: 0.78;
+}
+
+
+/* Fleet Command workspace */
+.fleet-command-center {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid rgba(170, 59, 255, 0.32);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(25, 18, 39, 0.92), rgba(9, 7, 16, 0.94));
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.fleet-command-center-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.fleet-command-center-header h2,
+.fleet-command-center-header p,
+.fleet-command-summary h3 {
+  margin: 0;
+}
+
+.fleet-command-center-header p {
+  max-width: 680px;
+  margin-top: 6px;
+  color: rgba(244, 243, 236, 0.68);
+  line-height: 1.5;
+}
+
+.fleet-command-kicker {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: rgba(201, 133, 255, 0.92);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.fleet-command-cost {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 3px;
+  min-width: 150px;
+  padding: 12px 14px;
+  border: 1px solid rgba(201, 133, 255, 0.26);
+  border-radius: 14px;
+  background: rgba(170, 59, 255, 0.1);
+  text-align: right;
+}
+
+.fleet-command-cost strong {
+  color: #f4f3ec;
+  font-size: 20px;
+}
+
+.fleet-command-cost span {
+  color: rgba(244, 243, 236, 0.62);
+  font-size: 12px;
+}
+
+.fleet-command-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 16px;
+}
+
+.fleet-command-builder,
+.fleet-command-summary {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.fleet-command-step {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: end;
+  gap: 10px;
+}
+
+.fleet-command-step-number {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(201, 133, 255, 0.34);
+  border-radius: 9px;
+  background: rgba(170, 59, 255, 0.13);
+  color: #f4f3ec;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.fleet-command-step label {
+  display: grid;
+  gap: 6px;
+  color: rgba(244, 243, 236, 0.68);
+  font-size: 12px;
+}
+
+.fleet-command-step select {
+  width: 100%;
+  min-height: 42px;
+}
+
+.fleet-command-add-button,
+.fleet-command-execute-button,
+.fleet-command-prepare-button {
+  width: 100%;
+}
+
+.fleet-command-add-button {
+  margin-top: 2px;
+}
+
+.fleet-command-summary {
+  align-content: start;
+}
+
+.fleet-command-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fleet-command-summary-header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-command-summary-header span {
+  color: rgba(244, 243, 236, 0.58);
+  font-size: 12px;
+}
+
+.fleet-command-text-button {
+  width: auto;
+  min-height: auto;
+  padding: 4px 7px;
+  border: 0;
+  background: transparent;
+  color: rgba(201, 133, 255, 0.9);
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.fleet-command-order-list {
+  display: grid;
+  gap: 8px;
+}
+
+.fleet-command-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.fleet-command-order-row > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.fleet-command-order-row strong,
+.fleet-command-order-row span,
+.fleet-command-order-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fleet-command-order-row span {
+  color: rgba(244, 243, 236, 0.8);
+  font-size: 13px;
+}
+
+.fleet-command-order-row small {
+  color: rgba(244, 243, 236, 0.54);
+}
+
+.fleet-command-order-row > button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 30px;
+  min-height: 30px;
+  padding: 0;
+  place-items: center;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.fleet-command-execute-button {
+  margin-top: 2px;
+  border-color: rgba(170, 59, 255, 0.58);
+  background: linear-gradient(135deg, rgba(170, 59, 255, 0.82), rgba(98, 49, 179, 0.9));
+  color: #fff;
+  font-weight: 800;
+}
+
+.fleet-command-prepare-button {
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .fleet-command-center-header {
+    display: grid;
+  }
+
+  .fleet-command-cost {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  .fleet-command-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .fleet-command-center {
+    padding: 14px;
+  }
+
+  .fleet-command-step {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-command-step-number {
+    display: none;
+  }
+}
+
 @media (max-width: 900px) {
   .round-flow-hint {
     max-width: none;
