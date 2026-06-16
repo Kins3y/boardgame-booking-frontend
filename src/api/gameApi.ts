@@ -1,6 +1,7 @@
 import type {
   AvailableUser,
   FleetCommandPayload,
+  FleetCommandResponse,
   FullGameSession,
   SessionOverviewItem,
   Civilization,
@@ -361,7 +362,7 @@ export async function colonizeSystemWithArk(
 export async function issueFleetCommand(
   sessionId: number,
   payload: FleetCommandPayload
-): Promise<FullGameSession> {
+): Promise<FleetCommandResponse> {
   const response = await fetch(
     `${API_URL}/game/sessions/${sessionId}/fleet-command`,
     {
@@ -377,9 +378,7 @@ export async function issueFleetCommand(
     throw new Error(await getErrorMessage(response));
   }
 
-  const data = await response.json();
-
-  return data.session;
+  return response.json();
 }
 
 

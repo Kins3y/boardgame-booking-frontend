@@ -1716,6 +1716,495 @@
   margin-top: 2px;
 }
 
+.fleet-route-preview {
+  display: grid;
+  gap: 5px;
+  padding: 12px 13px;
+  border: 1px solid rgba(103, 164, 255, 0.24);
+  border-radius: 12px;
+  background: rgba(103, 164, 255, 0.07);
+}
+
+.fleet-route-preview strong {
+  color: rgba(244, 243, 236, 0.92);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fleet-route-preview span {
+  color: #f4f3ec;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.fleet-route-preview small {
+  color: rgba(244, 243, 236, 0.64);
+  line-height: 1.45;
+}
+
+.fleet-route-preview em,
+.fleet-command-order-row em {
+  color: rgba(255, 216, 92, 0.9);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.fleet-command-order-row > div {
+  white-space: normal;
+}
+
+.fleet-command-order-row em {
+  display: block;
+  margin-top: 2px;
+}
+
+/* Danger Cards v1 */
+.fleet-command-results {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(6, 4, 12, 0.72);
+}
+
+.fleet-command-results-header,
+.fleet-command-result-title,
+.fleet-command-step-route {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.fleet-command-results-header h3 {
+  margin: 4px 0 0;
+}
+
+.fleet-command-results-list,
+.fleet-command-step-results,
+.danger-card-result-list {
+  display: grid;
+  gap: 12px;
+}
+
+.fleet-command-results-list {
+  margin-top: 14px;
+}
+
+.fleet-command-result-card {
+  padding: 15px;
+  border: 1px solid rgba(170, 59, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.fleet-command-result-destroyed {
+  border-color: rgba(255, 92, 116, 0.48);
+  background: rgba(255, 65, 95, 0.07);
+}
+
+.fleet-command-result-title > div,
+.fleet-command-step-route {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-command-result-title span,
+.fleet-command-step-route span,
+.fleet-command-step-route small {
+  color: rgba(244, 239, 255, 0.68);
+}
+
+.fleet-command-result-title em {
+  color: rgba(214, 174, 255, 0.92);
+  font-style: normal;
+  font-size: 0.86rem;
+  text-align: right;
+}
+
+.fleet-command-step-results {
+  margin-top: 14px;
+}
+
+.fleet-command-step-result {
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.danger-card-result-list {
+  margin-top: 10px;
+}
+
+.danger-card-result {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border-left: 3px solid rgba(255, 255, 255, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.danger-card-result > div {
+  display: grid;
+  gap: 3px;
+}
+
+.danger-card-result span,
+.danger-card-result p {
+  margin: 0;
+  color: rgba(244, 239, 255, 0.7);
+}
+
+.danger-card-result p {
+  font-size: 0.9rem;
+}
+
+.danger-card-effect-none {
+  border-left-color: rgba(112, 219, 170, 0.72);
+}
+
+.danger-card-effect-damage_front_unit {
+  border-left-color: rgba(255, 92, 116, 0.82);
+}
+
+.danger-card-effect-lose_energy {
+  border-left-color: rgba(102, 178, 255, 0.82);
+}
+
+.danger-card-effect-lose_food {
+  border-left-color: rgba(255, 203, 92, 0.82);
+}
+
+/* Move в†’ Transfer redesign: visual exchange board + receiving fleet movement */
+.fleet-transfer-workspace {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid rgba(103, 164, 255, 0.26);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(103, 164, 255, 0.07), rgba(170, 59, 255, 0.045));
+}
+
+.fleet-transfer-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.fleet-transfer-section-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-transfer-section-heading span,
+.fleet-transfer-remaining-move > div > span {
+  color: rgba(103, 164, 255, 0.9);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.fleet-transfer-section-heading strong,
+.fleet-transfer-remaining-move strong {
+  color: rgba(247, 242, 255, 0.97);
+  font-size: 15px;
+}
+
+.fleet-transfer-section-heading p,
+.fleet-transfer-remaining-move p {
+  max-width: 480px;
+  margin: 0;
+  color: rgba(244, 243, 236, 0.62);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fleet-transfer-fleet-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 9px;
+}
+
+.fleet-transfer-fleet-card {
+  display: grid;
+  gap: 3px;
+  min-height: 74px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(244, 243, 236, 0.76);
+  text-align: left;
+}
+
+.fleet-transfer-fleet-card:hover {
+  border-color: rgba(103, 164, 255, 0.45);
+  background: rgba(103, 164, 255, 0.08);
+}
+
+.fleet-transfer-fleet-card-selected {
+  border-color: rgba(170, 59, 255, 0.66);
+  background: rgba(170, 59, 255, 0.12);
+  box-shadow: 0 0 24px rgba(170, 59, 255, 0.1);
+}
+
+.fleet-transfer-fleet-card strong {
+  color: rgba(247, 242, 255, 0.96);
+}
+
+.fleet-transfer-fleet-card span,
+.fleet-transfer-fleet-card small {
+  color: rgba(244, 243, 236, 0.58);
+  font-size: 12px;
+}
+
+.fleet-transfer-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.fleet-transfer-side {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fleet-transfer-side-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.fleet-transfer-side-title strong {
+  color: rgba(247, 242, 255, 0.96);
+}
+
+.fleet-transfer-side-title span {
+  color: rgba(244, 243, 236, 0.5);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fleet-transfer-flow {
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  text-align: center;
+  color: rgba(244, 243, 236, 0.55);
+}
+
+.fleet-transfer-flow > span {
+  color: rgba(170, 59, 255, 0.92);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.fleet-transfer-flow strong {
+  color: rgba(247, 242, 255, 0.88);
+  font-size: 12px;
+}
+
+.fleet-transfer-flow small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.fleet-transfer-unit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.fleet-transfer-unit-card {
+  display: grid;
+  gap: 4px;
+  min-height: 92px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(244, 243, 236, 0.76);
+  text-align: left;
+}
+
+.fleet-transfer-unit-card:hover {
+  border-color: rgba(103, 164, 255, 0.42);
+  background: rgba(103, 164, 255, 0.065);
+}
+
+.fleet-transfer-unit-card-selected {
+  border-color: rgba(103, 164, 255, 0.68);
+  background: rgba(103, 164, 255, 0.13);
+  transform: translateX(3px);
+}
+
+.fleet-transfer-unit-card-reverse {
+  border-color: rgba(170, 59, 255, 0.68);
+  background: rgba(170, 59, 255, 0.13);
+  transform: translateX(-3px);
+}
+
+.fleet-transfer-unit-card-damaged {
+  box-shadow: inset 3px 0 0 rgba(255, 92, 116, 0.72);
+}
+
+.fleet-transfer-unit-card strong {
+  color: rgba(247, 242, 255, 0.96);
+  font-size: 13px;
+}
+
+.fleet-transfer-unit-card small {
+  color: rgba(244, 243, 236, 0.62);
+  font-size: 11px;
+}
+
+.fleet-transfer-unit-card em {
+  color: rgba(255, 164, 177, 0.94);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.fleet-transfer-unit-direction {
+  color: rgba(103, 164, 255, 0.9);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.fleet-transfer-capacity {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.fleet-transfer-capacity span:last-child {
+  text-align: right;
+}
+
+.fleet-transfer-capacity strong {
+  color: rgba(244, 243, 236, 0.55);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.fleet-transfer-remaining-move {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 216, 92, 0.24);
+  border-radius: 13px;
+  background: rgba(255, 216, 92, 0.055);
+}
+
+.fleet-transfer-remaining-move > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.fleet-transfer-move-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.fleet-transfer-move-option {
+  display: grid;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(244, 243, 236, 0.72);
+  text-align: left;
+}
+
+.fleet-transfer-move-option:hover {
+  border-color: rgba(255, 216, 92, 0.42);
+  background: rgba(255, 216, 92, 0.07);
+}
+
+.fleet-transfer-move-option-selected {
+  border-color: rgba(255, 216, 92, 0.72);
+  background: rgba(255, 216, 92, 0.12);
+  box-shadow: 0 0 20px rgba(255, 216, 92, 0.08);
+}
+
+.fleet-transfer-move-option strong {
+  color: rgba(255, 239, 181, 0.96);
+  font-size: 12px;
+}
+
+.fleet-transfer-move-option span {
+  color: rgba(244, 243, 236, 0.55);
+  font-size: 11px;
+}
+
+.fleet-transfer-report small {
+  color: rgba(255, 216, 92, 0.84);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .fleet-transfer-board {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-transfer-flow {
+    min-height: 52px;
+  }
+
+  .fleet-transfer-flow > span {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 620px) {
+  .fleet-transfer-section-heading {
+    flex-direction: column;
+  }
+
+  .fleet-transfer-capacity {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-transfer-capacity span:last-child {
+    text-align: left;
+  }
+}
+
+@media (max-width: 720px) {
+  .fleet-command-results-header,
+  .fleet-command-result-title,
+  .fleet-command-step-route {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .fleet-command-result-title em {
+    text-align: left;
+  }
+}
+
 @media (max-width: 900px) {
   .fleet-command-center-header {
     display: grid;

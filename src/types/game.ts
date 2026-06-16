@@ -34,16 +34,103 @@ export type SessionFleet = {
 };
 
 
-export type FleetOrderType = "move_defend";
+export type FleetOrderType =
+  | "move_defend"
+  | "move_move"
+  | "move_transfer";
 
 export type FleetCommandOrder = {
   fleet_id: number;
   order_type: FleetOrderType;
   target_system_id: number;
+  second_target_system_id?: number;
+  transfer_fleet_id?: number;
+  transfer_fleet_target_system_id?: number;
+  unit_ids_to_transfer_fleet?: number[];
+  unit_ids_to_command_fleet?: number[];
 };
 
 export type FleetCommandPayload = {
   orders: FleetCommandOrder[];
+};
+
+export type DangerCardEffectType =
+  | "none"
+  | "damage_front_unit"
+  | "lose_energy"
+  | "lose_food";
+
+export type DangerCardResult = {
+  card_key: string;
+  name: string;
+  description: string;
+  effect_type: DangerCardEffectType;
+  amount: number;
+  effect_summary: string;
+  target_unit_id: number | null;
+  target_unit_name: string | null;
+  unit_hp_before: number | null;
+  unit_hp_after: number | null;
+  unit_destroyed: boolean;
+  resource: "energy" | "food" | null;
+  resource_lost: number;
+};
+
+export type FleetMovementStepReport = {
+  step: number;
+  from_system_id: number;
+  from_system_name: string | null;
+  to_system_id: number;
+  to_system_name: string | null;
+  corridor_type: "safe" | "dangerous" | "wraparound";
+  danger_cards: number;
+  drawn_cards: DangerCardResult[];
+};
+
+export type TransferUnitSummary = {
+  id: number;
+  unit_type: string;
+  unit_name: string;
+  current_hp: number | null;
+  max_hp: number | null;
+  is_damaged: boolean;
+};
+
+export type FleetTransferReport = {
+  partner_fleet_id: number;
+  partner_fleet_name: string;
+  moved_to_partner: TransferUnitSummary[];
+  moved_to_command_fleet: TransferUnitSummary[];
+  missing_unit_ids: number[];
+  source_fleet_deleted: boolean;
+  partner_fleet_deleted: boolean;
+  partner_movement_available: boolean;
+  partner_movement_used: boolean;
+  partner_movement_step: FleetMovementStepReport | null;
+  partner_final_system_id: number;
+  partner_final_system_name: string | null;
+  partner_fleet_destroyed: boolean;
+  completed: boolean;
+};
+
+export type FleetCommandOrderReport = {
+  fleet_id: number;
+  fleet_name: string;
+  order_type: FleetOrderType;
+  steps: FleetMovementStepReport[];
+  final_system_id: number;
+  final_system_name: string | null;
+  total_danger_cards: number;
+  is_defensive: boolean;
+  fleet_destroyed: boolean;
+  order_completed: boolean;
+  transfer: FleetTransferReport | null;
+};
+
+export type FleetCommandResponse = {
+  message: string;
+  session: FullGameSession;
+  command_report: FleetCommandOrderReport[];
 };
 
 export type SessionPlayer = {

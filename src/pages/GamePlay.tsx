@@ -13,6 +13,8 @@ import {
 } from "../api/gameApi";
 import type {
   BuildingType,
+  FleetCommandOrderReport,
+  FleetOrderType,
   FullGameSession,
   MapEditorSavedMap,
   SessionBuilding,
@@ -32,6 +34,16 @@ type ResourceCost = {
   energy?: number;
   data?: number;
   food?: number;
+};
+
+type StagedFleetOrder = {
+  order_type: FleetOrderType;
+  target_system_id: number;
+  second_target_system_id?: number;
+  transfer_fleet_id?: number;
+  transfer_fleet_target_system_id?: number;
+  unit_ids_to_transfer_fleet?: number[];
+  unit_ids_to_command_fleet?: number[];
 };
 
 const BUILDING_COSTS: Record<BuildingType, ResourceCost> = {
@@ -333,6 +345,14 @@ function getUnitHpText(unit: SessionUnit): string {
   return `HP: ${unit.current_hp}/${unit.max_hp}`;
 }
 
+function isUnitDamaged(unit: SessionUnit): boolean {
+  return (
+    unit.current_hp !== null &&
+    unit.max_hp !== null &&
+    unit.current_hp < unit.max_hp
+  );
+}
+
 function getSystemColonyMapStatus(system: SessionSystem): string {
   const buildings = system.buildings ?? [];
   const units = system.units ?? [];
@@ -537,11 +557,31 @@ export default function GamePlay() {
   const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
   const [selectedCommandFleetId, setSelectedCommandFleetId] =
     useState<number | null>(null);
+  const [selectedCommandOrderType, setSelectedCommandOrderType] =
+    useState<FleetOrderType>("move_defend");
   const [selectedCommandTargetSystemId, setSelectedCommandTargetSystemId] =
     useState<number | null>(null);
+  const [
+    selectedCommandSecondTargetSystemId,
+    setSelectedCommandSecondTargetSystemId
+  ] = useState<number | null>(null);
   const [stagedFleetOrders, setStagedFleetOrders] = useState<
-    Record<number, number>
+    Record<number, StagedFleetOrder>
   >({});
+  const [selectedTransferFleetId, setSelectedTransferFleetId] =
+    useState<number | null>(null);
+  const [selectedUnitsToTransferFleet, setSelectedUnitsToTransferFleet] =
+    useState<number[]>([]);
+  const [selectedUnitsToCommandFleet, setSelectedUnitsToCommandFleet] =
+    useState<number[]>([]);
+  const [
+    selectedTransferFleetMoveTargetSystemId,
+    setSelectedTransferFleetMoveTargetSystemId
+  ] = useState<number | null>(null);
+
+  const [lastFleetCommandReport, setLastFleetCommandReport] = useState<
+    FleetCommandOrderReport[]
+  >([]);
 
   const [error, setError] = useState<string>("");
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
@@ -722,7 +762,9 @@ export default function GamePlay() {
     setSelectedStructureKey(null);
     setSelectedUnitId(null);
     setSelectedCommandFleetId(null);
+    setSelectedCommandOrderType("move_defend");
     setSelectedCommandTargetSystemId(null);
+    setSelectedCommandSecondTargetSystemId(null);
     setStagedFleetOrders({});
   }
 
@@ -917,6 +959,60 @@ export default function GamePlay() {
     }
   }
 
+  function getDefaultSecondTargetSystemId(
+    firstTargetSystemId: number | null
+  ): number | null {
+    if (!firstTargetSystemId) {
+      return null;
+    }
+
+    return getConnectedSystems(firstTargetSystemId)[0]?.system_id ?? null;
+  }
+
+  function getReadyTransferFleets(
+    systemId: number | null,
+    sourceFleetId: number | null
+  ): SessionFleet[] {
+    if (!currentPlayer || systemId === null) {
+      return [];
+    }
+
+    return currentPlayer.fleets.filter(
+      (fleet) =>
+        fleet.id !== sourceFleetId &&
+        fleet.system_id === systemId &&
+        !fleet.has_acted_this_round
+    );
+  }
+
+  function resetTransferSelection(
+    targetSystemId: number | null,
+    sourceFleetId: number | null
+  ) {
+    const defaultTransferFleet = getReadyTransferFleets(
+      targetSystemId,
+      sourceFleetId
+    )[0];
+
+    setSelectedTransferFleetId(defaultTransferFleet?.id ?? null);
+    setSelectedUnitsToTransferFleet([]);
+    setSelectedUnitsToCommandFleet([]);
+    setSelectedTransferFleetMoveTargetSystemId(null);
+  }
+
+  function toggleUnitSelection(
+    unitId: number,
+    selectedIds: number[],
+    setSelectedIds: (value: number[]) => void
+  ) {
+    if (selectedIds.includes(unitId)) {
+      setSelectedIds(selectedIds.filter((id) => id !== unitId));
+      return;
+    }
+
+    setSelectedIds([...selectedIds, unitId]);
+  }
+
   function handleSelectCommandFleet(fleetId: number) {
     const fleet = currentPlayer?.fleets.find(
       (candidate) => candidate.id === fleetId
@@ -927,10 +1023,67 @@ export default function GamePlay() {
     const firstConnectedSystem = fleet
       ? getConnectedSystems(fleet.system_id)[0]
       : null;
+    const firstTargetSystemId = firstConnectedSystem?.system_id ?? null;
 
-    setSelectedCommandTargetSystemId(
-      firstConnectedSystem?.system_id ?? null
+    setSelectedCommandTargetSystemId(firstTargetSystemId);
+    setSelectedCommandSecondTargetSystemId(
+      selectedCommandOrderType === "move_move"
+        ? getDefaultSecondTargetSystemId(firstTargetSystemId)
+        : null
     );
+    resetTransferSelection(firstTargetSystemId, fleetId);
+
+    setActionErrors((current) => {
+      const next = { ...current };
+      delete next.fleetCommand;
+      return next;
+    });
+  }
+
+  function handleSelectCommandOrderType(orderType: FleetOrderType) {
+    setSelectedCommandOrderType(orderType);
+
+    if (orderType === "move_move") {
+      setSelectedCommandSecondTargetSystemId(
+        getDefaultSecondTargetSystemId(selectedCommandTargetSystemId)
+      );
+    } else {
+      setSelectedCommandSecondTargetSystemId(null);
+    }
+
+    if (orderType === "move_transfer") {
+      resetTransferSelection(
+        selectedCommandTargetSystemId,
+        selectedCommandFleetId
+      );
+    } else {
+      setSelectedTransferFleetId(null);
+      setSelectedUnitsToTransferFleet([]);
+      setSelectedUnitsToCommandFleet([]);
+      setSelectedTransferFleetMoveTargetSystemId(null);
+    }
+
+    setActionErrors((current) => {
+      const next = { ...current };
+      delete next.fleetCommand;
+      return next;
+    });
+  }
+
+  function handleSelectFirstMoveTarget(systemId: number) {
+    setSelectedCommandTargetSystemId(systemId);
+
+    if (selectedCommandOrderType === "move_move") {
+      setSelectedCommandSecondTargetSystemId(
+        getDefaultSecondTargetSystemId(systemId)
+      );
+    } else {
+      setSelectedCommandSecondTargetSystemId(null);
+    }
+
+    if (selectedCommandOrderType === "move_transfer") {
+      resetTransferSelection(systemId, selectedCommandFleetId);
+    }
 
     setActionErrors((current) => {
       const next = { ...current };
@@ -963,45 +1116,206 @@ export default function GamePlay() {
       return;
     }
 
-    const connectedSystems = getConnectedSystems(fleet.system_id);
-    const targetSystemId =
+    const firstStepSystems = getConnectedSystems(fleet.system_id);
+    const firstTargetSystemId =
       selectedCommandTargetSystemId ??
-      connectedSystems[0]?.system_id ??
+      firstStepSystems[0]?.system_id ??
       null;
 
-    if (!targetSystemId) {
+    if (!firstTargetSystemId) {
       setActionErrors({
         fleetCommand: "The selected fleet has no connected target system."
       });
       return;
     }
 
-    const isConnected = connectedSystems.some(
-      (system) => system.system_id === targetSystemId
-    );
-
-    if (!isConnected) {
+    if (
+      !firstStepSystems.some(
+        (system) => system.system_id === firstTargetSystemId
+      )
+    ) {
       setActionErrors({
-        fleetCommand: "Select a directly connected target system."
+        fleetCommand: "Select a valid first movement corridor."
       });
       return;
     }
 
+    let secondTargetSystemId: number | undefined;
+    let transferFleetId: number | undefined;
+    let transferFleetTargetSystemId: number | undefined;
+    let unitIdsToTransferFleet: number[] | undefined;
+    let unitIdsToCommandFleet: number[] | undefined;
+
+    if (selectedCommandOrderType === "move_move") {
+      const secondStepSystems = getConnectedSystems(firstTargetSystemId);
+      const selectedSecondTarget =
+        selectedCommandSecondTargetSystemId ??
+        secondStepSystems[0]?.system_id ??
+        null;
+
+      if (!selectedSecondTarget) {
+        setActionErrors({
+          fleetCommand:
+            "Select the second movement system before adding the order."
+        });
+        return;
+      }
+
+      if (
+        !secondStepSystems.some(
+          (system) => system.system_id === selectedSecondTarget
+        )
+      ) {
+        setActionErrors({
+          fleetCommand:
+            "The second movement must use a corridor connected to the first selected system."
+        });
+        return;
+      }
+
+      secondTargetSystemId = selectedSecondTarget;
+    }
+
+    if (selectedCommandOrderType === "move_transfer") {
+      const transferFleet = availableFleets.find(
+        (candidate) => candidate.id === selectedTransferFleetId
+      );
+
+      if (
+        !transferFleet ||
+        transferFleet.id === fleet.id ||
+        transferFleet.system_id !== firstTargetSystemId
+      ) {
+        setActionErrors({
+          fleetCommand:
+            "Select a ready friendly fleet in the destination system."
+        });
+        return;
+      }
+
+      const reservedFleetIds = new Set<number>();
+
+      for (const [stagedFleetId, stagedOrder] of Object.entries(
+        stagedFleetOrders
+      )) {
+        if (Number(stagedFleetId) === fleet.id) {
+          continue;
+        }
+
+        reservedFleetIds.add(Number(stagedFleetId));
+
+        if (stagedOrder.transfer_fleet_id !== undefined) {
+          reservedFleetIds.add(stagedOrder.transfer_fleet_id);
+        }
+      }
+
+      if (reservedFleetIds.has(transferFleet.id)) {
+        setActionErrors({
+          fleetCommand:
+            "The transfer fleet already participates in another prepared order."
+        });
+        return;
+      }
+
+      if (
+        selectedUnitsToTransferFleet.length === 0 &&
+        selectedUnitsToCommandFleet.length === 0
+      ) {
+        setActionErrors({
+          fleetCommand: "Select at least one unit to transfer."
+        });
+        return;
+      }
+
+      const sourceProjectedCount =
+        fleet.units.length -
+        selectedUnitsToTransferFleet.length +
+        selectedUnitsToCommandFleet.length;
+      const transferProjectedCount =
+        transferFleet.units.length -
+        selectedUnitsToCommandFleet.length +
+        selectedUnitsToTransferFleet.length;
+
+      if (sourceProjectedCount > 5 || transferProjectedCount > 5) {
+        setActionErrors({
+          fleetCommand:
+            "The selected transfer would exceed the 5-unit fleet limit."
+        });
+        return;
+      }
+
+      transferFleetId = transferFleet.id;
+      unitIdsToTransferFleet = [...selectedUnitsToTransferFleet];
+      unitIdsToCommandFleet = [...selectedUnitsToCommandFleet];
+
+      if (selectedTransferFleetMoveTargetSystemId !== null) {
+        const remainingMoveSystems = getConnectedSystems(
+          transferFleet.system_id
+        );
+
+        if (
+          !remainingMoveSystems.some(
+            (system) =>
+              system.system_id ===
+              selectedTransferFleetMoveTargetSystemId
+          )
+        ) {
+          setActionErrors({
+            fleetCommand:
+              "The receiving fleet's remaining move must use a connected corridor."
+          });
+          return;
+        }
+
+        if (transferProjectedCount <= 0) {
+          setActionErrors({
+            fleetCommand:
+              "The receiving fleet cannot move because it would contain no units after transfer."
+          });
+          return;
+        }
+
+        transferFleetTargetSystemId =
+          selectedTransferFleetMoveTargetSystemId;
+      }
+    }
+
     setStagedFleetOrders((current) => ({
       ...current,
-      [fleet.id]: targetSystemId
+      [fleet.id]: {
+        order_type: selectedCommandOrderType,
+        target_system_id: firstTargetSystemId,
+        second_target_system_id: secondTargetSystemId,
+        transfer_fleet_id: transferFleetId,
+        transfer_fleet_target_system_id: transferFleetTargetSystemId,
+        unit_ids_to_transfer_fleet: unitIdsToTransferFleet,
+        unit_ids_to_command_fleet: unitIdsToCommandFleet
+      }
     }));
 
+    const additionallyReservedFleetId = transferFleetId;
     const remainingFleet = availableFleets.find(
       (candidate) =>
         candidate.id !== fleet.id &&
+        candidate.id !== additionallyReservedFleetId &&
         stagedFleetOrders[candidate.id] === undefined
     );
 
     if (remainingFleet) {
       const firstTarget = getConnectedSystems(remainingFleet.system_id)[0];
+      const firstTargetSystemIdForNextFleet = firstTarget?.system_id ?? null;
+
       setSelectedCommandFleetId(remainingFleet.id);
-      setSelectedCommandTargetSystemId(firstTarget?.system_id ?? null);
+      setSelectedCommandTargetSystemId(firstTargetSystemIdForNextFleet);
+      setSelectedCommandSecondTargetSystemId(
+        selectedCommandOrderType === "move_move"
+          ? getDefaultSecondTargetSystemId(firstTargetSystemIdForNextFleet)
+          : null
+      );
+      resetTransferSelection(
+        firstTargetSystemIdForNextFleet,
+        remainingFleet.id
+      );
     }
 
     setActionErrors((current) => {
@@ -1034,10 +1348,30 @@ export default function GamePlay() {
     }
 
     const orders = Object.entries(stagedFleetOrders).map(
-      ([fleetId, targetSystemId]) => ({
+      ([fleetId, order]) => ({
         fleet_id: Number(fleetId),
-        order_type: "move_defend" as const,
-        target_system_id: Number(targetSystemId)
+        order_type: order.order_type,
+        target_system_id: order.target_system_id,
+        ...(order.second_target_system_id !== undefined
+          ? {
+              second_target_system_id: order.second_target_system_id
+            }
+          : {}),
+        ...(order.transfer_fleet_id !== undefined
+          ? {
+              transfer_fleet_id: order.transfer_fleet_id,
+              ...(order.transfer_fleet_target_system_id !== undefined
+                ? {
+                    transfer_fleet_target_system_id:
+                      order.transfer_fleet_target_system_id
+                  }
+                : {}),
+              unit_ids_to_transfer_fleet:
+                order.unit_ids_to_transfer_fleet ?? [],
+              unit_ids_to_command_fleet:
+                order.unit_ids_to_command_fleet ?? []
+            }
+          : {})
       })
     );
 
@@ -1060,12 +1394,14 @@ export default function GamePlay() {
       setError("");
       setActionErrors({});
 
-      const updatedSession = await issueFleetCommand(session.id, {
+      const result = await issueFleetCommand(session.id, {
         orders
       });
 
-      setSession(updatedSession);
-      selectCurrentPlayerFromSession(updatedSession);
+      setSession(result.session);
+      setLastFleetCommandReport(result.command_report);
+      setStagedFleetOrders({});
+      selectCurrentPlayerFromSession(result.session);
     } catch (err) {
       setActionErrors({
         fleetCommand:
@@ -1163,6 +1499,29 @@ export default function GamePlay() {
     return "safe corridor";
   }
 
+  function getCorridorDangerCards(
+    fromSystemId: number,
+    toSystemId: number
+  ): number {
+    const connection = (mapDetails?.connections ?? []).find(
+      (candidate) =>
+        (candidate.from_system_id === fromSystemId &&
+          candidate.to_system_id === toSystemId) ||
+        (candidate.from_system_id === toSystemId &&
+          candidate.to_system_id === fromSystemId)
+    );
+
+    if (!connection) {
+      return 0;
+    }
+
+    if (connection.is_wraparound) {
+      return 2;
+    }
+
+    return connection.is_dangerous ? 1 : 0;
+  }
+
 
   function getFleetStatusText(fleet: SessionFleet): string {
     if (fleet.is_defensive) {
@@ -1229,35 +1588,150 @@ export default function GamePlay() {
     selectedCommandTargetSystemId ??
     selectedCommandConnectedSystems[0]?.system_id ??
     null;
+  const selectedCommandSecondStepSystems =
+    selectedCommandOrderType === "move_move" &&
+    effectiveCommandTargetSystemId !== null
+      ? getConnectedSystems(effectiveCommandTargetSystemId)
+      : [];
+  const effectiveCommandSecondTargetSystemId =
+    selectedCommandOrderType === "move_move"
+      ? selectedCommandSecondTargetSystemId ??
+        selectedCommandSecondStepSystems[0]?.system_id ??
+        null
+      : null;
+  const availableTransferFleets =
+    selectedCommandOrderType === "move_transfer"
+      ? getReadyTransferFleets(
+          effectiveCommandTargetSystemId,
+          selectedCommandFleet?.id ?? null
+        )
+      : [];
+  const effectiveTransferFleet =
+    availableTransferFleets.find(
+      (fleet) => fleet.id === selectedTransferFleetId
+    ) ?? availableTransferFleets[0] ?? null;
+  const projectedCommandFleetCount = selectedCommandFleet
+    ? selectedCommandFleet.units.length -
+      selectedUnitsToTransferFleet.length +
+      selectedUnitsToCommandFleet.length
+    : 0;
+  const projectedTransferFleetCount = effectiveTransferFleet
+    ? effectiveTransferFleet.units.length -
+      selectedUnitsToCommandFleet.length +
+      selectedUnitsToTransferFleet.length
+    : 0;
+  const transferCapacityInvalid =
+    projectedCommandFleetCount > 5 || projectedTransferFleetCount > 5;
+  const transferFleetRemainingMoveSystems = effectiveTransferFleet
+    ? getConnectedSystems(effectiveTransferFleet.system_id)
+    : [];
+  const selectedTransferFleetMoveDangerCards =
+    effectiveTransferFleet &&
+    selectedTransferFleetMoveTargetSystemId !== null
+      ? getCorridorDangerCards(
+          effectiveTransferFleet.system_id,
+          selectedTransferFleetMoveTargetSystemId
+        )
+      : 0;
+  const selectedRouteFirstDangerCards =
+    selectedCommandFleet && effectiveCommandTargetSystemId
+      ? getCorridorDangerCards(
+          selectedCommandFleet.system_id,
+          effectiveCommandTargetSystemId
+        )
+      : 0;
+  const selectedRouteSecondDangerCards =
+    selectedCommandOrderType === "move_move" &&
+    effectiveCommandTargetSystemId &&
+    effectiveCommandSecondTargetSystemId
+      ? getCorridorDangerCards(
+          effectiveCommandTargetSystemId,
+          effectiveCommandSecondTargetSystemId
+        )
+      : 0;
+  const selectedRouteTotalDangerCards =
+    selectedRouteFirstDangerCards +
+    selectedRouteSecondDangerCards +
+    selectedTransferFleetMoveDangerCards;
+
   const stagedCommandOrders = Object.entries(stagedFleetOrders)
-    .map(([fleetId, targetSystemId]) => {
+    .map(([fleetId, order]) => {
       const fleet = currentPlayerFleets.find(
         (candidate) => candidate.id === Number(fleetId)
       );
-      const targetSystem = getSessionSystemById(Number(targetSystemId));
+      const firstTargetSystem = getSessionSystemById(order.target_system_id);
+      const secondTargetSystem =
+        order.second_target_system_id !== undefined
+          ? getSessionSystemById(order.second_target_system_id)
+          : null;
+      const transferFleet =
+        order.transfer_fleet_id !== undefined
+          ? currentPlayerFleets.find(
+              (candidate) => candidate.id === order.transfer_fleet_id
+            ) ?? null
+          : null;
+      const transferFleetTargetSystem =
+        order.transfer_fleet_target_system_id !== undefined
+          ? getSessionSystemById(
+              order.transfer_fleet_target_system_id
+            )
+          : null;
 
-      if (!fleet || !targetSystem) {
+      if (
+        !fleet ||
+        !firstTargetSystem ||
+        (order.order_type === "move_move" && !secondTargetSystem) ||
+        (order.order_type === "move_transfer" && !transferFleet)
+      ) {
         return null;
       }
 
+      const firstCorridorLabel = getCorridorLabel(
+        fleet.system_id,
+        firstTargetSystem.system_id
+      );
+      const secondCorridorLabel = secondTargetSystem
+        ? getCorridorLabel(
+            firstTargetSystem.system_id,
+            secondTargetSystem.system_id
+          )
+        : null;
+      const totalDangerCards =
+        getCorridorDangerCards(
+          fleet.system_id,
+          firstTargetSystem.system_id
+        ) +
+        (secondTargetSystem
+          ? getCorridorDangerCards(
+              firstTargetSystem.system_id,
+              secondTargetSystem.system_id
+            )
+          : 0) +
+        (transferFleet && transferFleetTargetSystem
+          ? getCorridorDangerCards(
+              transferFleet.system_id,
+              transferFleetTargetSystem.system_id
+            )
+          : 0);
+
       return {
         fleet,
-        targetSystem,
-        corridorLabel: getCorridorLabel(
-          fleet.system_id,
-          targetSystem.system_id
-        )
+        orderType: order.order_type,
+        firstTargetSystem,
+        secondTargetSystem,
+        transferFleet,
+        transferFleetTargetSystem,
+        unitsToTransferFleetCount:
+          order.unit_ids_to_transfer_fleet?.length ?? 0,
+        unitsToCommandFleetCount:
+          order.unit_ids_to_command_fleet?.length ?? 0,
+        firstCorridorLabel,
+        secondCorridorLabel,
+        totalDangerCards
       };
     })
-    .filter(
-      (
-        order
-      ): order is {
-        fleet: SessionFleet;
-        targetSystem: SessionSystem;
-        corridorLabel: string;
-      } => order !== null
-    );
+    .filter((order) => order !== null);
+
 
   return (
     <div className="game-page game-simulation-page">
@@ -1563,8 +2037,8 @@ export default function GamePlay() {
                     <span className="fleet-command-kicker">Fleet command</span>
                     <h2>Issue coordinated orders</h2>
                     <p>
-                      Add orders for any number of ready fleets, then execute the
-                      complete command for 1 CP.
+                      Select every movement step manually. The interface shows
+                      each corridor and its danger before the command is added.
                     </p>
                   </div>
 
@@ -1621,9 +2095,23 @@ export default function GamePlay() {
                         <span className="fleet-command-step-number">2</span>
                         <label>
                           Order
-                          <select value="move_defend" disabled>
+                          <select
+                            value={selectedCommandOrderType}
+                            onChange={(event) =>
+                              handleSelectCommandOrderType(
+                                event.target.value as FleetOrderType
+                              )
+                            }
+                            disabled={isFleetCommandLoading}
+                          >
                             <option value="move_defend">
                               Move → Defensive Position
+                            </option>
+                            <option value="move_move">
+                              Move → Move
+                            </option>
+                            <option value="move_transfer">
+                              Move → Transfer
                             </option>
                           </select>
                         </label>
@@ -1632,11 +2120,11 @@ export default function GamePlay() {
                       <div className="fleet-command-step">
                         <span className="fleet-command-step-number">3</span>
                         <label>
-                          Move target
+                          First movement
                           <select
                             value={effectiveCommandTargetSystemId ?? ""}
                             onChange={(event) =>
-                              setSelectedCommandTargetSystemId(
+                              handleSelectFirstMoveTarget(
                                 Number(event.target.value)
                               )
                             }
@@ -1661,6 +2149,350 @@ export default function GamePlay() {
                         </label>
                       </div>
 
+                      {selectedCommandOrderType === "move_move" && (
+                        <div className="fleet-command-step">
+                          <span className="fleet-command-step-number">4</span>
+                          <label>
+                            Second movement
+                            <select
+                              value={
+                                effectiveCommandSecondTargetSystemId ?? ""
+                              }
+                              onChange={(event) =>
+                                setSelectedCommandSecondTargetSystemId(
+                                  Number(event.target.value)
+                                )
+                              }
+                              disabled={
+                                isFleetCommandLoading ||
+                                effectiveCommandTargetSystemId === null ||
+                                selectedCommandSecondStepSystems.length === 0
+                              }
+                            >
+                              {selectedCommandSecondStepSystems.map((system) => (
+                                <option
+                                  key={system.system_id}
+                                  value={system.system_id}
+                                >
+                                  {system.system_name} · {getCorridorLabel(
+                                    effectiveCommandTargetSystemId ?? 0,
+                                    system.system_id
+                                  )}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                      )}
+
+                      {selectedCommandOrderType === "move_transfer" && (
+                        <div className="fleet-transfer-workspace">
+                          <div className="fleet-transfer-section-heading">
+                            <div>
+                              <span>TRANSFER PHASE</span>
+                              <strong>Choose the partner fleet</strong>
+                            </div>
+                            <p>
+                              Transfer does not repair units. Damaged units remain
+                              selectable and keep their current HP.
+                            </p>
+                          </div>
+
+                          {availableTransferFleets.length > 0 ? (
+                            <div className="fleet-transfer-fleet-picker">
+                              {availableTransferFleets.map((fleet) => {
+                                const isSelected =
+                                  effectiveTransferFleet?.id === fleet.id;
+
+                                return (
+                                  <button
+                                    key={fleet.id}
+                                    type="button"
+                                    className={
+                                      isSelected
+                                        ? "fleet-transfer-fleet-card fleet-transfer-fleet-card-selected"
+                                        : "fleet-transfer-fleet-card"
+                                    }
+                                    onClick={() => {
+                                      setSelectedTransferFleetId(fleet.id);
+                                      setSelectedUnitsToTransferFleet([]);
+                                      setSelectedUnitsToCommandFleet([]);
+                                      setSelectedTransferFleetMoveTargetSystemId(
+                                        null
+                                      );
+                                    }}
+                                    disabled={isFleetCommandLoading}
+                                  >
+                                    <strong>{fleet.name}</strong>
+                                    <span>{fleet.units.length}/5 units</span>
+                                    <small>
+                                      {fleet.system_name ??
+                                        `System ${fleet.system_id}`}
+                                    </small>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="inline-action-error">
+                              No ready friendly fleet is waiting in the selected
+                              destination system.
+                            </p>
+                          )}
+
+                          {effectiveTransferFleet && selectedCommandFleet && (
+                            <>
+                              <div className="fleet-transfer-board">
+                                <div className="fleet-transfer-side">
+                                  <div className="fleet-transfer-side-title">
+                                    <strong>{selectedCommandFleet.name}</strong>
+                                    <span>Arriving fleet</span>
+                                  </div>
+
+                                  <div className="fleet-transfer-unit-grid">
+                                    {selectedCommandFleet.units.map((unit) => {
+                                      const isSelected =
+                                        selectedUnitsToTransferFleet.includes(
+                                          unit.id
+                                        );
+                                      const damaged = isUnitDamaged(unit);
+
+                                      return (
+                                        <button
+                                          key={unit.id}
+                                          type="button"
+                                          className={[
+                                            "fleet-transfer-unit-card",
+                                            isSelected
+                                              ? "fleet-transfer-unit-card-selected"
+                                              : "",
+                                            damaged
+                                              ? "fleet-transfer-unit-card-damaged"
+                                              : ""
+                                          ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                          onClick={() =>
+                                            toggleUnitSelection(
+                                              unit.id,
+                                              selectedUnitsToTransferFleet,
+                                              setSelectedUnitsToTransferFleet
+                                            )
+                                          }
+                                          disabled={isFleetCommandLoading}
+                                        >
+                                          <span className="fleet-transfer-unit-direction">
+                                            {isSelected ? "SEND →" : "STAY"}
+                                          </span>
+                                          <strong>
+                                            {getUnitDisplayName(unit)}
+                                          </strong>
+                                          <small>{getUnitHpText(unit)}</small>
+                                          {damaged && <em>DAMAGED · transferable</em>}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                <div className="fleet-transfer-flow">
+                                  <span>⇄</span>
+                                  <strong>Exchange</strong>
+                                  <small>Click unit cards to change side</small>
+                                </div>
+
+                                <div className="fleet-transfer-side">
+                                  <div className="fleet-transfer-side-title">
+                                    <strong>{effectiveTransferFleet.name}</strong>
+                                    <span>Receiving fleet</span>
+                                  </div>
+
+                                  <div className="fleet-transfer-unit-grid">
+                                    {effectiveTransferFleet.units.map((unit) => {
+                                      const isSelected =
+                                        selectedUnitsToCommandFleet.includes(
+                                          unit.id
+                                        );
+                                      const damaged = isUnitDamaged(unit);
+
+                                      return (
+                                        <button
+                                          key={unit.id}
+                                          type="button"
+                                          className={[
+                                            "fleet-transfer-unit-card",
+                                            isSelected
+                                              ? "fleet-transfer-unit-card-selected fleet-transfer-unit-card-reverse"
+                                              : "",
+                                            damaged
+                                              ? "fleet-transfer-unit-card-damaged"
+                                              : ""
+                                          ]
+                                            .filter(Boolean)
+                                            .join(" ")}
+                                          onClick={() =>
+                                            toggleUnitSelection(
+                                              unit.id,
+                                              selectedUnitsToCommandFleet,
+                                              setSelectedUnitsToCommandFleet
+                                            )
+                                          }
+                                          disabled={isFleetCommandLoading}
+                                        >
+                                          <span className="fleet-transfer-unit-direction">
+                                            {isSelected ? "← SEND" : "STAY"}
+                                          </span>
+                                          <strong>
+                                            {getUnitDisplayName(unit)}
+                                          </strong>
+                                          <small>{getUnitHpText(unit)}</small>
+                                          {damaged && <em>DAMAGED · transferable</em>}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div
+                                className={`fleet-transfer-capacity ${
+                                  transferCapacityInvalid
+                                    ? "fleet-transfer-capacity-invalid"
+                                    : ""
+                                }`}
+                              >
+                                <span>
+                                  {selectedCommandFleet.name}: {projectedCommandFleetCount}/5
+                                </span>
+                                <strong>After transfer</strong>
+                                <span>
+                                  {effectiveTransferFleet.name}: {projectedTransferFleetCount}/5
+                                </span>
+                              </div>
+
+                              <div className="fleet-transfer-remaining-move">
+                                <div>
+                                  <span>RECEIVING FLEET</span>
+                                  <strong>1 movement remains after transfer</strong>
+                                  <p>
+                                    Choose one connected system now, or hold
+                                    position and forfeit the unused movement.
+                                  </p>
+                                </div>
+
+                                <div className="fleet-transfer-move-options">
+                                  <button
+                                    type="button"
+                                    className={
+                                      selectedTransferFleetMoveTargetSystemId ===
+                                      null
+                                        ? "fleet-transfer-move-option fleet-transfer-move-option-selected"
+                                        : "fleet-transfer-move-option"
+                                    }
+                                    onClick={() =>
+                                      setSelectedTransferFleetMoveTargetSystemId(
+                                        null
+                                      )
+                                    }
+                                    disabled={isFleetCommandLoading}
+                                  >
+                                    <strong>Hold position</strong>
+                                    <span>Do not use the remaining move</span>
+                                  </button>
+
+                                  {transferFleetRemainingMoveSystems.map(
+                                    (system) => (
+                                      <button
+                                        key={system.system_id}
+                                        type="button"
+                                        className={
+                                          selectedTransferFleetMoveTargetSystemId ===
+                                          system.system_id
+                                            ? "fleet-transfer-move-option fleet-transfer-move-option-selected"
+                                            : "fleet-transfer-move-option"
+                                        }
+                                        onClick={() =>
+                                          setSelectedTransferFleetMoveTargetSystemId(
+                                            system.system_id
+                                          )
+                                        }
+                                        disabled={
+                                          isFleetCommandLoading ||
+                                          projectedTransferFleetCount <= 0
+                                        }
+                                      >
+                                        <strong>
+                                          → {system.system_name}
+                                        </strong>
+                                        <span>
+                                          {getCorridorLabel(
+                                            effectiveTransferFleet.system_id,
+                                            system.system_id
+                                          )}
+                                        </span>
+                                      </button>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
+
+                      {selectedCommandFleet &&
+                        effectiveCommandTargetSystemId !== null && (
+                          <div className="fleet-route-preview">
+                            <strong>Selected path</strong>
+                            <span>
+                              {selectedCommandFleet.system_name ??
+                                `System ${selectedCommandFleet.system_id}`}
+                              {" → "}
+                              {getSessionSystemById(
+                                effectiveCommandTargetSystemId
+                              )?.system_name ??
+                                `System ${effectiveCommandTargetSystemId}`}
+                              {selectedCommandOrderType === "move_move" &&
+                                effectiveCommandSecondTargetSystemId !== null && (
+                                  <>
+                                    {" → "}
+                                    {getSessionSystemById(
+                                      effectiveCommandSecondTargetSystemId
+                                    )?.system_name ??
+                                      `System ${effectiveCommandSecondTargetSystemId}`}
+                                  </>
+                                )}
+                            </span>
+                            <small>
+                              Step 1:{" "}
+                              {getCorridorLabel(
+                                selectedCommandFleet.system_id,
+                                effectiveCommandTargetSystemId
+                              )}
+                              {selectedCommandOrderType === "move_move" &&
+                                effectiveCommandSecondTargetSystemId !== null && (
+                                  <>
+                                    {" · Step 2: "}
+                                    {getCorridorLabel(
+                                      effectiveCommandTargetSystemId,
+                                      effectiveCommandSecondTargetSystemId
+                                    )}
+                                  </>
+                                )}
+                            </small>
+                            {selectedCommandOrderType === "move_transfer" &&
+                              effectiveTransferFleet && (
+                                <small>
+                                  Transfer with {effectiveTransferFleet.name}: {selectedUnitsToTransferFleet.length} out / {selectedUnitsToCommandFleet.length} in
+                                </small>
+                              )}
+                            <em>
+                              Total danger cards:{" "}
+                              {selectedRouteTotalDangerCards}
+                            </em>
+                          </div>
+                        )}
+
                       <button
                         type="button"
                         className="fleet-command-add-button"
@@ -1668,7 +2500,14 @@ export default function GamePlay() {
                         disabled={
                           isFleetCommandLoading ||
                           !selectedCommandFleet ||
-                          selectedCommandConnectedSystems.length === 0
+                          selectedCommandConnectedSystems.length === 0 ||
+                          (selectedCommandOrderType === "move_move" &&
+                            selectedCommandSecondStepSystems.length === 0) ||
+                          (selectedCommandOrderType === "move_transfer" &&
+                            (!effectiveTransferFleet ||
+                              (selectedUnitsToTransferFleet.length === 0 &&
+                                selectedUnitsToCommandFleet.length === 0) ||
+                              transferCapacityInvalid))
                         }
                       >
                         Add order
@@ -1702,7 +2541,19 @@ export default function GamePlay() {
                       ) : (
                         <div className="fleet-command-order-list">
                           {stagedCommandOrders.map(
-                            ({ fleet, targetSystem, corridorLabel }) => (
+                            ({
+                              fleet,
+                              orderType,
+                              firstTargetSystem,
+                              secondTargetSystem,
+                              transferFleet,
+                              transferFleetTargetSystem,
+                              unitsToTransferFleetCount,
+                              unitsToCommandFleetCount,
+                              firstCorridorLabel,
+                              secondCorridorLabel,
+                              totalDangerCards
+                            }) => (
                               <div
                                 key={fleet.id}
                                 className="fleet-command-order-row"
@@ -1710,13 +2561,47 @@ export default function GamePlay() {
                                 <div>
                                   <strong>{fleet.name}</strong>
                                   <span>
-                                    {fleet.system_name ?? `System ${fleet.system_id}`}
+                                    {fleet.system_name ??
+                                      `System ${fleet.system_id}`}
                                     {" → "}
-                                    {targetSystem.system_name}
+                                    {firstTargetSystem.system_name}
+                                    {secondTargetSystem && (
+                                      <>
+                                        {" → "}
+                                        {secondTargetSystem.system_name}
+                                      </>
+                                    )}
                                   </span>
                                   <small>
-                                    Move → Defensive Position · {corridorLabel}
+                                    {orderType === "move_move"
+                                      ? "Move → Move"
+                                      : orderType === "move_transfer"
+                                        ? "Move → Transfer"
+                                        : "Move → Defensive Position"}
+                                    {" · "}
+                                    Step 1: {firstCorridorLabel}
+                                    {secondCorridorLabel && (
+                                      <>
+                                        {" · Step 2: "}
+                                        {secondCorridorLabel}
+                                      </>
+                                    )}
                                   </small>
+                                  {transferFleet && (
+                                    <>
+                                      <small>
+                                        Transfer with {transferFleet.name}: {unitsToTransferFleetCount} out / {unitsToCommandFleetCount} in
+                                      </small>
+                                      <small>
+                                        {transferFleetTargetSystem
+                                          ? `${transferFleet.name} then moves to ${transferFleetTargetSystem.system_name}`
+                                          : `${transferFleet.name} holds position after transfer`}
+                                      </small>
+                                    </>
+                                  )}
+                                  <em>
+                                    Total danger cards: {totalDangerCards}
+                                  </em>
                                 </div>
 
                                 <button
@@ -1755,6 +2640,167 @@ export default function GamePlay() {
                           {actionErrors.fleetCommand}
                         </p>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {lastFleetCommandReport.length > 0 && (
+                  <div className="fleet-command-results">
+                    <div className="fleet-command-results-header">
+                      <div>
+                        <span className="game-section-kicker">Command report</span>
+                        <h3>Danger cards resolved</h3>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="fleet-command-text-button"
+                        onClick={() => setLastFleetCommandReport([])}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+
+                    <div className="fleet-command-results-list">
+                      {lastFleetCommandReport.map((orderReport) => (
+                        <article
+                          key={orderReport.fleet_id}
+                          className={`fleet-command-result-card ${
+                            orderReport.fleet_destroyed
+                              ? "fleet-command-result-destroyed"
+                              : ""
+                          }`}
+                        >
+                          <div className="fleet-command-result-title">
+                            <div>
+                              <strong>{orderReport.fleet_name}</strong>
+                              <span>
+                                {orderReport.order_type === "move_move"
+                                  ? "Move → Move"
+                                  : orderReport.order_type === "move_transfer"
+                                    ? "Move → Transfer"
+                                    : "Move → Defensive Position"}
+                              </span>
+                            </div>
+
+                            <em>
+                              {orderReport.fleet_destroyed
+                                ? "Fleet destroyed"
+                                : orderReport.is_defensive
+                                  ? "Defensive position"
+                                  : `Arrived: ${
+                                      orderReport.final_system_name ??
+                                      `System ${orderReport.final_system_id}`
+                                    }`}
+                            </em>
+                          </div>
+
+                          <div className="fleet-command-step-results">
+                            {orderReport.steps.map((step) => (
+                              <div
+                                key={`${orderReport.fleet_id}-${step.step}`}
+                                className="fleet-command-step-result"
+                              >
+                                <div className="fleet-command-step-route">
+                                  <strong>Step {step.step}</strong>
+                                  <span>
+                                    {step.from_system_name ??
+                                      `System ${step.from_system_id}`}
+                                    {" → "}
+                                    {step.to_system_name ??
+                                      `System ${step.to_system_id}`}
+                                  </span>
+                                  <small>
+                                    {step.corridor_type} corridor · {
+                                      step.drawn_cards.length
+                                    } danger card
+                                    {step.drawn_cards.length === 1 ? "" : "s"}
+                                  </small>
+                                </div>
+
+                                {step.drawn_cards.length === 0 ? (
+                                  <p className="action-hint">
+                                    Safe passage. No danger card was drawn.
+                                  </p>
+                                ) : (
+                                  <div className="danger-card-result-list">
+                                    {step.drawn_cards.map((card, cardIndex) => (
+                                      <div
+                                        key={`${orderReport.fleet_id}-${
+                                          step.step
+                                        }-${cardIndex}`}
+                                        className={`danger-card-result danger-card-effect-${
+                                          card.effect_type
+                                        }`}
+                                      >
+                                        <div>
+                                          <strong>{card.name}</strong>
+                                          <span>{card.description}</span>
+                                        </div>
+                                        <p>{card.effect_summary}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          {orderReport.transfer && (
+                            <div className="fleet-transfer-report">
+                              <strong>
+                                Transfer with {orderReport.transfer.partner_fleet_name}
+                              </strong>
+                              <span>
+                                Sent: {orderReport.transfer.moved_to_partner.length > 0
+                                  ? orderReport.transfer.moved_to_partner
+                                      .map((unit) =>
+                                        `${unit.unit_name}${
+                                          unit.current_hp !== null &&
+                                          unit.max_hp !== null
+                                            ? ` (${unit.current_hp}/${unit.max_hp} HP)`
+                                            : ""
+                                        }`
+                                      )
+                                      .join(", ")
+                                  : "none"}
+                              </span>
+                              <span>
+                                Received: {orderReport.transfer.moved_to_command_fleet.length > 0
+                                  ? orderReport.transfer.moved_to_command_fleet
+                                      .map((unit) =>
+                                        `${unit.unit_name}${
+                                          unit.current_hp !== null &&
+                                          unit.max_hp !== null
+                                            ? ` (${unit.current_hp}/${unit.max_hp} HP)`
+                                            : ""
+                                        }`
+                                      )
+                                      .join(", ")
+                                  : "none"}
+                              </span>
+                              <span>
+                                {orderReport.transfer.partner_movement_used
+                                  ? `${orderReport.transfer.partner_fleet_name} used its remaining movement and finished in ${
+                                      orderReport.transfer.partner_final_system_name ??
+                                      `System ${orderReport.transfer.partner_final_system_id}`
+                                    }.`
+                                  : `${orderReport.transfer.partner_fleet_name} held position and forfeited its remaining movement.`}
+                              </span>
+                              {orderReport.transfer.partner_movement_step && (
+                                <small>
+                                  Remaining move: {orderReport.transfer.partner_movement_step.corridor_type} corridor · {orderReport.transfer.partner_movement_step.drawn_cards.length} danger card{orderReport.transfer.partner_movement_step.drawn_cards.length === 1 ? "" : "s"}
+                                </small>
+                              )}
+                              {orderReport.transfer.missing_unit_ids.length > 0 && (
+                                <em>
+                                  Some selected units were destroyed before transfer.
+                                </em>
+                              )}
+                            </div>
+                          )}
+                        </article>
+                      ))}
                     </div>
                   </div>
                 )}
