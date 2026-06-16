@@ -6,7 +6,7 @@ import {
   endTurn,
   getEditorMap,
   getFullSession,
-  packColonyIntoArk,
+  packColonyBuildingIntoArk,
   passTurn
 } from "../api/gameApi";
 import type {
@@ -204,7 +204,7 @@ function getUnitDisplayName(unit: SessionUnit): string {
     return unit.is_foundation ? "Foundation Colony" : "Colony";
   }
 
-  if (unit.unit_type === "colony" && unit.state === "ark") {
+  if (unit.unit_type === "ark" || unit.state === "ark") {
     return "Ark";
   }
 
@@ -222,20 +222,21 @@ function getUnitHpText(unit: SessionUnit): string {
 }
 
 function getSystemColonyMapStatus(system: SessionSystem): string {
+  const buildings = system.buildings ?? [];
   const units = system.units ?? [];
 
-  const deployedColoniesCount = units.filter(
-    (unit) => unit.unit_type === "colony" && unit.state === "deployed"
+  const colonyBuildingsCount = buildings.filter(
+    (building) => building.building_type === "colony"
   ).length;
 
   const arkCount = units.filter(
-    (unit) => unit.unit_type === "colony" && unit.state === "ark"
+    (unit) => unit.unit_type === "ark" || unit.state === "ark"
   ).length;
 
   const parts: string[] = [];
 
-  if (deployedColoniesCount > 0) {
-    parts.push(`🏛 ${deployedColoniesCount}`);
+  if (colonyBuildingsCount > 0) {
+    parts.push(`🏛 ${colonyBuildingsCount}`);
   }
 
   if (arkCount > 0) {
@@ -281,6 +282,15 @@ function getBuildingsForPlayer(
   }
 
   return playerBuildings;
+}
+
+function getPlayerColonyCount(
+  session: FullGameSession,
+  playerId: number
+): number {
+  return getBuildingsForPlayer(session, playerId).filter(
+    (building) => building.building_type === "colony"
+  ).length;
 }
 
 function getSystemPosition(
@@ -633,16 +643,25 @@ export default function GamePlay() {
     }
   }
 
-  async function handlePackColonyIntoArk(unit: SessionUnit) {
+  async function handlePackColonyBuildingIntoArk(building: SessionBuilding) {
     if (!session) {
       return;
     }
 
-    const actionErrorKey = `unit-${unit.id}`;
+    const actionErrorKey = `building-${building.id}`;
 
-    if (!currentPlayer || unit.owner_player_id !== currentPlayer.id) {
+    if (!currentPlayer || building.owner_player_id !== currentPlayer.id) {
       setActionErrors({
         [actionErrorKey]: "Only the current player can control this colony."
+      });
+      return;
+    }
+
+    const colonyCount = getPlayerColonyCount(session, currentPlayer.id);
+
+    if (colonyCount <= 1) {
+      setActionErrors({
+        [actionErrorKey]: "Player cannot pack the last Colony into Ark."
       });
       return;
     }
@@ -663,13 +682,16 @@ export default function GamePlay() {
       setError("");
       setActionErrors({});
 
-      const updatedSession = await packColonyIntoArk(session.id, unit.id);
+      const updatedSession = await packColonyBuildingIntoArk(
+        session.id,
+        building.id
+      );
 
       setSession(updatedSession);
       selectCurrentPlayerFromSession(updatedSession);
     } catch (err) {
       setActionErrors({
-        [actionErrorKey]: err instanceof Error ? err.message : "Failed to launch ark"
+        [actionErrorKey]: err instanceof Error ? err.message : "Failed to pack colony into ark"
       });
     } finally {
       setIsUnitActionLoading(false);
@@ -907,6 +929,7 @@ export default function GamePlay() {
                       <div className="compact-player-meta">
                         <span>{player.nickname ?? `User ${player.user_id}`}</span>
                         <span>Buildings: {playerBuildings.length}</span>
+                        <span>Fleets: {player.fleets?.length ?? 0}/4</span>
                         <span className="player-card-turn-state">
                           <span>
                             CP: {player.command_points_left}/
@@ -918,6 +941,19 @@ export default function GamePlay() {
                           )}
                         </span>
                       </div>
+
+                      {(player.fleets?.length ?? 0) > 0 && (
+                        <div className="compact-fleet-list">
+                          {player.fleets.map((fleet) => (
+                            <div key={fleet.id} className="compact-fleet-row">
+                              <span>
+                                {fleet.name} · {fleet.system_name ?? `System ${fleet.system_id}`}
+                              </span>
+                              <span>{fleet.units.length}/5 units</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </button>
                   );
                 })}
@@ -1087,20 +1123,9 @@ export default function GamePlay() {
 
                       {(() => {
                         const buildings = selectedSystem.buildings ?? [];
-                        const units = selectedSystem.units ?? [];
-
-                        const deployedColonies = units.filter(
-                          (unit) =>
-                            unit.unit_type === "colony" &&
-                            unit.state === "deployed"
-                        );
-
                         const groupedBuildings = groupBuildingsByType(buildings);
-                        const hasStructures =
-                          Object.keys(groupedBuildings).length > 0 ||
-                          deployedColonies.length > 0;
 
-                        if (!hasStructures) {
+                        if (Object.keys(groupedBuildings).length === 0) {
                           return (
                             <p className="action-hint">
                               No buildings or colonies.
@@ -1110,96 +1135,17 @@ export default function GamePlay() {
 
                         return (
                           <div className="overview-card-grid">
-                            {deployedColonies.map((colony) => {
-                              const structureKey = `colony-${colony.id}`;
-                              const isSelected =
-                                selectedStructureKey === structureKey;
-                              const details = BUILDING_DETAILS.colony;
-                              const canControl =
-                                colony.owner_player_id === currentPlayer?.id &&
-                                session.status === "started";
-                              const resourceError = getResourceShortageMessage(
-                                currentPlayer,
-                                { energy: UNIT_ACTION_ENERGY_COST }
-                              );
-                              const actionErrorKey = `unit-${colony.id}`;
-
-                              return (
-                                <div
-                                  key={structureKey}
-                                  className={
-                                    isSelected
-                                      ? "overview-card selected"
-                                      : "overview-card"
-                                  }
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={() => {
-                                    setSelectedStructureKey(structureKey);
-                                    setSelectedUnitId(null);
-                                  }}
-                                  onKeyDown={(event) => {
-                                    if (event.key === "Enter") {
-                                      setSelectedStructureKey(structureKey);
-                                      setSelectedUnitId(null);
-                                    }
-                                  }}
-                                >
-                                  <strong>🏛 {getUnitDisplayName(colony)}</strong>
-                                  <span>{details.income}</span>
-
-                                  {isSelected && (
-                                    <div className="overview-card-details">
-                                      <p>{details.description}</p>
-                                      <p>ATK: {colony.attack}</p>
-                                      <p>DEF: {colony.defense}</p>
-                                      <p>{getUnitHpText(colony)}</p>
-
-                                      <button
-  type="button"
-  onClick={(event) => {
-    event.stopPropagation();
-    handlePackColonyIntoArk(colony);
-  }}
-  disabled={
-    isUnitActionLoading ||
-    !canControl ||
-    colony.is_foundation ||
-    Boolean(resourceError)
-  }
->
-  Launch Ark · {UNIT_ACTION_ENERGY_COST} ⚡
-</button>
-{colony.is_foundation && (
-  <p className="action-hint">
-    Foundation Colony is the faction's primary settlement and cannot be launched as an ark.
-  </p>
-)}
-{resourceError && (
-  <p className="inline-action-error">{resourceError}</p>
-)}
-{actionErrors[actionErrorKey] && (
-  <p className="inline-action-error">
-    {actionErrors[actionErrorKey]}
-  </p>
-)}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-
                             {Object.entries(groupedBuildings).map(
                               ([buildingType, buildingGroup]) => {
-                                const structureKey = `building-${buildingType}`;
-                                const isSelected =
-                                  selectedStructureKey === structureKey;
                                 const firstBuilding = buildingGroup[0];
 
                                 if (!firstBuilding) {
                                   return null;
                                 }
 
+                                const structureKey = `building-${buildingType}-${firstBuilding.owner_player_id}`;
+                                const isSelected =
+                                  selectedStructureKey === structureKey;
                                 const details =
                                   BUILDING_DETAILS[buildingType] ?? {
                                     income: "No income data",
@@ -1207,6 +1153,20 @@ export default function GamePlay() {
                                     technologies: [],
                                     description: "No description yet."
                                   };
+                                const isColony = buildingType === "colony";
+                                const canControl =
+                                  firstBuilding.owner_player_id === currentPlayer?.id &&
+                                  session.status === "started";
+                                const resourceError = getResourceShortageMessage(
+                                  currentPlayer,
+                                  { energy: UNIT_ACTION_ENERGY_COST }
+                                );
+                                const actionErrorKey = `building-${firstBuilding.id}`;
+                                const currentPlayerColonyCount = currentPlayer
+                                  ? getPlayerColonyCount(session, currentPlayer.id)
+                                  : 0;
+                                const isLastPlayerColony =
+                                  isColony && canControl && currentPlayerColonyCount <= 1;
 
                                 return (
                                   <div
@@ -1230,6 +1190,7 @@ export default function GamePlay() {
                                     }}
                                   >
                                     <strong>
+                                      {isColony ? "🏛 " : ""}
                                       {getBuildingDisplayName(firstBuilding)} ×
                                       {buildingGroup.length}
                                     </strong>
@@ -1253,6 +1214,47 @@ export default function GamePlay() {
                                             ? details.technologies.join(", ")
                                             : "No technologies yet"}
                                         </p>
+
+                                        {isColony && (
+                                          <>
+                                            <button
+                                              type="button"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                handlePackColonyBuildingIntoArk(
+                                                  firstBuilding
+                                                );
+                                              }}
+                                              disabled={
+                                                isUnitActionLoading ||
+                                                !canControl ||
+                                                isLastPlayerColony ||
+                                                Boolean(resourceError)
+                                              }
+                                            >
+                                              Pack into Ark ·{" "}
+                                              {UNIT_ACTION_ENERGY_COST} ⚡
+                                            </button>
+
+                                            {isLastPlayerColony && (
+                                              <p className="action-hint">
+                                                Last Colony cannot be packed into Ark.
+                                              </p>
+                                            )}
+
+                                            {resourceError && (
+                                              <p className="inline-action-error">
+                                                {resourceError}
+                                              </p>
+                                            )}
+
+                                            {actionErrors[actionErrorKey] && (
+                                              <p className="inline-action-error">
+                                                {actionErrors[actionErrorKey]}
+                                              </p>
+                                            )}
+                                          </>
+                                        )}
                                       </div>
                                     )}
                                   </div>
@@ -1268,15 +1270,7 @@ export default function GamePlay() {
                       <h3>Units</h3>
 
                       {(() => {
-                        const units = selectedSystem.units ?? [];
-
-                        const visibleUnits = units.filter(
-                          (unit) =>
-                            !(
-                              unit.unit_type === "colony" &&
-                              unit.state === "deployed"
-                            )
-                        );
+                        const visibleUnits = selectedSystem.units ?? [];
 
                         if (visibleUnits.length === 0) {
                           return (
@@ -1321,7 +1315,7 @@ export default function GamePlay() {
                                   }}
                                 >
                                   <strong>
-                                    {unit.state === "ark" ? "🚀 " : ""}
+                                    {unit.unit_type === "ark" || unit.state === "ark" ? "🚀 " : ""}
                                     {getUnitDisplayName(unit)}
                                   </strong>
 
@@ -1333,8 +1327,8 @@ export default function GamePlay() {
                                     <div className="overview-card-details">
                                       <p>Food upkeep: {unit.food_upkeep}</p>
 
-                                      {unit.unit_type === "colony" &&
-                                        unit.state === "ark" && (
+                                      {(unit.unit_type === "ark" ||
+                                        unit.state === "ark") && (
                                           <button
                                             type="button"
                                             onClick={(event) => {

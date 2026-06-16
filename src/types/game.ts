@@ -1,3 +1,38 @@
+export type SessionUnit = {
+  id: number;
+  unit_type: string;
+  state: string;
+  system_id: number;
+  fleet_id: number | null;
+  slot_index: number | null;
+  owner_player_id: number;
+
+  attack: number;
+  defense: number;
+
+  current_hp: number | null;
+  max_hp: number | null;
+
+  food_upkeep: number;
+  is_foundation: boolean;
+  is_combat: boolean;
+  formation_weight: number;
+  built_order: number;
+};
+
+export type SessionFleet = {
+  id: number;
+  session_id: number;
+  owner_player_id: number;
+  system_id: number;
+  system_name: string | null;
+  fleet_number: number;
+  name: string;
+  is_defensive: boolean;
+  has_acted_this_round: boolean;
+  units: SessionUnit[];
+};
+
 export type SessionPlayer = {
   id: number;
   session_id: number;
@@ -21,6 +56,7 @@ export type SessionPlayer = {
 
   command_points_left: number;
   has_passed: boolean;
+  fleets: SessionFleet[];
 };
 
 export type SessionBuilding = {
@@ -30,23 +66,6 @@ export type SessionBuilding = {
   system_id?: number;
   system_name?: string | null;
   owner_player_id: number;
-};
-
-export type SessionUnit = {
-  id: number;
-  unit_type: string;
-  state: string;
-  system_id: number;
-  owner_player_id: number;
-
-  attack: number;
-  defense: number;
-
-  current_hp: number | null;
-  max_hp: number | null;
-
-  food_upkeep: number;
-  is_foundation: boolean;
 };
 
 export type SessionSystem = {

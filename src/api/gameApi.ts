@@ -309,12 +309,12 @@ export async function passTurn(
   return data.session;
 }
 
-export async function packColonyIntoArk(
+export async function packColonyBuildingIntoArk(
   sessionId: number,
-  unitId: number
+  buildingId: number
 ): Promise<FullGameSession> {
   const response = await fetch(
-    `${API_URL}/game/sessions/${sessionId}/units/${unitId}/pack-into-ark`,
+    `${API_URL}/game/sessions/${sessionId}/buildings/${buildingId}/pack-into-ark`,
     {
       method: "POST"
     }
@@ -327,6 +327,13 @@ export async function packColonyIntoArk(
   const data = await response.json();
 
   return data.session;
+}
+
+export async function packColonyIntoArk(
+  sessionId: number,
+  buildingId: number
+): Promise<FullGameSession> {
+  return packColonyBuildingIntoArk(sessionId, buildingId);
 }
 
 export async function colonizeSystemWithArk(
