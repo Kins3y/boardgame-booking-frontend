@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useParams } from "react-router-dom";
 import {
   buildBuilding,
@@ -28,6 +28,97 @@ import "./GameSession.css";
 
 const UNIT_ACTION_ENERGY_COST = 3;
 const COMMAND_POINTS_PER_ROUND = 3;
+
+
+type PlayerVisual = {
+  color: string;
+  soft: string;
+  glow: string;
+  deep: string;
+};
+
+const PLAYER_VISUAL_PALETTE: PlayerVisual[] = [
+  {
+    color: "#9b7cff",
+    soft: "rgba(155, 124, 255, 0.18)",
+    glow: "rgba(155, 124, 255, 0.42)",
+    deep: "#24194a"
+  },
+  {
+    color: "#43d9ff",
+    soft: "rgba(67, 217, 255, 0.16)",
+    glow: "rgba(67, 217, 255, 0.4)",
+    deep: "#103447"
+  },
+  {
+    color: "#ff6d8d",
+    soft: "rgba(255, 109, 141, 0.16)",
+    glow: "rgba(255, 109, 141, 0.4)",
+    deep: "#481a2a"
+  },
+  {
+    color: "#ffcf5a",
+    soft: "rgba(255, 207, 90, 0.16)",
+    glow: "rgba(255, 207, 90, 0.38)",
+    deep: "#463714"
+  },
+  {
+    color: "#64e6a3",
+    soft: "rgba(100, 230, 163, 0.16)",
+    glow: "rgba(100, 230, 163, 0.38)",
+    deep: "#123b2a"
+  },
+  {
+    color: "#ff985f",
+    soft: "rgba(255, 152, 95, 0.16)",
+    glow: "rgba(255, 152, 95, 0.4)",
+    deep: "#452719"
+  }
+];
+
+const NEUTRAL_PLAYER_VISUAL: PlayerVisual = {
+  color: "#9aa4bb",
+  soft: "rgba(154, 164, 187, 0.14)",
+  glow: "rgba(154, 164, 187, 0.24)",
+  deep: "#222938"
+};
+
+function getFactionInitials(name: string | null | undefined): string {
+  if (!name) {
+    return "◇";
+  }
+
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return initials || "◇";
+}
+
+function getUnitIcon(unit: SessionUnit): string {
+  if (unit.unit_type === "ark" || unit.state === "ark") {
+    return "🚀";
+  }
+
+  const icons: Record<string, string> = {
+    scout: "🛸",
+    marine: "🪖",
+    frigate: "🚢",
+    cruiser: "🛳️"
+  };
+
+  return icons[unit.unit_type] ?? "◆";
+}
+
+function getFleetCombatRating(fleet: SessionFleet): number {
+  return fleet.units.reduce(
+    (total, unit) => total + unit.attack + unit.defense,
+    0
+  );
+}
 
 type ResourceCost = {
   matter?: number;
@@ -351,31 +442,6 @@ function isUnitDamaged(unit: SessionUnit): boolean {
     unit.max_hp !== null &&
     unit.current_hp < unit.max_hp
   );
-}
-
-function getSystemColonyMapStatus(system: SessionSystem): string {
-  const buildings = system.buildings ?? [];
-  const units = system.units ?? [];
-
-  const colonyBuildingsCount = buildings.filter(
-    (building) => building.building_type === "colony"
-  ).length;
-
-  const arkCount = units.filter(
-    (unit) => unit.unit_type === "ark" || unit.state === "ark"
-  ).length;
-
-  const parts: string[] = [];
-
-  if (colonyBuildingsCount > 0) {
-    parts.push(`🏛 ${colonyBuildingsCount}`);
-  }
-
-  if (arkCount > 0) {
-    parts.push(`🚀 ${arkCount}`);
-  }
-
-  return parts.length > 0 ? parts.join(" / ") : "—";
 }
 
 function groupBuildingsByType(buildings: SessionBuilding[]) {
@@ -1443,6 +1509,76 @@ export default function GamePlay() {
     );
   }
 
+
+  function getPlayerById(playerId: number | null | undefined): SessionPlayer | null {
+    if (playerId === null || playerId === undefined) {
+      return null;
+    }
+
+    return session?.players.find((player) => player.id === playerId) ?? null;
+  }
+
+  function getPlayerVisual(playerId: number | null | undefined): PlayerVisual {
+    if (!session || playerId === null || playerId === undefined) {
+      return NEUTRAL_PLAYER_VISUAL;
+    }
+
+    const playerIndex = session.players.findIndex(
+      (player) => player.id === playerId
+    );
+
+    if (playerIndex < 0) {
+      return NEUTRAL_PLAYER_VISUAL;
+    }
+
+    return PLAYER_VISUAL_PALETTE[
+      playerIndex % PLAYER_VISUAL_PALETTE.length
+    ] ?? NEUTRAL_PLAYER_VISUAL;
+  }
+
+  function getPlayerVisualStyle(
+    playerId: number | null | undefined
+  ): CSSProperties {
+    const visual = getPlayerVisual(playerId);
+
+    return {
+      "--player-color": visual.color,
+      "--player-color-soft": visual.soft,
+      "--player-color-glow": visual.glow,
+      "--player-color-deep": visual.deep
+    } as CSSProperties;
+  }
+
+  function getOwnershipRelation(
+    ownerPlayerId: number | null | undefined
+  ): "friendly" | "hostile" | "neutral" {
+    if (ownerPlayerId === null || ownerPlayerId === undefined) {
+      return "neutral";
+    }
+
+    if (currentPlayer && ownerPlayerId === currentPlayer.id) {
+      return "friendly";
+    }
+
+    return "hostile";
+  }
+
+  function getOwnershipLabel(
+    ownerPlayerId: number | null | undefined
+  ): string {
+    const relation = getOwnershipRelation(ownerPlayerId);
+
+    if (relation === "friendly") {
+      return "YOUR CONTROL";
+    }
+
+    if (relation === "hostile") {
+      return "RIVAL CONTROL";
+    }
+
+    return "UNCHARTED";
+  }
+
   function getFleetsInSystem(systemId: number): SessionFleet[] {
     if (!session) {
       return [];
@@ -1732,91 +1868,167 @@ export default function GamePlay() {
     })
     .filter((order) => order !== null);
 
+  const totalFleetCount = session
+    ? session.players.reduce(
+        (total, player) => total + (player.fleets?.length ?? 0),
+        0
+      )
+    : 0;
+  const totalUnitCount = session
+    ? session.systems.reduce(
+        (total, system) => total + (system.units?.length ?? 0),
+        0
+      )
+    : 0;
+  const currentPlayerOwnedSystems = session && currentPlayer
+    ? session.systems.filter(
+        (system) => system.owner_player_id === currentPlayer.id
+      ).length
+    : 0;
+  const selectedSystemOwner = selectedSystem
+    ? getPlayerById(selectedSystem.owner_player_id)
+    : null;
+  const selectedSystemRelation = selectedSystem
+    ? getOwnershipRelation(selectedSystem.owner_player_id)
+    : "neutral";
 
   return (
-    <div className="game-page game-simulation-page">
-      <header className="game-header">
-        <div>
-          <h1>ARCHONT Game</h1>
-          <p>Simulation screen</p>
+    <div className="game-page game-simulation-page archont-gameplay-shell">
+      <header className="game-header archont-command-header">
+        <div className="archont-brand-lockup">
+          <div className="archont-brand-mark" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <div>
+            <span className="archont-eyebrow">Tabletop command interface</span>
+            <h1>ARCHONT</h1>
+            <p>Lead a civilization through the ruins of a fractured galaxy.</p>
+          </div>
         </div>
 
-        <button onClick={loadSession} disabled={isLoading}>
-          {isLoading ? "Loading..." : "Refresh"}
+        <button
+          className="archont-sync-button"
+          onClick={loadSession}
+          disabled={isLoading}
+        >
+          <span aria-hidden="true">↻</span>
+          {isLoading ? "Synchronizing..." : "Synchronize board"}
         </button>
       </header>
 
-      {error && <div className="game-error">{error}</div>}
+      {error && <div className="game-error archont-alert">{error}</div>}
 
       {session && (
         <>
-          <section className="game-panel simulation-summary-panel">
-            <div>
+          <section
+            className="game-panel archont-session-command-deck"
+            style={getPlayerVisualStyle(currentPlayer?.id)}
+          >
+            <div className="archont-session-identity">
+              <span className="archont-eyebrow">
+                Session {session.id} · {session.play_mode}
+              </span>
               <h2>{session.name}</h2>
-
-              <div className="session-info">
-                <span>Status: {session.status}</span>
-                <span>Round: {session.current_round}</span>
-                <span>Players: {session.players_count}</span>
+              <div className="archont-session-tags">
+                <span>{session.status}</span>
+                <span>{session.round_phase} phase</span>
+                <span>{session.players_count} commanders</span>
               </div>
             </div>
 
-            <div className="round-flow-hint">
-              Round advances automatically after all players spend CP or pass.
+            <div className="archont-command-stats" aria-label="Game status">
+              <article>
+                <span>ROUND</span>
+                <strong>{session.current_round}</strong>
+                <small>Operational cycle</small>
+              </article>
+              <article>
+                <span>CONTROL</span>
+                <strong>{currentPlayerOwnedSystems}</strong>
+                <small>Your systems</small>
+              </article>
+              <article>
+                <span>FLEETS</span>
+                <strong>{totalFleetCount}</strong>
+                <small>Across the board</small>
+              </article>
+              <article>
+                <span>UNITS</span>
+                <strong>{totalUnitCount}</strong>
+                <small>Deployed assets</small>
+              </article>
             </div>
-          </section>
 
-          <section className="game-panel hotseat-turn-panel">
-            <div>
-              <p className="turn-kicker">Hotseat mode</p>
-              <h2>Round {session.current_round}</h2>
-              <p className="action-hint">
-                Pass the device to the current player.
-              </p>
-            </div>
+            <div className="archont-active-commander">
+              <div className="archont-commander-emblem">
+                {getFactionInitials(currentPlayer?.faction_name)}
+              </div>
 
-            <div className="turn-current-player-card">
-              <span>Current player</span>
-              <strong>
-                {currentPlayer?.faction_name ?? "No active player"}
-              </strong>
-              <small>
-                {currentPlayer?.civilization_name ?? "No civilization"}
-              </small>
-              <div className="turn-command-points">
-                CP: {currentPlayer?.command_points_left ?? 0}/
-                {COMMAND_POINTS_PER_ROUND}
+              <div className="archont-commander-copy">
+                <span>Active commander</span>
+                <strong>
+                  {currentPlayer?.faction_name ?? "No active player"}
+                </strong>
+                <small>
+                  {currentPlayer?.civilization_name ?? "No civilization"}
+                </small>
+              </div>
+
+              <div className="archont-cp-display">
+                <span>Command points</span>
+                <div className="archont-cp-pips">
+                  {Array.from({ length: COMMAND_POINTS_PER_ROUND }).map(
+                    (_, index) => (
+                      <i
+                        key={index}
+                        className={
+                          index < (currentPlayer?.command_points_left ?? 0)
+                            ? "active"
+                            : ""
+                        }
+                      />
+                    )
+                  )}
+                </div>
+                <strong>
+                  {currentPlayer?.command_points_left ?? 0}/
+                  {COMMAND_POINTS_PER_ROUND}
+                </strong>
+              </div>
+
+              <div className="turn-actions archont-turn-actions">
+                <button
+                  type="button"
+                  onClick={handleEndTurn}
+                  disabled={
+                    isTurnActionLoading ||
+                    session.status !== "started" ||
+                    !currentPlayer
+                  }
+                >
+                  {isTurnActionLoading ? "Processing..." : "End turn"}
+                </button>
+
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={handlePassTurn}
+                  disabled={
+                    isTurnActionLoading ||
+                    session.status !== "started" ||
+                    !currentPlayer
+                  }
+                >
+                  {isTurnActionLoading ? "Processing..." : "Pass round"}
+                </button>
               </div>
             </div>
-
-            <div className="turn-actions">
-              <button
-                type="button"
-                onClick={handleEndTurn}
-                disabled={
-                  isTurnActionLoading ||
-                  session.status !== "started" ||
-                  !currentPlayer
-                }
-              >
-                {isTurnActionLoading ? "Processing..." : "End turn"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handlePassTurn}
-                disabled={
-                  isTurnActionLoading ||
-                  session.status !== "started" ||
-                  !currentPlayer
-                }
-              >
-                {isTurnActionLoading ? "Processing..." : "Pass"}
-              </button>
-            </div>
           </section>
 
-          <section className="simulation-layout">
+          <section className="simulation-layout archont-game-board-layout">
             <aside className="simulation-sidebar players-sidebar">
               <h2>Players</h2>
 
@@ -1832,54 +2044,98 @@ export default function GamePlay() {
 
                   return (
                     <button
-                      className={
-                        isSelected
-                          ? "compact-player-card selected"
-                          : "compact-player-card"
-                      }
+                      className={[
+                        "compact-player-card",
+                        "archont-player-card",
+                        isSelected ? "selected" : "",
+                        isCurrentPlayer ? "current" : "",
+                        player.has_passed ? "passed" : ""
+                      ].join(" ")}
+                      style={getPlayerVisualStyle(player.id)}
                       key={player.id}
                       onClick={() => handleSelectPlayer(player)}
                     >
-                      <div className="compact-player-header">
-                        <strong>{player.faction_name}</strong>
-                        <span>
+                      <span className="archont-player-accent" />
+
+                      <div className="compact-player-header archont-player-header">
+                        <span className="archont-player-emblem">
+                          {getFactionInitials(player.faction_name)}
+                        </span>
+
+                        <span className="archont-player-identity">
+                          <strong>{player.faction_name}</strong>
+                          <small>
+                            {player.civilization_name ?? "Unknown civilization"}
+                          </small>
+                        </span>
+
+                        <span className="archont-player-state-badge">
                           {isCurrentPlayer
-                            ? "Current turn"
-                            : player.civilization_name ?? "No civilization"}
+                            ? "ACTIVE"
+                            : player.has_passed
+                              ? "PASSED"
+                              : "STANDBY"}
                         </span>
                       </div>
 
-                      <div className="resource-icons">
-                        <span title="Matter">🧱 {player.matter}</span>
-                        <span title="Energy">⚡ {player.energy}</span>
-                        <span title="Data">💾 {player.data}</span>
-                        <span title="Food">🍞 {player.food}</span>
+                      <div className="resource-icons archont-resource-grid">
+                        <span title="Matter"><i>MAT</i><strong>{player.matter}</strong></span>
+                        <span title="Energy"><i>ENG</i><strong>{player.energy}</strong></span>
+                        <span title="Data"><i>DAT</i><strong>{player.data}</strong></span>
+                        <span title="Food"><i>SUP</i><strong>{player.food}</strong></span>
                       </div>
 
-                      <div className="compact-player-meta">
-                        <span>{player.nickname ?? `User ${player.user_id}`}</span>
-                        <span>Buildings: {playerBuildings.length}</span>
-                        <span>Fleets: {player.fleets?.length ?? 0}/4</span>
-                        <span className="player-card-turn-state">
-                          <span>
-                            CP: {player.command_points_left}/
-                            {COMMAND_POINTS_PER_ROUND}
-                          </span>
+                      <div className="archont-player-operational-row">
+                        <span>
+                          <small>Systems</small>
+                          <strong>
+                            {session.systems.filter(
+                              (system) => system.owner_player_id === player.id
+                            ).length}
+                          </strong>
+                        </span>
+                        <span>
+                          <small>Structures</small>
+                          <strong>{playerBuildings.length}</strong>
+                        </span>
+                        <span>
+                          <small>Fleets</small>
+                          <strong>{player.fleets?.length ?? 0}/4</strong>
+                        </span>
+                      </div>
 
-                          {player.has_passed && (
-                            <strong className="player-pass-badge">PASS</strong>
+                      <div className="archont-player-cp-row">
+                        <span>{player.nickname ?? `User ${player.user_id}`}</span>
+                        <span className="archont-mini-cp-pips">
+                          {Array.from({ length: COMMAND_POINTS_PER_ROUND }).map(
+                            (_, index) => (
+                              <i
+                                key={index}
+                                className={
+                                  index < player.command_points_left
+                                    ? "active"
+                                    : ""
+                                }
+                              />
+                            )
                           )}
                         </span>
                       </div>
 
                       {(player.fleets?.length ?? 0) > 0 && (
-                        <div className="compact-fleet-list">
+                        <div className="compact-fleet-list archont-compact-fleet-list">
                           {player.fleets.map((fleet) => (
                             <div key={fleet.id} className="compact-fleet-row">
                               <span>
-                                {fleet.name} · {fleet.system_name ?? `System ${fleet.system_id}`}
+                                <strong>{fleet.name}</strong>
+                                <small>
+                                  {fleet.system_name ?? `System ${fleet.system_id}`}
+                                </small>
                               </span>
-                              <span>{fleet.units.length}/5 units</span>
+                              <span className="archont-fleet-mini-status">
+                                <b>{fleet.units.length}/5</b>
+                                <i>{getFleetStatusText(fleet)}</i>
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -1903,58 +2159,106 @@ export default function GamePlay() {
 
               <div className="galaxy-map enhanced-galaxy-map">
   <svg
-    className="game-map-connections"
+    className="game-map-connections archont-corridor-layer"
     viewBox="0 0 100 100"
     preserveAspectRatio="none"
+    aria-label="Galactic corridor network"
   >
     {(mapDetails?.connections ?? []).map((connection) => {
-  const fromSystem = getSessionSystemById(connection.from_system_id);
-  const toSystem = getSessionSystemById(connection.to_system_id);
+      const fromSystem = getSessionSystemById(connection.from_system_id);
+      const toSystem = getSessionSystemById(connection.to_system_id);
 
-  if (!fromSystem || !toSystem) {
-    return null;
-  }
+      if (!fromSystem || !toSystem) {
+        return null;
+      }
 
-  const fromPoint = getSystemPoint(fromSystem, mapDetails);
-  const toPoint = getSystemPoint(toSystem, mapDetails);
+      const fromPoint = getSystemPoint(fromSystem, mapDetails);
+      const toPoint = getSystemPoint(toSystem, mapDetails);
+      const corridorType = connection.is_wraparound
+        ? "wraparound"
+        : connection.is_dangerous
+          ? "dangerous"
+          : "safe";
+      const corridorTitle = `${fromSystem.system_name} ↔ ${toSystem.system_name} · ${corridorType} corridor`;
 
-  if (connection.is_wraparound) {
-    const segments = getWraparoundLineSegments(fromPoint, toPoint);
+      const renderCorridorSegment = (
+        segment: { x1: number; y1: number; x2: number; y2: number },
+        segmentKey: string
+      ) => {
+        const markerX = (segment.x1 + segment.x2) / 2;
+        const markerY = (segment.y1 + segment.y2) / 2;
 
-    return (
-      <g key={connection.id}>
-        {segments.map((segment, index) => (
-          <line
-            key={`${connection.id}-${index}`}
-            x1={segment.x1}
-            y1={segment.y1}
-            x2={segment.x2}
-            y2={segment.y2}
-            className={[
-              "game-map-connection",
-              connection.is_dangerous ? "dangerous" : "safe",
-              "wraparound"
-            ].join(" ")}
-          />
-        ))}
-      </g>
-    );
-  }
+        return (
+          <g
+            key={segmentKey}
+            className={`archont-corridor archont-corridor-${corridorType}`}
+          >
+            <title>{corridorTitle}</title>
 
-  return (
-    <line
-      key={connection.id}
-      x1={fromPoint.x}
-      y1={fromPoint.y}
-      x2={toPoint.x}
-      y2={toPoint.y}
-      className={[
-        "game-map-connection",
-        connection.is_dangerous ? "dangerous" : "safe"
-      ].join(" ")}
-    />
-  );
-})}
+            <line
+              x1={segment.x1}
+              y1={segment.y1}
+              x2={segment.x2}
+              y2={segment.y2}
+              className="game-map-connection corridor-track"
+            />
+
+            <line
+              x1={segment.x1}
+              y1={segment.y1}
+              x2={segment.x2}
+              y2={segment.y2}
+              className="game-map-connection corridor-core"
+            />
+
+            {corridorType === "dangerous" && (
+              <g
+                className="corridor-risk-marker corridor-risk-marker-dangerous"
+                transform={`translate(${markerX} ${markerY})`}
+              >
+                <polygon points="0,-1.55 1.55,0 0,1.55 -1.55,0" />
+                <circle r="0.34" />
+              </g>
+            )}
+
+            {corridorType === "wraparound" && (
+              <g
+                className="corridor-risk-marker corridor-risk-marker-wraparound"
+                transform={`translate(${markerX} ${markerY})`}
+              >
+                <circle r="1.62" />
+                <circle r="0.62" />
+              </g>
+            )}
+          </g>
+        );
+      };
+
+      if (connection.is_wraparound) {
+        const segments = getWraparoundLineSegments(fromPoint, toPoint);
+
+        return (
+          <g key={connection.id}>
+            {segments.map((segment, index) =>
+              renderCorridorSegment(
+                segment,
+                `${connection.id}-${index}`
+              )
+            )}
+          </g>
+        );
+      }
+
+      return renderCorridorSegment(
+        {
+          x1: fromPoint.x,
+          y1: fromPoint.y,
+          x2: toPoint.x,
+          y2: toPoint.y
+        },
+        String(connection.id)
+      );
+    })}
   </svg>
 
   {session.systems.map((system) => {
@@ -1965,70 +2269,99 @@ export default function GamePlay() {
 
     const buildingsCount = system.buildings?.length ?? 0;
     const unitsCount = system.units?.length ?? 0;
+    const systemFleets = getFleetsInSystem(system.system_id);
+    const friendlyFleetCount = currentPlayer
+      ? systemFleets.filter(
+          (fleet) => fleet.owner_player_id === currentPlayer.id
+        ).length
+      : 0;
+    const hostileFleetCount = currentPlayer
+      ? systemFleets.filter(
+          (fleet) => fleet.owner_player_id !== currentPlayer.id
+        ).length
+      : systemFleets.length;
+    const ownerPlayer = getPlayerById(system.owner_player_id);
+    const ownershipRelation = getOwnershipRelation(system.owner_player_id);
 
     const systemVisualClass = getGameplaySystemVisualClass(system.system_id);
     const systemTypeLabel = getSystemTypeLabel(system.system_id);
 
     return (
       <button
-  key={system.system_id}
-  className={[
-    "map-system-node",
-    "compact-map-system-node",
-    system.owner_player_id ? "owned" : "neutral",
-    systemVisualClass,
-    isSelected ? "selected" : "",
-    isControlledBySelectedPlayer ? "selectable" : ""
-  ].join(" ")}
-  style={{
-    left: position.left,
-    top: position.top
-  }}
-  title={`${system.system_name} · ${
-    system.owner_faction ? system.owner_faction : "Neutral"
-  }`}
-  onClick={() => {
-    setSelectedSystemId(system.system_id);
-    setSelectedStructureKey(null);
-    setSelectedUnitId(null);
-  }}
->
-  {systemTypeLabel && (
-    <span className="compact-system-type-badge">
-      {systemTypeLabel}
-    </span>
-  )}
+        key={system.system_id}
+        className={[
+          "map-system-node",
+          "compact-map-system-node",
+          "archont-system-node",
+          system.owner_player_id ? "owned" : "neutral",
+          `ownership-${ownershipRelation}`,
+          systemVisualClass,
+          isSelected ? "selected" : "",
+          isControlledBySelectedPlayer ? "selectable" : ""
+        ].join(" ")}
+        style={{
+          left: position.left,
+          top: position.top,
+          ...getPlayerVisualStyle(system.owner_player_id)
+        }}
+        title={`${system.system_name} · ${
+          system.owner_faction ? system.owner_faction : "Neutral"
+        }`}
+        onClick={() => {
+          setSelectedSystemId(system.system_id);
+          setSelectedStructureKey(null);
+          setSelectedUnitId(null);
+        }}
+      >
+        <span className="archont-system-orbit" />
+        <span className="archont-system-core">
+          {getFactionInitials(ownerPlayer?.faction_name)}
+        </span>
 
-  <span className="compact-system-title">
-    {system.system_name}
-  </span>
+        <span className="archont-system-content">
+          {systemTypeLabel && (
+            <span className="compact-system-type-badge">
+              {systemTypeLabel}
+            </span>
+          )}
 
-  <span className="compact-system-owner">
-    {system.owner_faction ? system.owner_faction : "Neutral"}
-  </span>
+          <span className="compact-system-title">
+            {system.system_name}
+          </span>
 
-  <span className="compact-system-icons">
-    <span title="Colony / Ark status">
-      {getSystemColonyMapStatus(system)}
-    </span>
+          <span className="compact-system-owner">
+            {getOwnershipLabel(system.owner_player_id)}
+          </span>
 
-    {buildingsCount > 0 && (
-      <span title="Buildings">🏗 {buildingsCount}</span>
-    )}
-
-    {unitsCount > 0 && (
-      <span title="Units">⚙ {unitsCount}</span>
-    )}
-  </span>
-</button>
+          <span className="compact-system-icons">
+            {buildingsCount > 0 && (
+              <span title="Structures">▦ {buildingsCount}</span>
+            )}
+            {unitsCount > 0 && <span title="Units">◆ {unitsCount}</span>}
+            {friendlyFleetCount > 0 && (
+              <span className="friendly-presence" title="Your fleets">
+                ▲ {friendlyFleetCount}
+              </span>
+            )}
+            {hostileFleetCount > 0 && (
+              <span className="hostile-presence" title="Rival fleets">
+                ⚠ {hostileFleetCount}
+              </span>
+            )}
+          </span>
+        </span>
+      </button>
     );
   })}
 </div>
 
-<div className="game-map-legend">
+<div className="game-map-legend archont-map-legend">
     <span className="legend-line-safe">Safe corridor</span>
     <span className="legend-line-dangerous">Dangerous corridor</span>
     <span className="legend-line-wraparound">Wraparound corridor</span>
+    <span className="legend-ownership-friendly">Your control</span>
+    <span className="legend-ownership-hostile">Rival control</span>
+    <span className="legend-ownership-neutral">Uncharted</span>
   </div>
 
               <section className="fleet-command-center">
@@ -2808,18 +3141,34 @@ export default function GamePlay() {
 
               {selectedSystem && (
                 <section className="system-overview-panel">
-                  <div className="system-overview-header">
-                    <div>
-                      <h2>{selectedSystem.system_name}</h2>
-                      <p>
-                        Owner:{" "}
-                        {selectedSystem.owner_faction
-                          ? selectedSystem.owner_faction
-                          : "Neutral system"}
-                      </p>
+                  <div
+                    className={`system-overview-header archont-system-overview-header ownership-${selectedSystemRelation}`}
+                    style={getPlayerVisualStyle(selectedSystem.owner_player_id)}
+                  >
+                    <div className="archont-system-overview-identity">
+                      <span className="archont-system-overview-emblem">
+                        {getFactionInitials(selectedSystemOwner?.faction_name)}
+                      </span>
+
+                      <div>
+                        <span className="archont-eyebrow">
+                          {getOwnershipLabel(selectedSystem.owner_player_id)}
+                        </span>
+                        <h2>{selectedSystem.system_name}</h2>
+                        <p>
+                          {selectedSystem.owner_faction
+                            ? selectedSystem.owner_faction
+                            : "Neutral system"}
+                        </p>
+                      </div>
                     </div>
 
-                    <span>System ID: {selectedSystem.system_id}</span>
+                    <div className="archont-system-overview-metrics">
+                      <span><small>ID</small><strong>{selectedSystem.system_id}</strong></span>
+                      <span><small>STRUCTURES</small><strong>{selectedSystem.buildings?.length ?? 0}</strong></span>
+                      <span><small>UNITS</small><strong>{selectedSystem.units?.length ?? 0}</strong></span>
+                      <span><small>FLEETS</small><strong>{getFleetsInSystem(selectedSystem.system_id).length}</strong></span>
+                    </div>
                   </div>
 
                   <div className="system-overview-grid">
@@ -3067,26 +3416,46 @@ export default function GamePlay() {
                                 !fleet.has_acted_this_round &&
                                 session.status === "started";
 
+                              const fleetRelation = getOwnershipRelation(
+                                fleet.owner_player_id
+                              );
+
                               return (
                                 <div
                                   key={fleet.id}
-                                  className="fleet-command-card"
+                                  className={`fleet-command-card archont-fleet-card ownership-${fleetRelation}`}
+                                  style={getPlayerVisualStyle(fleet.owner_player_id)}
                                 >
-                                  <div className="fleet-command-card-header">
-                                    <strong>{fleet.name}</strong>
-                                    <span>{getFleetStatusText(fleet)}</span>
+                                  <div className="fleet-command-card-header archont-fleet-card-header">
+                                    <span className="archont-fleet-emblem">
+                                      {getFactionInitials(owner?.faction_name)}
+                                    </span>
+                                    <span className="archont-fleet-identity">
+                                      <strong>{fleet.name}</strong>
+                                      <small>{owner?.faction_name ?? "Unknown"}</small>
+                                    </span>
+                                    <span className="archont-fleet-status">
+                                      {getFleetStatusText(fleet)}
+                                    </span>
                                   </div>
 
-                                  <p>
-                                    Owner: {owner?.faction_name ?? "Unknown"}
-                                  </p>
-                                  <p>Units: {fleet.units.length}/5</p>
+                                  <div className="archont-fleet-metrics">
+                                    <span><small>CAPACITY</small><strong>{fleet.units.length}/5</strong></span>
+                                    <span><small>COMBAT</small><strong>{getFleetCombatRating(fleet)}</strong></span>
+                                    <span><small>POSITION</small><strong>{fleet.is_defensive ? "DEF" : "OPEN"}</strong></span>
+                                  </div>
 
                                   {fleet.units.length > 0 && (
-                                    <div className="fleet-unit-strip">
+                                    <div className="fleet-unit-strip archont-fleet-unit-strip">
                                       {fleet.units.map((unit) => (
-                                        <span key={unit.id}>
-                                          {getUnitDisplayName(unit)}
+                                        <span
+                                          key={unit.id}
+                                          className={isUnitDamaged(unit) ? "damaged" : ""}
+                                          title={`${getUnitDisplayName(unit)} · ${getUnitHpText(unit)}`}
+                                        >
+                                          <i>{getUnitIcon(unit)}</i>
+                                          <b>{getUnitDisplayName(unit)}</b>
+                                          <small>{getUnitHpText(unit)}</small>
                                         </span>
                                       ))}
                                     </div>
@@ -3100,13 +3469,13 @@ export default function GamePlay() {
                                         handleSelectCommandFleet(fleet.id)
                                       }
                                     >
-                                      Prepare order
+                                      Open command console
                                     </button>
                                   )}
 
                                   {fleet.has_acted_this_round && (
                                     <p className="action-hint">
-                                      This fleet has already acted this round.
+                                      Fleet command already resolved this round.
                                     </p>
                                   )}
                                 </div>
@@ -3138,6 +3507,10 @@ export default function GamePlay() {
                               const canControl =
                                 unit.owner_player_id === currentPlayer?.id &&
                                 session.status === "started";
+                              const unitOwner = getPlayerById(unit.owner_player_id);
+                              const unitRelation = getOwnershipRelation(
+                                unit.owner_player_id
+                              );
                               const resourceError = getResourceShortageMessage(
                                 currentPlayer,
                                 { energy: UNIT_ACTION_ENERGY_COST }
@@ -3147,11 +3520,14 @@ export default function GamePlay() {
                               return (
                                 <div
                                   key={unit.id}
-                                  className={
-                                    isSelected
-                                      ? "overview-card selected"
-                                      : "overview-card"
-                                  }
+                                  className={[
+                                    "overview-card",
+                                    "archont-unit-card",
+                                    `ownership-${unitRelation}`,
+                                    isSelected ? "selected" : "",
+                                    isUnitDamaged(unit) ? "damaged" : ""
+                                  ].join(" ")}
+                                  style={getPlayerVisualStyle(unit.owner_player_id)}
                                   role="button"
                                   tabIndex={0}
                                   onClick={() => {
@@ -3165,14 +3541,44 @@ export default function GamePlay() {
                                     }
                                   }}
                                 >
-                                  <strong>
-                                    {unit.unit_type === "ark" || unit.state === "ark" ? "🚀 " : ""}
-                                    {getUnitDisplayName(unit)}
-                                  </strong>
+                                  <div className="archont-unit-card-heading">
+                                    <span className="archont-unit-icon">
+                                      {getUnitIcon(unit)}
+                                    </span>
+                                    <span>
+                                      <strong>{getUnitDisplayName(unit)}</strong>
+                                      <small>{unitOwner?.faction_name ?? "Unknown owner"}</small>
+                                    </span>
+                                    <span className="archont-entity-relation">
+                                      {unitRelation === "friendly"
+                                        ? "YOURS"
+                                        : unitRelation === "hostile"
+                                          ? "RIVAL"
+                                          : "NEUTRAL"}
+                                    </span>
+                                  </div>
 
-                                  <span>ATK: {unit.attack}</span>
-                                  <span>DEF: {unit.defense}</span>
-                                  <span>{getUnitHpText(unit)}</span>
+                                  <div className="archont-unit-stat-grid">
+                                    <span><small>ATK</small><strong>{unit.attack}</strong></span>
+                                    <span><small>DEF</small><strong>{unit.defense}</strong></span>
+                                    <span><small>HP</small><strong>{unit.current_hp ?? "—"}/{unit.max_hp ?? "—"}</strong></span>
+                                  </div>
+
+                                  {unit.current_hp !== null && unit.max_hp !== null && (
+                                    <span className="archont-hp-track">
+                                      <i
+                                        style={{
+                                          width: `${Math.max(
+                                            0,
+                                            Math.min(
+                                              100,
+                                              (unit.current_hp / unit.max_hp) * 100
+                                            )
+                                          )}%`
+                                        }}
+                                      />
+                                    </span>
+                                  )}
 
                                   {isSelected && (
                                     <div className="overview-card-details">

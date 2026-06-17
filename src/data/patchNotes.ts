@@ -3,7 +3,8 @@ export type PatchNoteType =
   | "backend"
   | "frontend"
   | "system"
-  | "balance";
+  | "balance"
+  | "gameplay";
 
 export type PatchNote = {
   id: string;
@@ -177,5 +178,26 @@ export const patchNotes: PatchNote[] = [
       "Kept the animated background decorative and non-interactive so it does not affect gameplay controls."
     ]
   },
+
+  {
+    id: "fleet-command-production-gameplay-update",
+    date: "2026-06-17",
+    type: "gameplay",
+    title: "Fleet Commands, danger routes and gameplay presentation",
+    summary:
+      "Fleet operations now support planned multi-step movement, unit transfers and corridor hazards, while the gameplay page received a production-ready visual overhaul.",
+    changes: [
+      "Added fleet-based command planning: one Command Point can issue orders to multiple ready fleets.",
+      "Added Move → Defensive Position and Move → Move orders with the complete route selected before execution.",
+      "Added Move → Transfer with visual unit exchange, support for damaged units and one remaining movement for the receiving fleet.",
+      "Added a 60-card virtual danger pool for dangerous and wraparound corridors, including hull damage, resource losses and harmless navigation events.",
+      "Danger cards are resolved after each movement step, and destroyed units or fleets are removed immediately.",
+      "Separated deployed Colonies from mobile Arks: Colonies are buildings, while Arks occupy real fleet capacity.",
+      "Added Barracks and Spaceport production with strict limits of 4 active fleets and 5 units per fleet.",
+      "Redesigned the gameplay page with faction colours, ownership states, fleet and unit identification, health visualization and a unified Fleet Command console.",
+      "Improved corridor readability: safe, dangerous and wraparound routes now use distinct colours, line patterns and risk markers.",
+      "Optimized the galaxy map by replacing continuous SVG animations and blur-heavy effects with lighter static styling."
+  ]
+},
 
 ];
