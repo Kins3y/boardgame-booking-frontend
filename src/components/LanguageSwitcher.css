@@ -1,0 +1,50 @@
+.archont-language-switcher {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid rgba(201, 151, 255, 0.32);
+  border-radius: 12px;
+  color: rgba(245, 239, 255, 0.78);
+  background: rgba(10, 7, 17, 0.88);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-language-switcher select {
+  min-width: 68px;
+  height: 28px;
+  padding: 0 24px 0 9px;
+  border: 1px solid rgba(201, 151, 255, 0.28);
+  border-radius: 8px;
+  color: #fff;
+  background: #171020;
+  cursor: pointer;
+  font: inherit;
+}
+
+.archont-language-switcher select:focus-visible {
+  outline: 2px solid rgba(201, 151, 255, 0.7);
+  outline-offset: 2px;
+}
+
+@media (max-width: 680px) {
+  .archont-language-switcher {
+    top: 10px;
+    right: 10px;
+    padding-left: 8px;
+  }
+
+  .archont-language-switcher > span {
+    display: none;
+  }
+}

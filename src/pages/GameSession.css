@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ARCHONT вЂ” consolidated GameSession styles
+   ARCHONT — consolidated GameSession styles
    Replaces the previous base file and all appended gameplay patches.
    Generated from the current production gameplay and session setup UI.
    ========================================================================== */
@@ -474,53 +474,17 @@
   margin: 10px auto;
 }
 
-.archont-gameplay-shell .simulation-sidebar {
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  border-radius: 20px;
-  background: linear-gradient(160deg, rgba(24, 17, 35, 0.93), rgba(8, 7, 13, 0.95));
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.025);
-  position: sticky;
-  top: 14px;
-  max-height: calc(100vh - 28px);
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(171, 101, 255, 0.32) transparent;
-}
 
-.archont-gameplay-shell .players-sidebar {
-  padding: 16px;
-}
 
-.archont-gameplay-shell .build-sidebar {
-  padding: 16px;
-}
 
-.archont-gameplay-shell .players-sidebar > h2 {
-  margin: 0 0 14px;
-  color: #fff;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
 
-.archont-gameplay-shell .build-sidebar > h2 {
-  margin: 0 0 14px;
-  color: #fff;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
 
-.archont-gameplay-shell .map-panel {
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  border-radius: 20px;
-  background: linear-gradient(160deg, rgba(24, 17, 35, 0.93), rgba(8, 7, 13, 0.95));
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.025);
-  min-width: 0;
-  padding: 18px;
-}
+
+
+
+
+
+
 
 .archont-gameplay-shell .map-header {
   display: flex;
@@ -545,33 +509,11 @@
   line-height: 1.45;
 }
 
-.archont-gameplay-shell .compact-players-list {
-  display: grid;
-  gap: 10px;
-}
 
-.archont-gameplay-shell .enhanced-galaxy-map::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.62;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.58) 0 1px, transparent 1.4px),
-      radial-gradient(circle, rgba(188, 151, 255, 0.34) 0 1px, transparent 1.5px);
-  background-position: 0 0, 37px 29px;
-  background-size: 83px 83px, 131px 131px;
-}
 
-.archont-gameplay-shell .enhanced-galaxy-map::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(circle, black, transparent 92%);
-}
+
+
+
 
 .archont-gameplay-shell .game-map-connections {
   z-index: 1;
@@ -674,65 +616,23 @@
   box-shadow: 0 0 14px rgba(166, 92, 255, 0.3);
 }
 
-.archont-gameplay-shell .acting-player-card {
-  border: 1px solid rgba(180, 115, 255, 0.13);
-  border-radius: 13px;
-  background: rgba(166, 92, 255, 0.055);
-}
 
-.archont-gameplay-shell .building-buttons {
-  display: grid;
-  gap: 7px;
-}
 
-.archont-gameplay-shell .building-option {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 9px;
-  align-items: center;
-  width: 100%;
-  padding: 9px;
-  text-align: left;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 11px;
-  color: rgba(235, 227, 245, 0.74);
-  background: rgba(255, 255, 255, 0.024);
-}
 
-.archont-gameplay-shell .building-option:hover {
-  border-color: rgba(187, 124, 255, 0.42);
-  background: rgba(159, 87, 255, 0.08);
-}
 
-.archont-gameplay-shell .building-option.selected {
-  border-color: rgba(187, 124, 255, 0.42);
-  background: rgba(159, 87, 255, 0.08);
-}
 
-.archont-gameplay-shell .building-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.19);
-}
 
-.archont-gameplay-shell .building-option > span:last-child {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
 
-.archont-gameplay-shell .building-option strong {
-  color: rgba(249, 244, 255, 0.86);
-  font-size: 0.72rem;
-}
 
-.archont-gameplay-shell .building-option small {
-  color: rgba(217, 205, 230, 0.42);
-  font-size: 0.55rem;
-}
+
+
+
+
+
+
+
+
+
 
 .archont-gameplay-shell select {
   font: inherit;
@@ -813,39 +713,40 @@
 }
 
 .archont-gameplay-shell .archont-system-orbit {
-  left: 18px;
-  width: 31px;
-  height: 31px;
+position: absolute;
+  left: 11px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 62%, transparent);
+  border-radius: 50%;
+  opacity: 0.58;
 }
 
 .archont-gameplay-shell .archont-system-core {
-  width: 23px;
-  height: 23px;
-  font-size: 0.46rem;
+position: relative;
+  z-index: 1;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--player-color-deep, #222938);
+  font-size: 0.52rem;
+  font-weight: 900;
 }
 
-.archont-gameplay-shell .archont-system-node .compact-system-type-badge {
-  padding: 1px 4px;
-  font-size: 0.4rem;
-}
 
-.archont-gameplay-shell .archont-system-node .compact-system-title {
-  font-size: 0.61rem;
-}
 
-.archont-gameplay-shell .archont-system-node .compact-system-owner {
-  font-size: 0.4rem;
-}
 
-.archont-gameplay-shell .archont-system-node .compact-system-icons {
-  gap: 2px;
-  margin-top: 3px;
-}
 
-.archont-gameplay-shell .archont-system-node .compact-system-icons > span {
-  padding: 1px 3px;
-  font-size: 0.41rem;
-}
+
+
+
+
+
 
 .archont-gameplay-shell .archont-map-legend {
   align-items: center;
@@ -853,22 +754,7 @@
   padding: 12px 14px;
 }
 
-.archont-gameplay-shell .enhanced-galaxy-map {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(185, 128, 255, 0.14);
-  border-radius: 20px;
-  background: radial-gradient(circle at 48% 45%, rgba(126, 77, 195, 0.13), transparent 33%),
-      radial-gradient(circle at 78% 18%, rgba(40, 171, 255, 0.08), transparent 24%),
-      radial-gradient(circle at 18% 82%, rgba(214, 61, 255, 0.07), transparent 25%),
-      linear-gradient(160deg, rgba(7, 5, 13, 0.98), rgba(14, 8, 23, 0.98));
-  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.66),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-      0 24px 60px rgba(0, 0, 0, 0.26);
-  min-height: 700px;
-  contain: layout paint style;
-  isolation: isolate;
-}
+
 
 .archont-gameplay-shell .archont-corridor-safe .corridor-core {
   stroke-dasharray: none;
@@ -922,34 +808,11 @@
   fill: #f5dcff;
 }
 
-.archont-gameplay-shell .archont-system-node {
-  --node-size: 90px;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: 6px;
-  min-height: 52px;
-  padding: 6px 7px;
-  border-radius: 13px;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background: linear-gradient(
-        145deg,
-        color-mix(
-          in srgb,
-          var(--player-color-soft, rgba(154, 164, 187, 0.12)) 76%,
-          transparent
-        ),
-        transparent 62%
-      ),
-      rgba(7, 6, 12, 0.96);
-}
 
-.archont-gameplay-shell .archont-system-node:hover {
-  transform: translate(-50%, -50%) scale(1.035);
-}
 
-.archont-gameplay-shell .archont-system-node.selected {
-  transform: translate(-50%, -50%) scale(1.075);
-}
+
+
+
 
 .archont-gameplay-shell .legend-line-safe::before {
   content: "";
@@ -1150,34 +1013,13 @@
 
 /* === PLAYER SIDEBAR === */
 
-.compact-players-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
-.compact-player-card {
-  width: 100%;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #343b5f;
-  background: #20263f;
-  color: #f2f4ff;
-  cursor: pointer;
-}
 
-.compact-player-card:hover {
-  border-color: #6c7cff;
-}
 
-.compact-player-card.selected {
-  border-color: #8fa0ff;
-  background: #26305a;
-}
+
+
+
+
 
 .compact-player-header {
   display: flex;
@@ -1215,76 +1057,23 @@
   width: 100%;
 }
 
-.compact-fleet-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 7px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.045);
-  color: rgba(247, 242, 255, 0.82);
-  font-size: 12px;
-}
 
-.compact-fleet-row span:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.compact-fleet-row span:last-child {
-  flex: 0 0 auto;
-  color: rgba(201, 133, 255, 0.92);
-}
 
-.archont-game-board-layout {
-  display: grid;
-  grid-template-columns: minmax(250px, 300px) minmax(620px, 1fr) minmax(260px, 320px);
-  gap: 18px;
-  align-items: start;
-  max-width: 1616px;
-  margin: 0 auto;
-  padding-bottom: 40px;
-}
 
-.archont-player-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  padding: 13px;
-  text-align: left;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 15px;
-  color: rgba(244, 238, 250, 0.86);
-  background: linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.08)), transparent 42%),
-      rgba(255, 255, 255, 0.025);
-  transition: transform 150ms ease,
-      border-color 150ms ease,
-      background 150ms ease;
-}
 
-.archont-player-card:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
-}
 
-.archont-player-card.selected {
-  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 74%, white 7%);
-  box-shadow: 0 0 0 1px var(--player-color-soft, rgba(155, 124, 255, 0.12)),
-      0 0 28px var(--player-color-glow, rgba(155, 124, 255, 0.13));
-}
 
-.archont-player-card.current {
-  background: linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.18)), transparent 52%),
-      rgba(255, 255, 255, 0.04);
-}
 
-.archont-player-card.passed {
-  opacity: 0.62;
-}
+
+
+
+
+
+
+
+
+
 
 .archont-player-accent {
   position: absolute;
@@ -1294,174 +1083,45 @@
   box-shadow: 0 0 18px var(--player-color-glow, rgba(155, 124, 255, 0.7));
 }
 
-.archont-player-header {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-}
 
-.archont-player-emblem {
-  display: grid;
-  place-items: center;
-  color: #fff;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.2), transparent 34%),
-      var(--player-color-deep, #24194a);
-  box-shadow: 0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  font-size: 0.72rem;
-}
 
-.archont-player-identity {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
 
-.archont-player-identity strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #fff;
-  font-size: 0.88rem;
-}
 
-.archont-player-identity small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: rgba(223, 212, 234, 0.55);
-  font-size: 0.69rem;
-}
 
-.archont-player-state-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 22px;
-  padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 32%, transparent);
-  border-radius: 999px;
-  color: var(--player-color, #9b7cff);
-  background: var(--player-color-soft, rgba(155, 124, 255, 0.08));
-  font-size: 0.55rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-}
 
-.archont-resource-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
-  margin-top: 11px;
-}
 
-.archont-resource-grid > span {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding: 7px;
-  border: 1px solid rgba(255, 255, 255, 0.055);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.025);
-}
 
-.archont-resource-grid i {
-  color: rgba(218, 207, 231, 0.46);
-  font-size: 0.52rem;
-  font-style: normal;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-}
 
-.archont-resource-grid strong {
-  color: #fff;
-  font-size: 0.86rem;
-}
 
-.archont-player-operational-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-  margin-top: 7px;
-}
 
-.archont-player-operational-row > span {
-  display: flex;
-  flex-direction: column;
-  padding: 6px 7px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.025);
-}
 
-.archont-player-operational-row small {
-  color: rgba(218, 207, 231, 0.42);
-  font-size: 0.5rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
-.archont-player-operational-row strong {
-  color: rgba(250, 247, 255, 0.84);
-  font-size: 0.72rem;
-}
 
-.archont-player-cp-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 9px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  color: rgba(219, 207, 233, 0.5);
-  font-size: 0.62rem;
-}
 
-.archont-compact-fleet-list {
-  display: grid;
-  gap: 5px;
-  margin-top: 9px;
-}
 
-.archont-compact-fleet-list .compact-fleet-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 7px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 9px;
-  background: rgba(0, 0, 0, 0.15);
-}
 
-.archont-compact-fleet-list .compact-fleet-row > span:first-child {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
 
-.archont-compact-fleet-list strong {
-  overflow: hidden;
-  color: rgba(246, 240, 253, 0.83);
-  font-size: 0.68rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
-.archont-compact-fleet-list small {
-  overflow: hidden;
-  color: rgba(218, 207, 231, 0.42);
-  font-size: 0.58rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* === GALACTIC MAP === */
@@ -1494,27 +1154,15 @@
   stroke-linecap: round;
 }
 
-.compact-map-system-node strong {
-  line-height: 1.15;
-}
 
-.compact-map-system-node span {
-  line-height: 1.15;
-}
 
-.compact-map-system-node.owned {
-  border-color: rgba(129, 199, 132, 0.9);
-  background: rgba(35, 78, 47, 0.96);
-}
 
-.compact-map-system-node.neutral {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(48, 48, 68, 0.94);
-}
 
-.compact-map-system-node.selectable {
-  cursor: pointer;
-}
+
+
+
+
+
 
 .game-map-legend {
   display: flex;
@@ -1574,340 +1222,120 @@
     );
 }
 
-.compact-map-system-node.system-visual-normal {
-  border-color: rgba(190, 190, 205, 0.78);
-  background: linear-gradient(145deg, rgba(44, 44, 58, 0.96), rgba(27, 27, 39, 0.96));
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
 
-.compact-map-system-node.system-visual-start {
-  border-color: rgba(124, 255, 170, 0.88);
-  background: linear-gradient(145deg, rgba(34, 93, 55, 0.98), rgba(19, 53, 39, 0.98));
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3),
-      0 0 16px rgba(86, 255, 155, 0.18),
-      inset 0 0 0 1px rgba(160, 255, 195, 0.12);
-}
 
-.compact-map-system-node.system-visual-archive {
-  position: absolute;
-  overflow: visible;
-}
 
-.compact-map-system-node.system-visual-archive::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -5px;
-  border-radius: inherit;
-  opacity: 0.9;
-  filter: blur(7px);
-}
 
-.compact-map-system-node.archive-level-1 {
-  border-color: rgba(255, 245, 125, 0.98);
-  background: linear-gradient(145deg, rgba(76, 70, 28, 0.98), rgba(36, 35, 20, 0.98));
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32),
-      0 0 14px rgba(255, 245, 125, 0.22);
-}
 
-.compact-map-system-node.archive-level-1::before {
-  background: rgba(255, 245, 125, 0.22);
-}
 
-.compact-map-system-node.archive-level-2 {
-  border-color: rgba(255, 132, 41, 0.98);
-  background: linear-gradient(145deg, rgba(118, 48, 16, 0.98), rgba(54, 24, 15, 0.98));
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.34),
-      0 0 20px rgba(255, 132, 41, 0.34);
-}
 
-.compact-map-system-node.archive-level-2::before {
-  background: rgba(255, 132, 41, 0.38);
-}
 
-.compact-map-system-node.archive-level-3 {
-  border-color: rgba(211, 145, 255, 0.98);
-  background: linear-gradient(145deg, rgba(88, 49, 130, 0.98), rgba(45, 28, 71, 0.98));
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.38),
-      0 0 22px rgba(211, 145, 255, 0.35),
-      inset 0 0 16px rgba(255, 221, 87, 0.08);
-}
 
-.compact-map-system-node.archive-level-3::before {
-  background: radial-gradient(circle, rgba(211, 145, 255, 0.45), transparent 65%);
-}
 
-.compact-map-system-node.archive-level-4 {
-  border-color: rgba(255, 92, 138, 0.98);
-  background: linear-gradient(145deg, rgba(118, 35, 69, 0.98), rgba(52, 22, 54, 0.98));
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42),
-      0 0 26px rgba(255, 92, 138, 0.4),
-      inset 0 0 18px rgba(185, 90, 255, 0.12);
-}
 
-.compact-map-system-node.archive-level-4::before {
-  background: radial-gradient(circle, rgba(255, 92, 138, 0.48), transparent 62%);
-}
 
-.compact-map-system-node.archive-level-5::before {
-  inset: -10px;
-  border-radius: 18px;
-  background: radial-gradient(circle, rgba(255, 74, 74, 0.55), transparent 56%),
-      radial-gradient(circle, rgba(170, 59, 255, 0.38), transparent 72%);
-  filter: blur(12px);
-}
 
-.compact-map-system-node.archive-level-5::after {
-  content: "";
-  position: absolute;
-  z-index: -2;
-  inset: -18px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 74, 74, 0.22);
-  background: conic-gradient(
-        from 45deg,
-        transparent,
-        rgba(255, 74, 74, 0.18),
-        transparent,
-        rgba(170, 59, 255, 0.16),
-        transparent
-      );
-  opacity: 0.9;
-}
 
-.compact-map-system-node.archive-level-5 .compact-system-type-badge {
-  color: #fff8d6;
-  background: linear-gradient(90deg, rgba(255, 74, 74, 0.86), rgba(170, 59, 255, 0.86));
-  box-shadow: 0 0 12px rgba(255, 74, 74, 0.45);
-}
 
-.compact-map-system-node.archive-level-5 .compact-system-title {
-  color: #fff8e1;
-  text-shadow: 0 0 8px rgba(255, 221, 87, 0.5),
-      0 0 14px rgba(255, 74, 74, 0.35);
-}
 
-.compact-map-system-node.archive-level-5 .compact-system-owner {
-  color: rgba(255, 245, 220, 0.92);
-}
 
-.compact-map-system-node.archive-level-5 .compact-system-icons {
-  color: rgba(255, 245, 220, 0.92);
-}
 
-.enhanced-galaxy-map {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(222, 217, 232, 0.85);
-  border-radius: 18px;
-  background: radial-gradient(circle at center, rgba(123, 44, 255, 0.18), transparent 58%),
-      radial-gradient(circle at 20% 25%, rgba(120, 200, 255, 0.12), transparent 34%),
-      linear-gradient(135deg, #0d0d18, #19162a);
-  min-height: 740px;
-}
 
-.compact-map-system-node {
-  z-index: 2;
-  display: grid;
-  grid-template-rows: auto auto auto;
-  transform: translate(-50%, -50%);
-  text-align: left;
-  white-space: normal;
-  width: 86px;
-  min-height: 48px;
-  padding: 5px 6px;
-  gap: 1px;
-  border-radius: 12px;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .compact-system-title {
-  overflow: hidden;
-  color: #fff;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 10px;
+color: #fff;
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .compact-system-owner {
-  overflow: hidden;
-  color: rgba(255, 255, 255, 0.72);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 9px;
+color: rgba(255, 255, 255, 0.64);
+  font-size: 0.51rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .compact-system-icons {
-  display: flex;
-  flex-wrap: wrap;
+display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 4px;
   margin-top: 2px;
-  color: rgba(255, 255, 255, 0.9);
-  gap: 3px;
-  font-size: 9px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.5rem;
+  line-height: 1.1;
 }
 
 .compact-system-type-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+display: inline-flex;
   width: fit-content;
   max-width: 100%;
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.92);
-  background: rgba(255, 255, 255, 0.12);
-  font-weight: 900;
-  text-transform: uppercase;
-  padding: 1px 5px;
-  font-size: 7px;
-  letter-spacing: 0.06em;
-}
-
-.compact-map-system-node.archive-level-5 {
-  border: 2px solid rgba(255, 74, 74, 0.98);
-  background: radial-gradient(circle at 50% 15%, rgba(255, 221, 87, 0.22), transparent 34%),
-      radial-gradient(circle at 20% 85%, rgba(170, 59, 255, 0.35), transparent 36%),
-      linear-gradient(145deg, rgba(92, 12, 24, 0.99), rgba(14, 10, 30, 0.99));
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.58),
-      0 0 28px rgba(255, 74, 74, 0.62),
-      0 0 52px rgba(170, 59, 255, 0.34),
-      inset 0 0 22px rgba(255, 221, 87, 0.13);
-  width: 104px;
-  min-height: 58px;
-  padding: 6px 7px;
-  border-radius: 15px;
-}
-
-.compact-map-system-node.selected {
-  box-shadow: 0 0 0 3px rgba(255, 241, 118, 0.92),
-      0 12px 26px rgba(0, 0, 0, 0.34);
-  z-index: 10;
-}
-
-.compact-map-system-node:hover {
-  z-index: 10;
-}
-
-.compact-map-system-node.archive-level-5:hover {
-  z-index: 12;
-}
-
-.compact-map-system-node.archive-level-5.selected {
-  z-index: 12;
-}
-
-.archont-system-node {
-  --node-size: 102px;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
-  gap: 8px;
-  align-items: center;
-  width: var(--node-size);
-  min-height: 62px;
-  padding: 8px;
-  transform: translate(-50%, -50%);
-  overflow: visible;
-  text-align: left;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 55%, rgba(255, 255, 255, 0.1));
-  border-radius: 16px;
-  color: #fff;
-  background: linear-gradient(145deg, var(--player-color-soft, rgba(154, 164, 187, 0.1)), transparent 58%),
-      rgba(9, 7, 15, 0.93);
-  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.48),
-      0 0 18px var(--player-color-glow, rgba(154, 164, 187, 0.14)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.035);
-  transition: transform 150ms ease,
-      border-color 150ms ease,
-      box-shadow 150ms ease;
-}
-
-.archont-system-node:hover {
-  z-index: 8;
-  transform: translate(-50%, -50%) scale(1.07);
-}
-
-.archont-system-node.selected {
-  z-index: 8;
-  transform: translate(-50%, -50%) scale(1.07);
-  border-color: var(--player-color, #9aa4bb);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.55),
-      0 0 0 2px rgba(255, 255, 255, 0.15),
-      0 0 34px var(--player-color-glow, rgba(154, 164, 187, 0.4));
-}
-
-.archont-system-node.ownership-friendly::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 20px;
-  pointer-events: none;
-  border: 1px solid color-mix(in srgb, var(--player-color, #64e6a3) 55%, transparent);
-}
-
-.archont-system-node.ownership-hostile::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border-radius: 20px;
-  pointer-events: none;
-  border: 1px dashed rgba(255, 100, 126, 0.55);
-}
-
-.archont-system-node .compact-system-type-badge {
-  position: static;
-  align-self: flex-start;
-  margin-bottom: 2px;
   padding: 2px 5px;
-  border-color: color-mix(in srgb, var(--player-color, #9aa4bb) 40%, transparent);
-  color: var(--player-color, #9aa4bb);
-  background: transparent;
-  font-size: 0.46rem;
-  letter-spacing: 0.08em;
-}
-
-.archont-system-node .compact-system-title {
-  overflow: hidden;
-  color: #fff;
-  font-size: 0.69rem;
-  font-weight: 800;
-  line-height: 1.1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.archont-system-node .compact-system-owner {
-  margin-top: 2px;
-  color: rgba(226, 217, 238, 0.48);
-  font-size: 0.45rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.archont-system-node .compact-system-icons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  margin-top: 4px;
-}
-
-.archont-system-node .compact-system-icons > span {
-  padding: 2px 4px;
-  border-radius: 5px;
-  color: rgba(238, 231, 247, 0.64);
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.11);
   font-size: 0.47rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-.archont-system-node .compact-system-icons .friendly-presence {
-  color: #8df1c0;
-  background: rgba(100, 230, 163, 0.12);
-}
 
-.archont-system-node .compact-system-icons .hostile-presence {
-  color: #ff8fa7;
-  background: rgba(255, 109, 141, 0.12);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .archont-map-legend {
   display: flex;
@@ -2167,23 +1595,11 @@
   font-size: 12px;
 }
 
-.archont-fleet-mini-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex: 0 0 auto;
-}
 
-.archont-fleet-mini-status b {
-  color: var(--player-color, #9b7cff);
-  font-size: 0.65rem;
-}
 
-.archont-fleet-mini-status i {
-  color: rgba(218, 207, 231, 0.42);
-  font-size: 0.52rem;
-  font-style: normal;
-}
+
+
+
 
 .archont-fleet-card {
   position: relative;
@@ -3158,68 +2574,23 @@
 
 /* === CONSTRUCTION TERMINAL === */
 
-.build-sidebar label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
-  color: #c6cbea;
-  font-size: 14px;
-}
 
-.build-sidebar select {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #343b5f;
-  background: #101426;
-  color: #f2f4ff;
-}
 
-.building-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 14px;
-}
 
-.building-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #343b5f;
-  background: #20263f;
-  color: #f2f4ff;
-  cursor: pointer;
-  text-align: left;
-}
 
-.building-option:hover {
-  border-color: #6c7cff;
-}
 
-.building-option.selected {
-  border-color: #ffcf6b;
-  background: #2d2945;
-}
 
-.building-icon {
-  font-size: 22px;
-}
 
-.building-option span:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
 
-.building-option small {
-  color: #c6cbea;
-}
+
+
+
+
+
+
+
+
+
 
 .build-submit-button {
   width: 100%;
@@ -3255,34 +2626,13 @@
   min-width: 110px;
 }
 
-.acting-player-card {
-  display: grid;
-  gap: 5px;
-  padding: 14px 16px;
-  border: 1px solid rgba(170, 59, 255, 0.26);
-  border-radius: 16px;
-  background: #ffffff;
-  color: #08060d;
-  box-shadow: 0 10px 24px rgba(8, 6, 13, 0.06);
-}
 
-.acting-player-card span {
-  color: #6b6375;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
 
-.acting-player-card strong {
-  color: #08060d;
-  font-size: 16px;
-}
 
-.acting-player-card small {
-  color: #7b21d8;
-  font-weight: 900;
-}
+
+
+
+
 
 .inline-action-error {
   margin: 8px 0 0;
@@ -3344,12 +2694,7 @@
   min-height: 100vh;
 }
 
-.simulation-layout {
-  display: grid;
-  grid-template-columns: 280px minmax(420px, 1fr) 300px;
-  gap: 16px;
-  align-items: stretch;
-}
+
 
 .simulation-sidebar {
   background: #181c2f;
@@ -3358,20 +2703,13 @@
   padding: 16px;
 }
 
-.map-panel {
-  background: #181c2f;
-  border: 1px solid #2b3150;
-  border-radius: 16px;
-  padding: 16px;
-}
+
 
 .simulation-sidebar h2 {
   margin-top: 0;
 }
 
-.map-panel h2 {
-  margin-top: 0;
-}
+
 
 .map-header {
   display: flex;
@@ -3622,10 +2960,8 @@
 }
 
 .archont-system-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
+display: grid;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -3681,23 +3017,14 @@
   color: rgba(255, 190, 199, 0.96);
 }
 
-.archont-gameplay-shell .archont-system-node.ownership-neutral {
-  border-color: rgba(161, 168, 188, 0.42);
-}
+
 
 /* === RESPONSIVE === */
 
 @media (max-width: 1320px) {
-  .archont-gameplay-shell .build-sidebar {
-    position: relative;
-    top: auto;
-    grid-column: 1 / -1;
-    max-height: none;
-  }
+  
 
-  .archont-gameplay-shell .build-sidebar .building-buttons {
-    grid-template-columns: repeat(5, minmax(150px, 1fr));
-  }
+  
 
   .archont-session-command-deck {
     grid-template-columns: 1fr 1.3fr;
@@ -3707,27 +3034,16 @@
     grid-column: 1 / -1;
   }
 
-  .archont-game-board-layout {
-    grid-template-columns: 260px minmax(560px, 1fr);
-  }
+  
 
 }
 
 @media (max-width: 1200px) {
-  .enhanced-galaxy-map {
-    min-height: 620px;
-  }
+  
 
-  .compact-map-system-node {
-    width: 78px;
-    min-height: 44px;
-    padding: 5px;
-  }
+  
 
-  .compact-map-system-node.archive-level-5 {
-    width: 94px;
-    min-height: 54px;
-  }
+  
 
   .compact-system-title {
     font-size: 9px;
@@ -3752,9 +3068,7 @@
     min-height: 520px;
   }
 
-  .simulation-layout {
-    grid-template-columns: 1fr;
-  }
+  
 
 }
 
@@ -3768,19 +3082,11 @@
     display: none;
   }
 
-  .archont-gameplay-shell .simulation-sidebar {
-    position: relative;
-    top: auto;
-    max-height: none;
-  }
+  
 
-  .archont-gameplay-shell .compact-players-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  
 
-  .archont-gameplay-shell .enhanced-galaxy-map {
-    min-height: 580px;
-  }
+  
 
   .archont-session-command-deck {
     grid-template-columns: 1fr;
@@ -3791,10 +3097,7 @@
     grid-column: auto;
   }
 
-  .archont-game-board-layout {
-    grid-template-columns: 1fr;
-    padding-inline: 14px;
-  }
+  
 
 }
 
@@ -3912,12 +3215,7 @@
 }
 
 @media (max-width: 680px) {
-  .archont-gameplay-shell .archont-system-node {
-    --node-size: 82px;
-    grid-template-columns: 21px minmax(0, 1fr);
-    min-height: 48px;
-    padding: 5px 6px;
-  }
+  
 
   .archont-gameplay-shell .archont-corridor .corridor-track {
     stroke-width: 7px;
@@ -3935,22 +3233,13 @@
     width: 100%;
   }
 
-  .archont-gameplay-shell .compact-players-list {
-    grid-template-columns: 1fr;
-  }
+  
 
-  .archont-gameplay-shell .build-sidebar .building-buttons {
-    grid-template-columns: 1fr;
-  }
+  
 
-  .archont-gameplay-shell .map-panel {
-    padding: 10px;
-  }
+  
 
-  .archont-gameplay-shell .enhanced-galaxy-map {
-    min-height: 520px;
-    overflow: auto;
-  }
+  
 
   .archont-command-stats {
     grid-template-columns: repeat(2, 1fr);
@@ -3975,11 +3264,7 @@
     align-items: flex-start;
   }
 
-  .archont-system-node {
-    --node-size: 88px;
-    grid-template-columns: 25px minmax(0, 1fr);
-    min-height: 56px;
-  }
+  
 
   .archont-system-overview-header {
     align-items: flex-start;
@@ -4032,4 +3317,1643 @@
     animation: none;
   }
 
+}
+
+/* ==========================================================================
+   HORIZONTAL GAME BOARD LAYOUT
+   Players above the map, full-width map, construction below the map.
+   ========================================================================== */
+
+.archont-gameplay-shell.game-page {
+  width: 100%;
+  padding: 0 0 40px;
+  box-sizing: border-box;
+}
+
+.archont-game-board-layout,
+.archont-board-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "players"
+    "map"
+    "construction";
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 36px;
+  align-items: stretch;
+}
+
+.archont-gameplay-shell .simulation-sidebar,
+.archont-gameplay-shell .players-sidebar,
+.archont-gameplay-shell .build-sidebar {
+  position: relative;
+  top: auto;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 16px;
+  background:
+    linear-gradient(160deg, rgba(24, 17, 35, 0.94), rgba(8, 7, 13, 0.96));
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.26),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+  scrollbar-width: none;
+}
+
+.archont-gameplay-shell .simulation-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.archont-gameplay-shell .players-sidebar,
+.archont-players-ribbon {
+  grid-area: players;
+  padding: 10px;
+}
+
+.archont-gameplay-shell .players-sidebar > h2 {
+  margin: 0 0 8px;
+  color: rgba(245, 239, 252, 0.76);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.archont-gameplay-shell .compact-players-list,
+.compact-players-list {
+display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.compact-player-card,
+.archont-player-card {
+position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 148px;
+  padding: 11px 12px 10px 15px;
+  overflow: hidden;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: rgba(244, 238, 250, 0.9);
+  background:
+    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.11)), transparent 54%),
+    rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.archont-player-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 44%,
+    transparent
+  );
+}
+
+.archont-player-card.selected {
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 78%,
+    white 5%
+  );
+  background:
+    linear-gradient(
+      135deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.13)),
+      transparent 58%
+    ),
+    rgba(255, 255, 255, 0.04);
+}
+
+.archont-player-card.current {
+  box-shadow:
+    0 0 0 1px var(--player-color, #9b7cff),
+    0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.18));
+}
+
+.archont-player-card.passed {
+  opacity: 0.6;
+}
+
+.archont-player-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--player-color, #9b7cff);
+  box-shadow: 0 0 14px var(--player-color-glow, rgba(155, 124, 255, 0.6));
+}
+
+.compact-player-header,
+.archont-player-header {
+display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+}
+
+.archont-player-emblem {
+display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
+  border-radius: 10px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), transparent 34%),
+    var(--player-color-deep, #24194a);
+  box-shadow: 0 0 16px var(--player-color-glow, rgba(155, 124, 255, 0.24));
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.archont-player-identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.archont-player-identity strong,
+.archont-player-identity small {
+margin-top: 2px;
+  color: rgba(223, 212, 234, 0.64);
+  font-size: 0.68rem;
+  line-height: 1.2;
+}
+
+.archont-player-identity strong {
+color: #fff;
+  font-size: 0.88rem;
+  line-height: 1.15;
+}
+
+.archont-player-identity small {
+  color: rgba(223, 212, 234, 0.5);
+  font-size: 0.58rem;
+}
+
+.archont-player-state-badge {
+display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 38%, transparent);
+  border-radius: 999px;
+  color: var(--player-color, #9b7cff);
+  background: var(--player-color-soft, rgba(155, 124, 255, 0.1));
+  font-size: 0.54rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.resource-icons,
+.archont-resource-grid,
+.archont-construction-resource-grid,
+.building-cost-resources {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+
+.archont-resource-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.archont-construction-resource-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 7px;
+}
+
+.building-cost-resources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.archont-resource-badge {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr) auto;
+  grid-template-areas: "symbol label value";
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 7px 5px 5px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 38%,
+    rgba(255, 255, 255, 0.06)
+  );
+  border-radius: 10px;
+  color: var(--player-color, #9b7cff);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.18)) 72%, transparent),
+      rgba(0, 0, 0, 0.12)
+    );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-resource-symbol {
+  grid-area: symbol;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 58%,
+    rgba(255, 255, 255, 0.12)
+  );
+  border-radius: 8px;
+  color: #fff;
+  background: var(--player-color-deep, #24194a);
+  box-shadow:
+    0 0 12px var(--player-color-glow, rgba(155, 124, 255, 0.22)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.archont-resource-label {
+  grid-area: label;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 68%, white 32%);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-resource-value {
+  grid-area: value;
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.archont-resource-badge-compact {
+  grid-template-columns: 22px minmax(25px, auto) auto;
+  min-height: 29px;
+  width: auto;
+  padding: 3px 6px 3px 3px;
+  border-radius: 8px;
+}
+
+.archont-resource-badge-compact .archont-resource-symbol {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+}
+
+.archont-resource-badge-compact .archont-resource-label {
+  font-size: 0.5rem;
+}
+
+.archont-resource-badge-compact .archont-resource-value {
+  font-size: 0.72rem;
+}
+
+.archont-player-operational-row {
+display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+}
+
+.archont-player-operational-row > span {
+display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px 7px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.archont-player-operational-row small {
+overflow: hidden;
+  color: rgba(218, 207, 231, 0.54);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-player-operational-row strong {
+color: rgba(250, 247, 255, 0.92);
+  font-size: 0.72rem;
+}
+
+.archont-player-cp-row {
+display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  color: rgba(219, 207, 233, 0.62);
+  font-size: 0.64rem;
+}
+
+.archont-player-cp-row > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-mini-cp-pips {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 3px;
+}
+
+.archont-mini-cp-pips i {
+  width: 11px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.archont-mini-cp-pips i.active {
+  background: var(--player-color, #9b7cff);
+  box-shadow: 0 0 7px var(--player-color-glow, rgba(155, 124, 255, 0.48));
+}
+
+.compact-fleet-list,
+.archont-compact-fleet-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+}
+
+.archont-compact-fleet-list .compact-fleet-row,
+.compact-fleet-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.13);
+}
+
+.archont-compact-fleet-list .compact-fleet-row > span:first-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.archont-compact-fleet-list strong,
+.archont-compact-fleet-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-compact-fleet-list strong {
+  color: rgba(246, 240, 253, 0.82);
+  font-size: 0.54rem;
+}
+
+.archont-compact-fleet-list small {
+  color: rgba(218, 207, 231, 0.38);
+  font-size: 0.45rem;
+}
+
+.archont-fleet-mini-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+}
+
+.archont-fleet-mini-status b {
+  color: var(--player-color, #9b7cff);
+  font-size: 0.52rem;
+}
+
+.archont-fleet-mini-status i {
+  color: rgba(218, 207, 231, 0.38);
+  font-size: 0.42rem;
+  font-style: normal;
+}
+
+/* Full-width map stage */
+
+.archont-gameplay-shell .map-panel,
+.archont-map-stage {
+  grid-area: map;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 16px;
+  background:
+    linear-gradient(160deg, rgba(24, 17, 35, 0.93), rgba(8, 7, 13, 0.96));
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-gameplay-shell .map-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.archont-gameplay-shell .map-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.08rem;
+}
+
+.archont-gameplay-shell .map-header p {
+  max-width: 780px;
+  margin: 3px 0 0;
+  color: rgba(219, 208, 232, 0.55);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.enhanced-galaxy-map {
+position: relative;
+  min-height: clamp(660px, 74vh, 880px);
+  width: 100%;
+  overflow: hidden;
+  contain: layout paint style;
+  isolation: isolate;
+  border: 1px solid rgba(222, 217, 232, 0.2);
+  border-radius: 16px;
+  background-color: #070914;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.92) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 67% 23%, rgba(183, 220, 255, 0.78) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 84% 71%, rgba(255, 225, 174, 0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 31% 79%, rgba(222, 191, 255, 0.7) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 50% 50%, rgba(123, 44, 255, 0.15), transparent 54%),
+    radial-gradient(circle at 16% 34%, rgba(61, 169, 255, 0.1), transparent 30%),
+    linear-gradient(145deg, #060811 0%, #0d1020 46%, #080713 100%);
+  background-size: 137px 137px, 193px 193px, 251px 251px, 317px 317px, auto, auto, auto;
+}
+
+.compact-map-system-node,
+.archont-system-node {
+  --node-size: 122px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-areas:
+    "core type"
+    "core title"
+    "core owner"
+    "stats stats";
+  column-gap: 7px;
+  row-gap: 3px;
+  align-items: center;
+  width: var(--node-size);
+  min-height: 86px;
+  padding: 8px 9px;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  box-sizing: border-box;
+  text-align: left;
+  white-space: normal;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9aa4bb) 62%,
+    rgba(255, 255, 255, 0.16)
+  );
+  border-radius: 11px;
+  color: #fff;
+  background:
+    linear-gradient(
+      145deg,
+      var(--player-color-soft, rgba(154, 164, 187, 0.13)),
+      transparent 68%
+    ),
+    rgba(8, 8, 16, 0.97);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition:
+    border-color 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.archont-system-node:hover {
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9aa4bb) 82%,
+    white 12%
+  );
+  box-shadow:
+    0 0 0 1px color-mix(
+      in srgb,
+      var(--player-color, #9aa4bb) 44%,
+      transparent
+    ),
+    0 9px 22px rgba(0, 0, 0, 0.38);
+}
+
+.archont-system-node.selected {
+  z-index: 12;
+  transform: translate(-50%, -50%);
+  border-color: #fff176;
+  box-shadow:
+    0 0 0 2px rgba(255, 241, 118, 0.92),
+    0 10px 24px rgba(0, 0, 0, 0.42);
+}
+
+/* Archive level changes colour only; dimensions remain stable. */
+.archont-system-node.archive-level-5 {
+  --node-size: 122px;
+  min-height: 86px;
+  padding: 8px 9px;
+  border-width: 2px;
+  border-radius: 11px;
+}
+
+/* Decorative orbit was visually noisy and reduced usable text space. */
+.archont-system-orbit {
+  display: none;
+}
+
+.archont-system-core {
+  grid-area: core;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  align-self: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9aa4bb) 66%,
+    white 8%
+  );
+  border-radius: 7px;
+  color: #fff;
+  background: var(--player-color-deep, #222938);
+  font-size: 0.52rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.archont-system-content {
+  display: contents;
+}
+
+.compact-system-type-badge {
+  grid-area: type;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 16px;
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.48rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.compact-system-title {
+  grid-area: title;
+  display: block;
+  min-width: 0;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1.16;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  text-wrap: balance;
+}
+
+.compact-system-owner {
+  grid-area: owner;
+  display: block;
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.5rem;
+  font-weight: 750;
+  line-height: 1.15;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  letter-spacing: 0.035em;
+}
+
+.compact-system-icons {
+  grid-area: stats;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, auto));
+  justify-content: start;
+  gap: 4px;
+  min-height: 17px;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.compact-system-icons > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  min-height: 16px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+/* Horizontal construction terminal */
+
+.archont-gameplay-shell .build-sidebar,
+.archont-construction-ribbon {
+grid-area: auto;
+  display: grid;
+  grid-template-columns: auto minmax(245px, 290px) minmax(0, 1fr) minmax(180px, 230px) 124px;
+  grid-template-areas: "title actor buildings system submit";
+  gap: 10px;
+  align-items: stretch;
+  width: 100%;
+  max-width: none;
+  margin: 10px 0 16px;
+  padding: 11px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(24, 17, 35, 0.95), rgba(8, 7, 13, 0.98));
+}
+
+.archont-gameplay-shell .build-sidebar > h2 {
+grid-area: title;
+  align-self: center;
+  margin: 0;
+  color: rgba(245, 239, 252, 0.78);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.acting-player-card {
+grid-area: actor;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 30%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 58%, rgba(0, 0, 0, 0.16));
+}
+
+.acting-player-card span {
+  color: rgba(218, 207, 231, 0.46);
+  font-size: 0.48rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.acting-player-card strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acting-player-card small {
+  color: var(--player-color, #c989ff);
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.building-buttons {
+  grid-area: buildings;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(145px, 1fr));
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+.building-option {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 76px;
+  padding: 10px 11px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  color: rgba(235, 227, 245, 0.84);
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    transform 130ms ease;
+}
+
+.building-option:hover {
+  transform: translateY(-1px);
+  border-color: rgba(187, 124, 255, 0.5);
+  background: rgba(159, 87, 255, 0.09);
+}
+
+.building-option.selected {
+  border-color: rgba(255, 207, 90, 0.76);
+  background: rgba(255, 207, 90, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 207, 90, 0.08);
+}
+
+.building-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 1.15rem;
+}
+
+.building-option > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.building-option strong {
+  color: rgba(252, 248, 255, 0.96);
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.building-option small {
+  color: rgba(225, 214, 237, 0.66);
+  font-size: 0.67rem;
+  font-weight: 650;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.building-option .building-effect {
+  color: rgba(225, 214, 237, 0.72);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.building-option.selected .archont-resource-badge {
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 62%,
+    rgba(255, 255, 255, 0.14)
+  );
+  background: color-mix(
+    in srgb,
+    var(--player-color-soft, rgba(155, 124, 255, 0.18)) 78%,
+    rgba(0, 0, 0, 0.12)
+  );
+}
+
+.archont-gameplay-shell .build-sidebar label {
+  grid-area: system;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  color: rgba(218, 207, 231, 0.54);
+  font-size: 0.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.archont-gameplay-shell .build-sidebar select {
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #f2f4ff;
+  background: #101426;
+  font-size: 0.68rem;
+}
+
+.build-submit-button {
+  grid-area: submit;
+  width: 100%;
+  min-height: 54px;
+  padding: 8px;
+  border: 1px solid rgba(170, 59, 255, 0.42);
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(135deg, #a84cff, #6231b3);
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.build-submit-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.archont-gameplay-shell .build-sidebar > .action-hint,
+.archont-gameplay-shell .build-sidebar > .inline-action-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+@media (max-width: 1280px) {
+  .archont-gameplay-shell .compact-players-list,
+  .compact-players-list {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .archont-gameplay-shell .build-sidebar,
+  .archont-construction-ribbon {
+    grid-template-columns: auto minmax(230px, 280px) minmax(0, 1fr) minmax(170px, 210px);
+    grid-template-areas:
+      "title actor system submit"
+      "buildings buildings buildings buildings";
+  }
+
+  .building-buttons {
+    grid-template-columns: repeat(5, minmax(132px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .archont-gameplay-shell.game-page {
+    padding-inline: 0;
+  }
+
+  .archont-gameplay-shell .compact-players-list,
+  .compact-players-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archont-gameplay-shell .build-sidebar,
+  .archont-construction-ribbon {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "title title"
+      "actor system"
+      "buildings buildings"
+      "submit submit";
+  }
+
+  .archont-gameplay-shell .build-sidebar > h2 {
+    writing-mode: initial;
+    transform: none;
+  }
+
+  .building-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .enhanced-galaxy-map {
+    min-height: 600px;
+  }
+}
+
+@media (max-width: 620px) {
+  .archont-gameplay-shell .compact-players-list,
+  .compact-players-list {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-fleet-list,
+  .archont-compact-fleet-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archont-gameplay-shell .build-sidebar,
+  .archont-construction-ribbon {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "actor"
+      "buildings"
+      "system"
+      "submit";
+  }
+
+  .building-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .enhanced-galaxy-map {
+    min-height: 520px;
+  }
+
+  .compact-map-system-node,
+  .archont-system-node {
+    --node-size: 104px;
+    min-height: 82px;
+  }
+}
+
+
+/* Board polish v2 responsive refinements */
+@media (max-width: 1420px) {
+  .archont-gameplay-shell .compact-players-list,
+  .compact-players-list {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .archont-gameplay-shell .build-sidebar,
+  .archont-construction-ribbon {
+    grid-template-columns: auto minmax(230px, 280px) minmax(0, 1fr) 210px;
+    grid-template-areas:
+      "title actor system submit"
+      "title buildings buildings buildings";
+  }
+}
+
+@media (max-width: 760px) {
+  .archont-resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .compact-map-system-node,
+  .archont-system-node {
+    --node-size: 108px;
+    min-height: 84px;
+  }
+
+  .archont-gameplay-shell .build-sidebar,
+  .archont-construction-ribbon {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "actor"
+      "buildings"
+      "system"
+      "submit";
+  }
+
+  .archont-gameplay-shell .build-sidebar > h2 {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}
+
+
+/* Unified faction-coloured resource infographic */
+@media (max-width: 1420px) {
+  .archont-construction-resource-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .acting-player-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .archont-construction-resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .archont-resource-grid,
+  .archont-construction-resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .building-cost-resources {
+    gap: 4px;
+  }
+}
+
+/* ========================================================================== 
+   ACTIVE PLAYER THEME + COMPACT RESOURCE LANGUAGE
+   Root palette comes from the current player. Owned entities override it with
+   their own inline palette, so every contextual block uses the correct faction.
+   ========================================================================== */
+
+.archont-gameplay-shell {
+  --archont-accent: var(--player-color, #9b7cff);
+  --archont-accent-soft: var(--player-color-soft, rgba(155, 124, 255, 0.16));
+  --archont-accent-glow: var(--player-color-glow, rgba(155, 124, 255, 0.32));
+  --archont-accent-deep: var(--player-color-deep, #24194a);
+}
+
+/* Major gameplay surfaces inherit the active commander's palette. */
+.archont-gameplay-shell .map-panel,
+.archont-gameplay-shell .players-sidebar,
+.archont-gameplay-shell .build-sidebar,
+.archont-gameplay-shell .fleet-command-center,
+.archont-gameplay-shell .fleet-command-results,
+.archont-gameplay-shell .system-overview-panel {
+  border-color: color-mix(in srgb, var(--archont-accent) 24%, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.25),
+    0 0 34px color-mix(in srgb, var(--archont-accent-glow) 30%, transparent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-gameplay-shell .map-header h2,
+.archont-gameplay-shell .players-sidebar > h2,
+.archont-gameplay-shell .build-sidebar > h2,
+.archont-gameplay-shell .fleet-command-kicker,
+.archont-gameplay-shell .game-section-kicker,
+.archont-gameplay-shell .turn-kicker {
+  color: color-mix(in srgb, var(--archont-accent) 70%, white 30%);
+}
+
+.archont-gameplay-shell .archont-sync-button,
+.archont-gameplay-shell select,
+.archont-gameplay-shell .fleet-command-builder,
+.archont-gameplay-shell .fleet-command-summary,
+.archont-gameplay-shell .fleet-transfer-workspace,
+.archont-gameplay-shell .fleet-route-preview {
+  border-color: color-mix(in srgb, var(--archont-accent) 28%, rgba(255, 255, 255, 0.08));
+}
+
+.archont-gameplay-shell .archont-sync-button:hover:not(:disabled),
+.archont-gameplay-shell .fleet-command-add-button:hover:not(:disabled),
+.archont-gameplay-shell .fleet-command-prepare-button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--archont-accent) 72%, white 8%);
+  background: color-mix(in srgb, var(--archont-accent-soft) 68%, rgba(10, 8, 16, 0.94));
+}
+
+.archont-gameplay-shell .fleet-command-step-number,
+.archont-gameplay-shell .fleet-command-cost,
+.archont-gameplay-shell .fleet-command-order-row,
+.archont-gameplay-shell .acting-player-card,
+.archont-gameplay-shell .turn-current-player-card {
+  border-color: color-mix(in srgb, var(--archont-accent) 38%, transparent);
+}
+
+.archont-gameplay-shell .fleet-command-step-number,
+.archont-gameplay-shell .fleet-command-cost,
+.archont-gameplay-shell .acting-player-card {
+  background: color-mix(in srgb, var(--archont-accent-soft) 70%, rgba(0, 0, 0, 0.18));
+}
+
+.archont-gameplay-shell .fleet-command-execute-button,
+.archont-gameplay-shell .build-submit-button {
+  border-color: color-mix(in srgb, var(--archont-accent) 76%, white 8%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--archont-accent) 86%, white 4%),
+    color-mix(in srgb, var(--archont-accent-deep) 88%, black 12%)
+  );
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--archont-accent-glow) 42%, transparent);
+}
+
+.archont-gameplay-shell .fleet-command-execute-button:hover:not(:disabled),
+.archont-gameplay-shell .build-submit-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.archont-gameplay-shell .building-option:hover,
+.archont-gameplay-shell .building-option.selected,
+.archont-gameplay-shell .overview-card:hover,
+.archont-gameplay-shell .overview-card.selected,
+.archont-gameplay-shell .fleet-transfer-fleet-card-selected,
+.archont-gameplay-shell .fleet-transfer-unit-card-selected,
+.archont-gameplay-shell .fleet-transfer-unit-card-reverse,
+.archont-gameplay-shell .fleet-transfer-move-option-selected {
+  border-color: color-mix(in srgb, var(--archont-accent) 72%, white 8%);
+  background: color-mix(in srgb, var(--archont-accent-soft) 72%, rgba(0, 0, 0, 0.16));
+}
+
+.archont-gameplay-shell .building-icon,
+.archont-gameplay-shell .fleet-unit-strip span,
+.archont-gameplay-shell .turn-command-points,
+.archont-gameplay-shell .archont-mini-cp-pips i.active {
+  border-color: color-mix(in srgb, var(--archont-accent) 48%, rgba(255, 255, 255, 0.08));
+  color: color-mix(in srgb, var(--archont-accent) 72%, white 28%);
+  background: color-mix(in srgb, var(--archont-accent-soft) 72%, rgba(0, 0, 0, 0.14));
+}
+
+/* Resource language is always MAT / ENG / SUP / DAT. */
+.archont-resource-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.archont-resource-badge {
+  grid-template-columns: 19px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "symbol value"
+    "symbol label";
+  column-gap: 5px;
+  row-gap: 0;
+  min-width: 0;
+  min-height: 38px;
+  padding: 4px 5px 4px 4px;
+  border-radius: 9px;
+}
+
+.archont-resource-symbol {
+  width: 19px;
+  height: 29px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+}
+
+.archont-resource-label {
+  overflow: visible;
+  align-self: end;
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 28%);
+  font-size: 0.48rem;
+  line-height: 1;
+  letter-spacing: 0.055em;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.archont-resource-value {
+  align-self: start;
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1.05;
+}
+
+.archont-resource-badge-compact {
+  grid-template-columns: 17px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "symbol value"
+    "symbol label";
+  min-width: 48px;
+  min-height: 32px;
+  padding: 3px 5px 3px 3px;
+}
+
+.archont-resource-badge-compact .archont-resource-symbol {
+  width: 17px;
+  height: 24px;
+  border-radius: 5px;
+  font-size: 0.55rem;
+}
+
+.archont-resource-badge-compact .archont-resource-label {
+  font-size: 0.44rem;
+}
+
+.archont-resource-badge-compact .archont-resource-value {
+  font-size: 0.68rem;
+}
+
+.archont-construction-resource-grid {
+  grid-template-columns: repeat(4, minmax(48px, 1fr));
+  gap: 4px;
+}
+
+.building-cost-resources {
+  gap: 4px;
+}
+
+/* Each player card still owns its own palette through inline CSS variables. */
+.archont-player-card .archont-resource-badge,
+.archont-player-card .archont-player-operational-row > span,
+.archont-player-card .compact-fleet-row {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 24%, rgba(255, 255, 255, 0.06));
+}
+
+.archont-player-card .archont-player-operational-row > span,
+.archont-player-card .compact-fleet-row {
+  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 42%, rgba(0, 0, 0, 0.18));
+}
+
+@media (max-width: 760px) {
+  .archont-resource-grid,
+  .archont-construction-resource-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+/* =========================================================
+   Resource vertical alignment + building overview infographic
+   ========================================================= */
+
+/* Number is centered directly above MAT / ENG / SUP / DAT. */
+.archont-resource-badge {
+  grid-template-areas:
+    "symbol value"
+    "symbol label";
+}
+
+.archont-resource-label,
+.archont-resource-value {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  text-align: center;
+}
+
+.archont-resource-value {
+  align-self: end;
+  padding-bottom: 1px;
+}
+
+.archont-resource-label {
+  align-self: start;
+}
+
+.archont-resource-badge-compact {
+  grid-template-areas:
+    "symbol value"
+    "symbol label";
+}
+
+/* Structure cards use the same player-colour infographic language. */
+.system-overview-block .overview-card {
+  gap: 10px;
+  padding: 12px;
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 28%,
+    rgba(255, 255, 255, 0.07)
+  );
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--player-color-soft, rgba(155, 124, 255, 0.16)) 48%,
+        transparent
+      ),
+      transparent 58%
+    ),
+    rgba(8, 6, 14, 0.72);
+}
+
+.system-overview-block .overview-card:hover,
+.system-overview-block .overview-card.selected {
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 74%,
+    white 8%
+  );
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--player-color-soft, rgba(155, 124, 255, 0.16)) 78%,
+        transparent
+      ),
+      transparent 62%
+    ),
+    rgba(12, 8, 20, 0.86);
+}
+
+.overview-structure-header {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.overview-structure-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 58%,
+    rgba(255, 255, 255, 0.12)
+  );
+  border-radius: 11px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.18), transparent 36%),
+    var(--player-color-deep, #24194a);
+  box-shadow:
+    0 0 16px var(--player-color-glow, rgba(155, 124, 255, 0.22)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.overview-structure-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.overview-structure-copy strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.overview-structure-copy small,
+.overview-income-caption {
+  color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 68%,
+    white 32%
+  );
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.overview-structure-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 38%,
+    rgba(255, 255, 255, 0.08)
+  );
+  border-radius: 999px;
+  color: #fff;
+  background: color-mix(
+    in srgb,
+    var(--player-color-soft, rgba(155, 124, 255, 0.16)) 62%,
+    rgba(0, 0, 0, 0.18)
+  );
+  font-size: 0.76rem;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+}
+
+.overview-structure-income {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding-top: 9px;
+  border-top: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 18%,
+    rgba(255, 255, 255, 0.06)
+  );
+}
+
+.overview-resource-income-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.overview-resource-income-row .archont-resource-badge-compact {
+  flex: 0 1 64px;
+  min-width: 58px;
+}
+
+.overview-no-income {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(225, 216, 238, 0.62);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 620px) {
+  .overview-structure-income {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-resource-income-row {
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================================
+   System resource-building capacity
+   ========================================================= */
+.system-building-capacity {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 28%, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.1)), transparent 44%),
+    rgba(8, 6, 14, 0.72);
+}
+
+.system-building-capacity-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.system-building-capacity-heading h3,
+.system-building-capacity-heading p {
+  margin: 0;
+}
+
+.system-building-capacity-heading h3 {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.system-building-capacity-heading p {
+  max-width: 560px;
+  color: rgba(236, 226, 248, 0.62);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.system-building-capacity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.system-building-capacity-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-areas:
+    "icon copy"
+    "meter meter";
+  gap: 8px 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 22%, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.system-building-capacity-card.is-full {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 60%, white 8%);
+  background: var(--player-color-soft, rgba(155, 124, 255, 0.11));
+}
+
+.system-building-capacity-card.is-unavailable {
+  opacity: 0.48;
+}
+
+.system-building-capacity-icon {
+  grid-area: icon;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
+  border-radius: 10px;
+  color: var(--player-color, #c895ff);
+  background: var(--player-color-soft, rgba(155, 124, 255, 0.1));
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.system-building-capacity-copy {
+  grid-area: copy;
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.system-building-capacity-copy strong {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.system-building-capacity-copy small {
+  color: var(--player-color, #c895ff);
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.system-building-capacity-meter {
+  grid-area: meter;
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.system-building-capacity-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--player-color, #9b7cff);
+  box-shadow: 0 0 10px var(--player-color-glow, rgba(155, 124, 255, 0.28));
+}
+
+@media (max-width: 1050px) {
+  .system-building-capacity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .system-building-capacity-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .system-building-capacity-heading p {
+    text-align: left;
+  }
+
+  .system-building-capacity-grid {
+    grid-template-columns: 1fr;
+  }
 }

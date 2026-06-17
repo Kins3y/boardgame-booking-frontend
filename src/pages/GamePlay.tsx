@@ -127,6 +127,80 @@ type ResourceCost = {
   food?: number;
 };
 
+type ResourceKind = "matter" | "energy" | "data" | "food";
+
+type ResourceBadgeProps = {
+  kind: ResourceKind;
+  value: number;
+  compact?: boolean;
+  valuePrefix?: string;
+  valueSuffix?: string;
+};
+
+const RESOURCE_ORDER: ResourceKind[] = [
+  "matter",
+  "energy",
+  "food",
+  "data"
+];
+
+const RESOURCE_INFO: Record<
+  ResourceKind,
+  { label: string; shortLabel: string; icon: string }
+> = {
+  matter: {
+    label: "Matter",
+    shortLabel: "MAT",
+    icon: "◆"
+  },
+  energy: {
+    label: "Energy",
+    shortLabel: "ENG",
+    icon: "ϟ"
+  },
+  data: {
+    label: "Data",
+    shortLabel: "DAT",
+    icon: "⌁"
+  },
+  food: {
+    label: "Supply",
+    shortLabel: "SUP",
+    icon: "▰"
+  }
+};
+
+function ResourceBadge({
+  kind,
+  value,
+  compact = false,
+  valuePrefix = "",
+  valueSuffix = ""
+}: ResourceBadgeProps) {
+  const resource = RESOURCE_INFO[kind];
+
+  return (
+    <span
+      className={[
+        "archont-resource-badge",
+        `archont-resource-${kind}`,
+        compact ? "archont-resource-badge-compact" : ""
+      ].join(" ")}
+      title={`${resource.label}: ${valuePrefix}${value}${valueSuffix}`}
+    >
+      <i className="archont-resource-symbol" aria-hidden="true">
+        {resource.icon}
+      </i>
+      <small className="archont-resource-label">
+        {resource.shortLabel}
+      </small>
+      <strong className="archont-resource-value">
+        {valuePrefix}{value}{valueSuffix}
+      </strong>
+    </span>
+  );
+}
+
 type StagedFleetOrder = {
   order_type: FleetOrderType;
   target_system_id: number;
@@ -172,19 +246,19 @@ function getResourceShortageMessage(
   const missingResources: string[] = [];
 
   if ((cost.matter ?? 0) > player.matter) {
-    missingResources.push(`matter: need ${cost.matter}, have ${player.matter}`);
+    missingResources.push(`MAT: need ${cost.matter}, have ${player.matter}`);
   }
 
   if ((cost.energy ?? 0) > player.energy) {
-    missingResources.push(`energy: need ${cost.energy}, have ${player.energy}`);
+    missingResources.push(`ENG: need ${cost.energy}, have ${player.energy}`);
   }
 
   if ((cost.data ?? 0) > player.data) {
-    missingResources.push(`data: need ${cost.data}, have ${player.data}`);
+    missingResources.push(`DAT: need ${cost.data}, have ${player.data}`);
   }
 
   if ((cost.food ?? 0) > player.food) {
-    missingResources.push(`food: need ${cost.food}, have ${player.food}`);
+    missingResources.push(`SUP: need ${cost.food}, have ${player.food}`);
   }
 
   if (missingResources.length === 0) {
@@ -205,35 +279,35 @@ const BUILDING_OPTIONS: {
     type: "mine",
     name: "Mine",
     icon: "⛏️",
-    cost: "6 🧱 / 2 ⚡",
-    income: "+2 🧱 / round"
+    cost: "6 MAT / 2 ENG",
+    income: "+2 MAT / round"
   },
   {
     type: "power_plant",
     name: "Power Plant",
     icon: "⚡",
-    cost: "6 🧱 / 3 ⚡",
-    income: "+2 ⚡ / round"
+    cost: "6 MAT / 3 ENG",
+    income: "+2 ENG / round"
   },
   {
     type: "storage",
     name: "Supply Depot",
     icon: "📦",
-    cost: "3 🧱 / 2 ⚡",
-    income: "+1 🍞 / round"
+    cost: "3 MAT / 2 ENG",
+    income: "+1 SUP / round"
   },
   {
     type: "barracks",
     name: "Barracks",
     icon: "🛡️",
-    cost: "8 🧱 / 3 ⚡",
+    cost: "8 MAT / 3 ENG",
     income: "Produces light units / Ark"
   },
   {
     type: "spaceport",
     name: "Spaceport",
     icon: "🛰️",
-    cost: "10 🧱 / 4 ⚡ / 1 💾",
+    cost: "10 MAT / 4 ENG / 1 DAT",
     income: "Produces medium / heavy units"
   }
 ];
@@ -260,32 +334,32 @@ const BUILDING_DETAILS: Record<
   }
 > = {
   mine: {
-    income: "+2 🧱 Matter / round",
+    income: "+2 MAT / round",
     produces: [],
     technologies: [],
     description: "Basic matter production building."
   },
   power_plant: {
-    income: "+2 ⚡ Energy / round",
+    income: "+2 ENG / round",
     produces: [],
     technologies: [],
     description: "Basic energy production building."
   },
   energy_plant: {
-    income: "+2 ⚡ Energy / round",
+    income: "+2 ENG / round",
     produces: [],
     technologies: [],
     description: "Alternative energy production building."
   },
   storage: {
-    income: "+1 🍞 Food / round",
+    income: "+1 SUP / round",
     produces: [],
     technologies: [],
     description:
       "Supply building. Up to 2 Supply Depots can be built in one system."
   },
   research_center: {
-    income: "+1 💾 Data / round",
+    income: "+1 DAT / round",
     produces: [],
     technologies: ["Blueprint research", "Civilization upgrades"],
     description: "Allows research actions and technology progression."
@@ -309,12 +383,59 @@ const BUILDING_DETAILS: Record<
     description: "Defensive orbital structure."
   },
   colony: {
-    income: "+2 🧱 Matter / round, +2 ⚡ Energy / round",
+    income: "+2 MAT / round, +2 ENG / round",
     produces: [],
     technologies: [],
     description: "A deployed colony makes the system colonized. It has no HP."
   }
 };
+
+type BuildingIncomeResource = {
+  kind: ResourceKind;
+  value: number;
+};
+
+const BUILDING_OVERVIEW_ICONS: Record<string, string> = {
+  mine: "◆",
+  power_plant: "ϟ",
+  energy_plant: "ϟ",
+  storage: "▰",
+  research_center: "⌁",
+  barracks: "⌬",
+  spaceport: "◈",
+  orbital_defense: "⬡",
+  colony: "🏛"
+};
+
+function getBuildingOverviewIcon(buildingType: string): string {
+  return BUILDING_OVERVIEW_ICONS[buildingType] ?? "◇";
+}
+
+function getBuildingIncomeResources(
+  buildingType: string,
+  buildingCount: number
+): BuildingIncomeResource[] {
+  const multiplier = Math.max(buildingCount, 1);
+
+  switch (buildingType) {
+    case "mine":
+      return [{ kind: "matter", value: 2 * multiplier }];
+    case "power_plant":
+    case "energy_plant":
+      return [{ kind: "energy", value: 2 * multiplier }];
+    case "storage":
+      return [{ kind: "food", value: 1 * multiplier }];
+    case "research_center":
+      return [{ kind: "data", value: 1 * multiplier }];
+    case "colony":
+      return [
+        { kind: "matter", value: 2 * multiplier },
+        { kind: "energy", value: 2 * multiplier }
+      ];
+    default:
+      return [];
+  }
+}
 
 type UnitProductionOption = {
   unit_type: UnitType;
@@ -1893,7 +2014,10 @@ export default function GamePlay() {
     : "neutral";
 
   return (
-    <div className="game-page game-simulation-page archont-gameplay-shell">
+    <div
+      className="game-page game-simulation-page archont-gameplay-shell"
+      style={getPlayerVisualStyle(currentPlayer?.id)}
+    >
       <header className="game-header archont-command-header">
         <div className="archont-brand-lockup">
           <div className="archont-brand-mark" aria-hidden="true">
@@ -2009,7 +2133,7 @@ export default function GamePlay() {
                     !currentPlayer
                   }
                 >
-                  {isTurnActionLoading ? "Processing..." : "End turn"}
+                  {isTurnActionLoading ? "Processing..." : "End turn · 1 CP"}
                 </button>
 
                 <button
@@ -2028,8 +2152,8 @@ export default function GamePlay() {
             </div>
           </section>
 
-          <section className="simulation-layout archont-game-board-layout">
-            <aside className="simulation-sidebar players-sidebar">
+          <section className="simulation-layout archont-game-board-layout archont-board-stack">
+            <aside className="simulation-sidebar players-sidebar archont-players-ribbon">
               <h2>Players</h2>
 
               <div className="compact-players-list">
@@ -2079,10 +2203,10 @@ export default function GamePlay() {
                       </div>
 
                       <div className="resource-icons archont-resource-grid">
-                        <span title="Matter"><i>MAT</i><strong>{player.matter}</strong></span>
-                        <span title="Energy"><i>ENG</i><strong>{player.energy}</strong></span>
-                        <span title="Data"><i>DAT</i><strong>{player.data}</strong></span>
-                        <span title="Food"><i>SUP</i><strong>{player.food}</strong></span>
+                        <ResourceBadge kind="matter" value={player.matter} />
+                        <ResourceBadge kind="energy" value={player.energy} />
+                        <ResourceBadge kind="food" value={player.food} />
+                        <ResourceBadge kind="data" value={player.data} />
                       </div>
 
                       <div className="archont-player-operational-row">
@@ -2146,7 +2270,7 @@ export default function GamePlay() {
               </div>
             </aside>
 
-            <main className="map-panel">
+            <main className="map-panel archont-map-stage">
               <div className="map-header">
                 <div>
                   <h2>Galactic map</h2>
@@ -2363,6 +2487,161 @@ export default function GamePlay() {
     <span className="legend-ownership-hostile">Rival control</span>
     <span className="legend-ownership-neutral">Uncharted</span>
   </div>
+
+              <aside
+                className="simulation-sidebar build-sidebar archont-construction-ribbon"
+                style={getPlayerVisualStyle(currentPlayer?.id)}
+              >
+              <h2>Construction</h2>
+              <div className="acting-player-card">
+                <span>Acting player</span>
+                <strong>{currentPlayer?.faction_name ?? "No active player"}</strong>
+                <small>
+                  {currentPlayer
+                    ? `CP: ${currentPlayer.command_points_left}/${COMMAND_POINTS_PER_ROUND}`
+                    : "No turn state"}
+                </small>
+
+                {currentPlayer && (
+                  <div
+                    className="archont-construction-resource-grid"
+                    aria-label="Active player resources"
+                  >
+                    <ResourceBadge
+                      kind="matter"
+                      value={currentPlayer.matter}
+                      compact
+                    />
+                    <ResourceBadge
+                      kind="energy"
+                      value={currentPlayer.energy}
+                      compact
+                    />
+                    <ResourceBadge
+                      kind="food"
+                      value={currentPlayer.food}
+                      compact
+                    />
+                    <ResourceBadge
+                      kind="data"
+                      value={currentPlayer.data}
+                      compact
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="building-buttons">
+                {BUILDING_OPTIONS.map((building) => (
+                  <button
+                    key={building.type}
+                    className={
+                      selectedBuildingType === building.type
+                        ? "building-option selected"
+                        : "building-option"
+                    }
+                    onClick={() => {
+                      setSelectedBuildingType(building.type);
+                      setActionErrors((currentErrors) => ({
+                        ...currentErrors,
+                        build: ""
+                      }));
+                    }}
+                  >
+                    <span className="building-icon">{building.icon}</span>
+
+                    <span>
+                      <strong>{building.name}</strong>
+
+                      <span
+                        className="building-cost-resources"
+                        aria-label={`${building.name} resource cost`}
+                      >
+                        {RESOURCE_ORDER.map((kind) => {
+                          const amount = BUILDING_COSTS[building.type][kind] ?? 0;
+
+                          return amount > 0 ? (
+                            <ResourceBadge
+                              key={kind}
+                              kind={kind}
+                              value={amount}
+                              compact
+                            />
+                          ) : null;
+                        })}
+                      </span>
+
+                      <small className="building-effect">{building.income}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <label>
+                Controlled system
+                <select
+                  value={canBuildInSelectedSystem ? selectedSystemId ?? "" : ""}
+                  onChange={(event) => {
+                    const value = event.target.value;
+
+                    setSelectedSystemId(value ? Number(value) : null);
+                    setSelectedStructureKey(null);
+                    setSelectedUnitId(null);
+                    setActionErrors((currentErrors) => ({
+                      ...currentErrors,
+                      build: ""
+                    }));
+                  }}
+                  disabled={!currentPlayer || controlledSystems.length === 0}
+                >
+                  <option value="">Select system</option>
+
+                  {controlledSystems.map((system) => (
+                    <option key={system.system_id} value={system.system_id}>
+                      {system.system_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {controlledSystems.length === 0 && (
+                <p className="action-hint">
+                  Current player does not control any systems.
+                </p>
+              )}
+
+              {selectedSystem && !canBuildInSelectedSystem && (
+                <p className="action-hint">
+                  Select a system controlled by the selected player to build
+                  here.
+                </p>
+              )}
+
+              {selectedBuildingResourceError && (
+                <p className="inline-action-error">
+                  {selectedBuildingResourceError}
+                </p>
+              )}
+
+              {actionErrors.build && (
+                <p className="inline-action-error">{actionErrors.build}</p>
+              )}
+
+              <button
+                className="build-submit-button"
+                onClick={handleBuildBuilding}
+                disabled={
+                  isBuilding ||
+                  session.status !== "started" ||
+                  !currentPlayer ||
+                  !selectedSystemId ||
+                  !canBuildInSelectedSystem ||
+                  Boolean(selectedBuildingResourceError)
+                }
+              >
+                {isBuilding ? "Building..." : "Build · 1 CP"}
+              </button>
+              </aside>
 
               <section className="fleet-command-center">
                 <div className="fleet-command-center-header">
@@ -3140,7 +3419,10 @@ export default function GamePlay() {
               </section>
 
               {selectedSystem && (
-                <section className="system-overview-panel">
+                <section
+                  className="system-overview-panel"
+                  style={getPlayerVisualStyle(selectedSystem.owner_player_id)}
+                >
                   <div
                     className={`system-overview-header archont-system-overview-header ownership-${selectedSystemRelation}`}
                     style={getPlayerVisualStyle(selectedSystem.owner_player_id)}
@@ -3170,6 +3452,107 @@ export default function GamePlay() {
                       <span><small>FLEETS</small><strong>{getFleetsInSystem(selectedSystem.system_id).length}</strong></span>
                     </div>
                   </div>
+
+                  {(() => {
+                    const mapSystem = mapDetails?.systems.find(
+                      (system) => system.id === selectedSystem.system_id
+                    );
+
+                    if (!mapSystem) {
+                      return null;
+                    }
+
+                    const systemBuildings = selectedSystem.buildings ?? [];
+                    const countBuildings = (...buildingTypes: string[]) =>
+                      systemBuildings.filter((building) =>
+                        buildingTypes.includes(building.building_type)
+                      ).length;
+
+                    const capacityItems = [
+                      {
+                        key: "mine",
+                        icon: "◆",
+                        label: "Mines",
+                        current: countBuildings("mine"),
+                        maximum: mapSystem.mineral_slots
+                      },
+                      {
+                        key: "energy",
+                        icon: "ϟ",
+                        label: "Power Plants",
+                        current: countBuildings("power_plant", "energy_plant"),
+                        maximum: mapSystem.energy_slots
+                      },
+                      {
+                        key: "storage",
+                        icon: "▰",
+                        label: "Supply Depots",
+                        current: countBuildings("storage"),
+                        maximum: mapSystem.storage_slots
+                      },
+                      {
+                        key: "research",
+                        icon: "⌁",
+                        label: "Research Centers",
+                        current: countBuildings("research_center"),
+                        maximum: mapSystem.research_center_slots
+                      }
+                    ];
+
+                    return (
+                      <section className="system-building-capacity">
+                        <div className="system-building-capacity-heading">
+                          <div>
+                            <span className="archont-eyebrow">System infrastructure</span>
+                            <h3>Building capacity</h3>
+                          </div>
+                          <p>
+                            Built structures compared with this system's available resource slots.
+                          </p>
+                        </div>
+
+                        <div className="system-building-capacity-grid">
+                          {capacityItems.map((item) => {
+                            const ratio =
+                              item.maximum > 0
+                                ? Math.min(100, (item.current / item.maximum) * 100)
+                                : 0;
+                            const isFull =
+                              item.maximum > 0 && item.current >= item.maximum;
+                            const isUnavailable = item.maximum <= 0;
+
+                            return (
+                              <article
+                                className={[
+                                  "system-building-capacity-card",
+                                  isFull ? "is-full" : "",
+                                  isUnavailable ? "is-unavailable" : ""
+                                ].join(" ")}
+                                key={item.key}
+                              >
+                                <span className="system-building-capacity-icon">
+                                  {item.icon}
+                                </span>
+
+                                <span className="system-building-capacity-copy">
+                                  <strong>{item.label}</strong>
+                                  <small>
+                                    {isUnavailable
+                                      ? "Unavailable"
+                                      : `${item.current} / ${item.maximum}`}
+                                  </small>
+                                </span>
+
+                                <span className="system-building-capacity-meter">
+                                  <i style={{ width: `${ratio}%` }} />
+                                </span>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      </section>
+                    );
+                  })()}
 
                   <div className="system-overview-grid">
                     <div className="system-overview-block">
@@ -3208,6 +3591,10 @@ export default function GamePlay() {
                                     description: "No description yet."
                                   };
                                 const isColony = buildingType === "colony";
+                                const incomeResources = getBuildingIncomeResources(
+                                  buildingType,
+                                  buildingGroup.length
+                                );
                                 const canControl =
                                   firstBuilding.owner_player_id === currentPlayer?.id &&
                                   session.status === "started";
@@ -3230,6 +3617,7 @@ export default function GamePlay() {
                                         ? "overview-card selected"
                                         : "overview-card"
                                     }
+                                    style={getPlayerVisualStyle(firstBuilding.owner_player_id)}
                                     role="button"
                                     tabIndex={0}
                                     onClick={() => {
@@ -3243,13 +3631,51 @@ export default function GamePlay() {
                                       }
                                     }}
                                   >
-                                    <strong>
-                                      {isColony ? "🏛 " : ""}
-                                      {getBuildingDisplayName(firstBuilding)} ×
-                                      {buildingGroup.length}
-                                    </strong>
+                                    <div className="overview-structure-header">
+                                      <span
+                                        className="overview-structure-icon"
+                                        aria-hidden="true"
+                                      >
+                                        {getBuildingOverviewIcon(buildingType)}
+                                      </span>
 
-                                    <span>{details.income}</span>
+                                      <span className="overview-structure-copy">
+                                        <strong>
+                                          {getBuildingDisplayName(firstBuilding)}
+                                        </strong>
+                                        <small>
+                                          {isColony ? "COLONY" : "STRUCTURE"}
+                                        </small>
+                                      </span>
+
+                                      <span className="overview-structure-count">
+                                        ×{buildingGroup.length}
+                                      </span>
+                                    </div>
+
+                                    {incomeResources.length > 0 ? (
+                                      <div className="overview-structure-income">
+                                        <small className="overview-income-caption">
+                                          PER ROUND
+                                        </small>
+
+                                        <div className="overview-resource-income-row">
+                                          {incomeResources.map((incomeResource) => (
+                                            <ResourceBadge
+                                              key={incomeResource.kind}
+                                              kind={incomeResource.kind}
+                                              value={incomeResource.value}
+                                              valuePrefix="+"
+                                              compact
+                                            />
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span className="overview-no-income">
+                                        NO DIRECT INCOME
+                                      </span>
+                                    )}
 
                                     {isSelected && (
                                       <div className="overview-card-details">
@@ -3308,7 +3734,7 @@ export default function GamePlay() {
                                                     >
                                                       <span>{unitOption.icon}</span>
                                                       <span>
-                                                        Produce {unitOption.name}
+                                                        Produce {unitOption.name} · 1 CP
                                                         <small>
                                                           {unitOption.costText}
                                                         </small>
@@ -3353,7 +3779,7 @@ export default function GamePlay() {
                                                 Boolean(resourceError)
                                               }
                                             >
-                                              Pack into Ark ·{" "}
+                                              Pack into Ark · 1 CP ·{" "}
                                               {UNIT_ACTION_ENERGY_COST} ⚡
                                             </button>
 
@@ -3598,7 +4024,7 @@ export default function GamePlay() {
                                               Boolean(resourceError)
                                             }
                                           >
-                                            Colonize System ·{" "}
+                                            Colonize System · 1 CP ·{" "}
                                             {UNIT_ACTION_ENERGY_COST} ⚡
                                           </button>
                                         )}
@@ -3628,111 +4054,7 @@ export default function GamePlay() {
               )}
             </main>
 
-            <aside className="simulation-sidebar build-sidebar">
-              <h2>Construction</h2>
-              <div className="acting-player-card">
-                <span>Acting player</span>
-                <strong>{currentPlayer?.faction_name ?? "No active player"}</strong>
-                <small>
-                  {currentPlayer
-                    ? `CP: ${currentPlayer.command_points_left}/${COMMAND_POINTS_PER_ROUND}`
-                    : "No turn state"}
-                </small>
-              </div>
 
-              <div className="building-buttons">
-                {BUILDING_OPTIONS.map((building) => (
-                  <button
-                    key={building.type}
-                    className={
-                      selectedBuildingType === building.type
-                        ? "building-option selected"
-                        : "building-option"
-                    }
-                    onClick={() => {
-                      setSelectedBuildingType(building.type);
-                      setActionErrors((currentErrors) => ({
-                        ...currentErrors,
-                        build: ""
-                      }));
-                    }}
-                  >
-                    <span className="building-icon">{building.icon}</span>
-
-                    <span>
-                      <strong>{building.name}</strong>
-                      <small>{building.cost}</small>
-                      <small>{building.income}</small>
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <label>
-                Controlled system
-                <select
-                  value={canBuildInSelectedSystem ? selectedSystemId ?? "" : ""}
-                  onChange={(event) => {
-                    const value = event.target.value;
-
-                    setSelectedSystemId(value ? Number(value) : null);
-                    setSelectedStructureKey(null);
-                    setSelectedUnitId(null);
-                    setActionErrors((currentErrors) => ({
-                      ...currentErrors,
-                      build: ""
-                    }));
-                  }}
-                  disabled={!currentPlayer || controlledSystems.length === 0}
-                >
-                  <option value="">Select system</option>
-
-                  {controlledSystems.map((system) => (
-                    <option key={system.system_id} value={system.system_id}>
-                      {system.system_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {controlledSystems.length === 0 && (
-                <p className="action-hint">
-                  Current player does not control any systems.
-                </p>
-              )}
-
-              {selectedSystem && !canBuildInSelectedSystem && (
-                <p className="action-hint">
-                  Select a system controlled by the selected player to build
-                  here.
-                </p>
-              )}
-
-              {selectedBuildingResourceError && (
-                <p className="inline-action-error">
-                  {selectedBuildingResourceError}
-                </p>
-              )}
-
-              {actionErrors.build && (
-                <p className="inline-action-error">{actionErrors.build}</p>
-              )}
-
-              <button
-                className="build-submit-button"
-                onClick={handleBuildBuilding}
-                disabled={
-                  isBuilding ||
-                  session.status !== "started" ||
-                  !currentPlayer ||
-                  !selectedSystemId ||
-                  !canBuildInSelectedSystem ||
-                  Boolean(selectedBuildingResourceError)
-                }
-              >
-                {isBuilding ? "Building..." : "Build"}
-              </button>
-            </aside>
           </section>
         </>
       )}
