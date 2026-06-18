@@ -115,11 +115,16 @@ function getUnitIcon(unit: SessionUnit): string {
   return icons[unit.unit_type] ?? "◆";
 }
 
+function getFleetAttack(fleet: SessionFleet): number {
+  return fleet.units.reduce((total, unit) => total + unit.attack, 0);
+}
+
+function getFleetDefense(fleet: SessionFleet): number {
+  return fleet.units.reduce((total, unit) => total + unit.defense, 0);
+}
+
 function getFleetCombatRating(fleet: SessionFleet): number {
-  return fleet.units.reduce(
-    (total, unit) => total + unit.attack + unit.defense,
-    0,
-  );
+  return getFleetAttack(fleet) + getFleetDefense(fleet);
 }
 
 type ResourceCost = {
@@ -132,6 +137,20 @@ type ResourceCost = {
 type ResourceKind = "matter" | "energy" | "data" | "food";
 
 type WorkspaceTab = "systems" | "buildings" | "fleets";
+
+type ActiveEngagement = {
+  systemId: number;
+  systemName: string;
+  ownerName: string;
+  friendlyFleets: SessionFleet[];
+  rivalFleets: SessionFleet[];
+  friendlyLabel: string;
+  rivalLabel: string;
+  friendlyUnits: number;
+  rivalUnits: number;
+  friendlyCombat: number;
+  rivalCombat: number;
+};
 
 type ResolutionPreview = {
   fleetId: number;
@@ -2524,6 +2543,22 @@ export default function GamePlay() {
     );
   }
 
+  function getFleetOwnerLabel(fleet: SessionFleet): string {
+    const owner = getFleetOwner(fleet);
+
+    if (!owner) {
+      return "Rival";
+    }
+
+    const displayName = owner.nickname ?? owner.email ?? owner.faction_name;
+
+    if (displayName === owner.faction_name) {
+      return owner.faction_name;
+    }
+
+    return `${displayName} · ${owner.faction_name}`;
+  }
+
   function getPlayerById(
     playerId: number | null | undefined,
   ): SessionPlayer | null {
@@ -2744,6 +2779,15 @@ export default function GamePlay() {
     ? getConnectedSystems(selectedCommandFleet.system_id)
     : [];
   const selectedCommandFleetEngaged = isFleetEngaged(selectedCommandFleet);
+  const selectedCommandEngagedEnemies = selectedCommandFleet
+    ? getEngagedEnemyFleets(selectedCommandFleet)
+    : [];
+  const selectedCommandEngagedEnemyLabel = selectedCommandEngagedEnemies
+    .map((fleet) => `${getFleetOwnerLabel(fleet)} · ${fleet.name}`)
+    .join(", ");
+  const selectedCommandEngagementSystem = selectedCommandFleet
+    ? getSessionSystemById(selectedCommandFleet.system_id)
+    : null;
   const selectedCommandDestinationSystems =
     selectedCommandOrderType === "move_attack"
       ? getAttackableConnectedSystems(selectedCommandFleet)
@@ -3448,6 +3492,103 @@ export default function GamePlay() {
     ? getOwnershipRelation(selectedSystem.owner_player_id)
     : "neutral";
 
+  const activeConflictSystemIds = useMemo(() => {
+    const conflictSystemIds = new Set<number>();
+
+    if (!session) {
+      return conflictSystemIds;
+    }
+
+    for (const system of session.systems) {
+      const systemFleets = session.players.flatMap((player) =>
+        (player.fleets ?? []).filter(
+          (fleet) =>
+            fleet.system_id === system.system_id && fleet.units.length > 0,
+        ),
+      );
+      const ownerIds = new Set(
+        systemFleets.map((fleet) => fleet.owner_player_id),
+      );
+
+      if (ownerIds.size > 1) {
+        conflictSystemIds.add(system.system_id);
+      }
+    }
+
+    return conflictSystemIds;
+  }, [session]);
+
+  const activeEngagements = useMemo<ActiveEngagement[]>(() => {
+    if (!session || !currentPlayer) {
+      return [];
+    }
+
+    return session.systems
+      .map((system) => {
+        const systemFleets = session.players.flatMap((player) =>
+          (player.fleets ?? []).filter(
+            (fleet) =>
+              fleet.system_id === system.system_id && fleet.units.length > 0,
+          ),
+        );
+        const friendlyFleets = systemFleets.filter(
+          (fleet) => fleet.owner_player_id === currentPlayer.id,
+        );
+        const rivalFleets = systemFleets.filter(
+          (fleet) => fleet.owner_player_id !== currentPlayer.id,
+        );
+
+        if (friendlyFleets.length === 0 || rivalFleets.length === 0) {
+          return null;
+        }
+
+        const owner = getPlayerById(system.owner_player_id);
+        const friendlyUnits = friendlyFleets.reduce(
+          (total, fleet) => total + fleet.units.length,
+          0,
+        );
+        const rivalUnits = rivalFleets.reduce(
+          (total, fleet) => total + fleet.units.length,
+          0,
+        );
+        const friendlyCombat = friendlyFleets.reduce(
+          (total, fleet) => total + getFleetCombatRating(fleet),
+          0,
+        );
+        const rivalCombat = rivalFleets.reduce(
+          (total, fleet) => total + getFleetCombatRating(fleet),
+          0,
+        );
+        const friendlyLabel = friendlyFleets
+          .map((fleet) => fleet.name)
+          .join(", ");
+        const rivalLabel = rivalFleets
+          .map((fleet) => `${getFleetOwnerLabel(fleet)} · ${fleet.name}`)
+          .join(", ");
+
+        return {
+          systemId: system.system_id,
+          systemName: system.system_name,
+          ownerName: owner?.faction_name ?? "Neutral system",
+          friendlyFleets,
+          rivalFleets,
+          friendlyLabel,
+          rivalLabel,
+          friendlyUnits,
+          rivalUnits,
+          friendlyCombat,
+          rivalCombat,
+        };
+      })
+      .filter((engagement): engagement is ActiveEngagement => engagement !== null);
+  }, [session, currentPlayer]);
+
+  const visibleActiveEngagements = activeEngagements.slice(0, 3);
+  const hiddenActiveEngagementsCount = Math.max(
+    0,
+    activeEngagements.length - visibleActiveEngagements.length,
+  );
+
   return (
     <div
       className="game-page game-simulation-page archont-gameplay-shell"
@@ -3871,6 +4012,9 @@ export default function GamePlay() {
                   const ownershipRelation = getOwnershipRelation(
                     system.owner_player_id,
                   );
+                  const hasActiveConflict = activeConflictSystemIds.has(
+                    system.system_id,
+                  );
 
                   const systemVisualClass = getGameplaySystemVisualClass(
                     system.system_id,
@@ -3887,6 +4031,7 @@ export default function GamePlay() {
                         system.owner_player_id ? "owned" : "neutral",
                         `ownership-${ownershipRelation}`,
                         systemVisualClass,
+                        hasActiveConflict ? "in-conflict" : "",
                         isSelected ? "selected" : "",
                         isControlledBySelectedPlayer ? "selectable" : "",
                       ].join(" ")}
@@ -4321,6 +4466,50 @@ export default function GamePlay() {
                     </div>
                   </div>
 
+                  {activeEngagements.length > 0 && (
+                    <section className="archont-active-engagements">
+                      <div className="archont-active-engagements-title">
+                        <span>Active engagements</span>
+                        <strong>{activeEngagements.length}</strong>
+                      </div>
+
+                      <div className="archont-active-engagements-list">
+                        {visibleActiveEngagements.map((engagement) => (
+                          <button
+                            key={engagement.systemId}
+                            type="button"
+                            className="archont-active-engagement-card"
+                            onClick={() => {
+                              setSelectedSystemId(engagement.systemId);
+                              setSelectedStructureKey(null);
+                              setSelectedUnitId(null);
+                            }}
+                          >
+                            <span className="archont-active-engagement-icon">
+                              ⚔
+                            </span>
+                            <span className="archont-active-engagement-copy">
+                              <small>{engagement.ownerName}</small>
+                              <strong>{engagement.systemName}</strong>
+                              <em>
+                                {engagement.friendlyLabel} vs {engagement.rivalLabel}
+                              </em>
+                            </span>
+                            <span className="archont-active-engagement-balance">
+                              {engagement.friendlyUnits}u / {engagement.rivalUnits}u
+                            </span>
+                          </button>
+                        ))}
+
+                        {hiddenActiveEngagementsCount > 0 && (
+                          <span className="archont-active-engagements-more">
+                            +{hiddenActiveEngagementsCount} more
+                          </span>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
                   <div className="archont-fleet-slot-grid">
                     {Array.from({ length: 4 }).map((_, index) => {
                       const fleet = currentPlayerFleets[index] ?? null;
@@ -4420,6 +4609,13 @@ export default function GamePlay() {
                               </em>
                             </span>
                           </div>
+
+                          {isEngagedFleet && (
+                            <span className="archont-fleet-decision-strip">
+                              <strong>Decision pending</strong>
+                              <small>Continue combat or retreat when this fleet is ready.</small>
+                            </span>
+                          )}
 
                           <div className="archont-fleet-slot-metrics">
                             <span>
@@ -4564,6 +4760,20 @@ export default function GamePlay() {
                               </select>
                             </label>
                           </div>
+
+                          {selectedCommandFleetEngaged && selectedCommandFleet && (
+                            <div className="archont-engaged-action-note">
+                              <span>⚔ Engaged fleet</span>
+                              <strong>
+                                {selectedCommandEngagementSystem?.system_name ??
+                                  selectedCommandFleet.system_name ??
+                                  `System ${selectedCommandFleet.system_id}`}
+                              </strong>
+                              <small>
+                                {selectedCommandFleet.name} is engaged with {selectedCommandEngagedEnemyLabel || "enemy fleet"}. Normal movement is locked until you continue combat or retreat.
+                              </small>
+                            </div>
+                          )}
 
                           {selectedCommandOrderType !== "split_move" &&
                             selectedCommandOrderType !== "defend" &&
@@ -5342,12 +5552,28 @@ export default function GamePlay() {
                               <div className="fleet-route-preview is-combat-engagement">
                                 <strong>Combat engagement</strong>
                                 <span>
-                                  {selectedCommandFleet.name} vs {effectiveAttackTargetFleet.name}
+                                  {getFleetOwnerLabel(selectedCommandFleet)} · {selectedCommandFleet.name}
+                                  {" vs "}
+                                  {getFleetOwnerLabel(effectiveAttackTargetFleet)} · {effectiveAttackTargetFleet.name}
                                 </span>
                                 <small>
-                                  One simultaneous combat exchange. Surviving fleets remain in the system.
+                                  {selectedCommandEngagementSystem?.system_name ??
+                                    selectedCommandFleet.system_name ??
+                                    `System ${selectedCommandFleet.system_id}`}
+                                  {" · "}
+                                  One simultaneous exchange. Surviving fleets remain engaged.
                                 </small>
-                                <em>No corridor movement</em>
+                                <em>
+                                  Estimated exchange: {Math.max(
+                                    0,
+                                    getFleetAttack(selectedCommandFleet) -
+                                      getFleetDefense(effectiveAttackTargetFleet),
+                                  )} enemy HP / {Math.max(
+                                    0,
+                                    getFleetAttack(effectiveAttackTargetFleet) -
+                                      getFleetDefense(selectedCommandFleet),
+                                  )} own HP
+                                </em>
                               </div>
                             )}
 

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ARCHONT — consolidated GameSession styles
+   ARCHONT вЂ” consolidated GameSession styles
    Replaces the previous base file and all appended gameplay patches.
    Generated from the current production gameplay and session setup UI.
    ========================================================================== */
@@ -5521,7 +5521,7 @@ button.archont-fleet-slot-card:disabled:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Transfer → Move */
+/* Transfer в†’ Move */
 .fleet-transfer-continuing-selector {
   border-color: color-mix(
     in srgb,
@@ -5549,7 +5549,7 @@ button.archont-fleet-slot-card:disabled:hover {
 }
 
 /* =========================================================
-   Split → Move v1
+   Split в†’ Move v1
    One source fleet creates exactly one new fleet slot.
    ========================================================= */
 
@@ -7429,7 +7429,7 @@ button.archont-fleet-slot-card:disabled:hover {
   }
 }
 
-/* Hostile Move → Move warning and interception result */
+/* Hostile Move в†’ Move warning and interception result */
 .archont-hostile-entry-warning {
   display: grid;
   gap: 5px;
@@ -7493,31 +7493,27 @@ button.archont-fleet-slot-card:disabled:hover {
   background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 70%, transparent);
   color: rgba(246, 239, 255, 0.94) !important;
 }
-/* Move → Move: first-step interception warning */
+
+
+/* Move в†’ Move: first-step interception warning */
 
 .archont-hostile-first-step-warning {
   display: grid;
   gap: 5px;
-
   padding: 12px 14px;
-
   border: 1px solid rgba(255, 103, 126, 0.5);
   border-radius: 13px;
-
   background:
     linear-gradient(
       145deg,
       rgba(255, 72, 104, 0.14),
       rgba(63, 10, 25, 0.42)
     );
-
-  box-shadow:
-    inset 3px 0 0 rgba(255, 103, 126, 0.86);
+  box-shadow: inset 3px 0 0 rgba(255, 103, 126, 0.86);
 }
 
 .archont-hostile-first-step-warning strong {
   color: #ff9daf;
-
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.11em;
@@ -7526,7 +7522,6 @@ button.archont-fleet-slot-card:disabled:hover {
 
 .archont-hostile-first-step-warning span {
   color: #ffffff;
-
   font-size: 0.9rem;
   font-weight: 850;
   line-height: 1.35;
@@ -7534,7 +7529,393 @@ button.archont-fleet-slot-card:disabled:hover {
 
 .archont-hostile-first-step-warning small {
   color: rgba(255, 230, 235, 0.75);
-
   font-size: 0.78rem;
   line-height: 1.45;
+}
+
+
+/* Combat Engagement UX v2: light-touch conflict readability */
+
+.archont-system-node.in-conflict {
+  border-color: rgba(255, 135, 105, 0.74);
+  box-shadow:
+    0 0 0 1px rgba(255, 135, 105, 0.32),
+    0 10px 24px rgba(0, 0, 0, 0.4);
+}
+
+.archont-system-node.in-conflict::after {
+  content: "\2694";
+  position: absolute;
+  top: -9px;
+  right: -7px;
+  z-index: 4;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid rgba(255, 197, 150, 0.58);
+  border-radius: 999px;
+  color: #ffe8d7;
+  background: rgba(42, 17, 20, 0.94);
+  box-shadow: 0 0 14px rgba(255, 104, 91, 0.28);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.archont-active-engagements {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(255, 111, 94, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(8, 7, 15, 0.44);
+}
+
+.archont-active-engagements-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.archont-active-engagements-title span {
+  color: rgba(255, 232, 218, 0.72);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.archont-active-engagements-title strong {
+  display: grid;
+  min-width: 26px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  color: #ffe8d7;
+  background: rgba(255, 111, 94, 0.14);
+  font-size: 0.78rem;
+}
+
+.archont-active-engagements-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 9px;
+}
+
+.archont-active-engagement-card {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 13px;
+  color: inherit;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.archont-active-engagement-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 170, 132, 0.34);
+  background: rgba(255, 111, 94, 0.07);
+}
+
+.archont-active-engagement-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 9px;
+  color: #ffe8d7;
+  background: rgba(255, 111, 94, 0.13);
+  font-size: 0.78rem;
+}
+
+.archont-active-engagement-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.archont-active-engagement-copy small {
+  overflow: hidden;
+  color: rgba(227, 216, 239, 0.54);
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-active-engagement-copy strong {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-active-engagement-copy em {
+  overflow: hidden;
+  color: rgba(255, 232, 218, 0.66);
+  font-size: 0.63rem;
+  font-style: normal;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-active-engagement-balance,
+.archont-active-engagements-more {
+  justify-self: end;
+  padding: 5px 7px;
+  border-radius: 999px;
+  color: rgba(255, 245, 236, 0.82);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.62rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.archont-fleet-decision-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 140, 120, 0.26);
+  border-radius: 999px;
+  background: rgba(255, 111, 94, 0.06);
+}
+
+.archont-fleet-decision-strip strong {
+  color: #ffd9c8;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-fleet-decision-strip small {
+  overflow: hidden;
+  color: rgba(255, 232, 218, 0.64);
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-engaged-action-note {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 140, 120, 0.3);
+  border-radius: 13px;
+  background:
+    linear-gradient(145deg, rgba(255, 111, 94, 0.09), transparent),
+    rgba(255, 255, 255, 0.035);
+}
+
+.archont-engaged-action-note span {
+  color: #ffd1bd;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.archont-engaged-action-note strong {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+.archont-engaged-action-note small {
+  color: rgba(236, 226, 246, 0.72);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.fleet-route-preview.is-combat-engagement em {
+  color: #ffd5bf;
+}
+
+@media (max-width: 760px) {
+  .archont-active-engagement-card {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .archont-active-engagement-balance {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .archont-fleet-decision-strip {
+    display: grid;
+    border-radius: 12px;
+  }
+}
+
+/* Compact fleet slot card layout */
+
+.archont-fleet-slot-card {
+  gap: 7px;
+  min-height: 0;
+  padding: 10px;
+}
+
+.archont-fleet-slot-card > header {
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.archont-fleet-emblem {
+  width: 30px;
+  height: 30px;
+  font-size: 0.78rem;
+}
+
+.archont-fleet-slot-card header strong {
+  font-size: 0.74rem;
+}
+
+.archont-fleet-slot-card header small {
+  font-size: 0.56rem;
+}
+
+.archont-fleet-slot-card header b {
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Location becomes a compact pill, not a full info card */
+
+.archont-fleet-location {
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 7px;
+  padding: 6px 8px;
+  border-radius: 9px;
+}
+
+.archont-fleet-location-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  font-size: 0.68rem;
+  box-shadow: none;
+}
+
+.archont-fleet-location-copy {
+  gap: 0;
+  min-width: 0;
+}
+
+.archont-fleet-location-copy small {
+  margin-bottom: 1px;
+  font-size: 0.43rem;
+  letter-spacing: 0.09em;
+}
+
+.archont-fleet-location-copy strong {
+  font-size: 0.68rem;
+  line-height: 1.15;
+}
+
+.archont-fleet-location-copy em {
+  max-width: 100%;
+  font-size: 0.52rem;
+  line-height: 1.2;
+}
+
+/* Decision state should be a small status line */
+
+.archont-fleet-decision-strip {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  gap: 6px;
+  padding: 5px 7px;
+  border-radius: 999px;
+}
+
+.archont-fleet-decision-strip strong {
+  font-size: 0.52rem;
+  letter-spacing: 0.06em;
+}
+
+.archont-fleet-decision-strip small {
+  display: none;
+}
+
+/* Metrics are compact */
+
+.archont-fleet-slot-metrics {
+  border-radius: 8px;
+}
+
+.archont-fleet-slot-metrics > span {
+  gap: 1px;
+  padding: 5px 7px;
+}
+
+.archont-fleet-slot-metrics small {
+  font-size: 0.42rem;
+}
+
+.archont-fleet-slot-metrics strong {
+  font-size: 0.64rem;
+}
+
+/* Units stay inside one compact row */
+
+.archont-fleet-slot-units {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.archont-fleet-slot-units > span {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 21px;
+  padding: 3px 5px;
+  gap: 3px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+}
+
+.archont-fleet-slot-units small {
+  font-size: 0.42rem;
+  white-space: nowrap;
+}
+
+/* On narrow screens cards may still breathe normally */
+
+@media (max-width: 980px) {
+  .archont-fleet-slot-card {
+    padding: 11px;
+  }
+
+  .archont-fleet-location-copy em {
+    white-space: normal;
+  }
+
+  .archont-fleet-decision-strip small {
+    display: inline;
+  }
 }
