@@ -4,7 +4,6 @@
    Generated from the current production gameplay and session setup UI.
    ========================================================================== */
 
-
 /* === SESSION SETUP === */
 
 .available-users-grid {
@@ -158,7 +157,6 @@
   cursor: not-allowed;
 }
 
-
 /* === SHARED SESSION PRIMITIVES === */
 
 .game-page {
@@ -310,7 +308,6 @@
   color: #c6cbea;
 }
 
-
 /* === GAMEPLAY SHELL & HEADER === */
 
 .archont-gameplay-shell {
@@ -319,10 +316,23 @@
   min-height: 100vh;
   overflow-x: hidden;
   color: #f7f2ff;
-  background: radial-gradient(circle at 12% 4%, rgba(120, 72, 255, 0.18), transparent 32%),
-      radial-gradient(circle at 88% 12%, rgba(40, 183, 255, 0.12), transparent 28%),
-      radial-gradient(circle at 58% 72%, rgba(177, 54, 255, 0.09), transparent 38%),
-      linear-gradient(180deg, #07050c 0%, #0b0712 42%, #05040a 100%);
+  background:
+    radial-gradient(
+      circle at 12% 4%,
+      rgba(120, 72, 255, 0.18),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 88% 12%,
+      rgba(40, 183, 255, 0.12),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 58% 72%,
+      rgba(177, 54, 255, 0.09),
+      transparent 38%
+    ),
+    linear-gradient(180deg, #07050c 0%, #0b0712 42%, #05040a 100%);
 }
 
 .archont-gameplay-shell::before {
@@ -332,8 +342,9 @@
   z-index: -1;
   pointer-events: none;
   opacity: 0.42;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
   background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.86), transparent 94%);
 }
@@ -344,10 +355,26 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.11) 0 1px, transparent 1.5px),
-      radial-gradient(circle at 73% 18%, rgba(255, 255, 255, 0.09) 0 1px, transparent 1.5px),
-      radial-gradient(circle at 82% 76%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.5px);
-  background-size: 173px 173px, 251px 251px, 319px 319px;
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.11) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 73% 18%,
+      rgba(255, 255, 255, 0.09) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 82% 76%,
+      rgba(255, 255, 255, 0.08) 0 1px,
+      transparent 1.5px
+    );
+  background-size:
+    173px 173px,
+    251px 251px,
+    319px 319px;
 }
 
 .archont-gameplay-shell button {
@@ -384,10 +411,12 @@
   flex: 0 0 58px;
   border: 1px solid rgba(194, 153, 255, 0.34);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(174, 86, 255, 0.2), rgba(57, 22, 89, 0.08)),
-      rgba(12, 8, 20, 0.78);
-  box-shadow: 0 0 32px rgba(156, 80, 255, 0.14),
-      inset 0 0 22px rgba(255, 255, 255, 0.04);
+  background:
+    linear-gradient(145deg, rgba(174, 86, 255, 0.2), rgba(57, 22, 89, 0.08)),
+    rgba(12, 8, 20, 0.78);
+  box-shadow:
+    0 0 32px rgba(156, 80, 255, 0.14),
+    inset 0 0 22px rgba(255, 255, 255, 0.04);
   transform: rotate(45deg);
 }
 
@@ -431,8 +460,9 @@
   line-height: 0.95;
   letter-spacing: 0.12em;
   color: #ffffff;
-  text-shadow: 0 0 24px rgba(180, 96, 255, 0.24),
-      0 0 1px rgba(255, 255, 255, 0.9);
+  text-shadow:
+    0 0 24px rgba(180, 96, 255, 0.24),
+    0 0 1px rgba(255, 255, 255, 0.9);
 }
 
 .archont-brand-lockup p {
@@ -453,9 +483,10 @@
   color: rgba(246, 239, 255, 0.92);
   background: rgba(18, 12, 28, 0.76);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
-  transition: border-color 160ms ease,
-      transform 160ms ease,
-      background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
 }
 
 .archont-sync-button:hover:not(:disabled) {
@@ -473,18 +504,6 @@
   max-width: 1616px;
   margin: 10px auto;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 .archont-gameplay-shell .map-header {
   display: flex;
@@ -508,12 +527,6 @@
   font-size: 0.82rem;
   line-height: 1.45;
 }
-
-
-
-
-
-
 
 .archont-gameplay-shell .game-map-connections {
   z-index: 1;
@@ -570,8 +583,13 @@
   overflow: hidden;
   border: 1px solid rgba(189, 128, 255, 0.13);
   border-radius: 18px;
-  background: radial-gradient(circle at 100% 0%, rgba(159, 88, 255, 0.11), transparent 32%),
-      rgba(255, 255, 255, 0.018);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(159, 88, 255, 0.11),
+      transparent 32%
+    ),
+    rgba(255, 255, 255, 0.018);
 }
 
 .archont-gameplay-shell .fleet-command-center-header {
@@ -615,24 +633,6 @@
   background: linear-gradient(145deg, #a65cff, #5e35c9);
   box-shadow: 0 0 14px rgba(166, 92, 255, 0.3);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .archont-gameplay-shell select {
   font: inherit;
@@ -713,19 +713,20 @@
 }
 
 .archont-gameplay-shell .archont-system-orbit {
-position: absolute;
+  position: absolute;
   left: 11px;
   top: 50%;
   width: 20px;
   height: 20px;
   transform: translateY(-50%);
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 62%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 62%, transparent);
   border-radius: 50%;
   opacity: 0.58;
 }
 
 .archont-gameplay-shell .archont-system-core {
-position: relative;
+  position: relative;
   z-index: 1;
   display: grid;
   width: 22px;
@@ -738,23 +739,11 @@ position: relative;
   font-weight: 900;
 }
 
-
-
-
-
-
-
-
-
-
-
 .archont-gameplay-shell .archont-map-legend {
   align-items: center;
   gap: 10px 14px;
   padding: 12px 14px;
 }
-
-
 
 .archont-gameplay-shell .archont-corridor-safe .corridor-core {
   stroke-dasharray: none;
@@ -808,12 +797,6 @@ position: relative;
   fill: #f5dcff;
 }
 
-
-
-
-
-
-
 .archont-gameplay-shell .legend-line-safe::before {
   content: "";
   display: inline-block;
@@ -861,27 +844,40 @@ position: relative;
   transition: none !important;
 }
 
-
 /* === SESSION COMMAND DECK === */
 
 .archont-session-command-deck {
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(240px, 1.1fr) minmax(360px, 1.4fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(240px, 1.1fr) minmax(360px, 1.4fr) minmax(
+      360px,
+      1fr
+    );
   gap: 18px;
   align-items: stretch;
   max-width: 1616px;
   margin: 8px auto 18px;
   padding: 18px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 22%, rgba(255, 255, 255, 0.08));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 22%,
+      rgba(255, 255, 255, 0.08)
+    );
   border-radius: 22px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.12)), transparent 34%),
-      linear-gradient(145deg, rgba(22, 15, 33, 0.96), rgba(9, 7, 15, 0.94));
-  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.38),
-      0 0 70px var(--player-color-glow, rgba(155, 124, 255, 0.1)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  background:
+    linear-gradient(
+      135deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.12)),
+      transparent 34%
+    ),
+    linear-gradient(145deg, rgba(22, 15, 33, 0.96), rgba(9, 7, 15, 0.94));
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.38),
+    0 0 70px var(--player-color-glow, rgba(155, 124, 255, 0.1)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .archont-session-command-deck::before {
@@ -964,8 +960,9 @@ position: relative;
   background: rgba(255, 255, 255, 0.025);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "emblem copy cp"
-      "actions actions actions";
+  grid-template-areas:
+    "emblem copy cp"
+    "actions actions actions";
   gap: 12px;
   align-items: center;
   padding: 14px;
@@ -1010,16 +1007,7 @@ position: relative;
   box-shadow: 0 0 12px var(--player-color-glow, rgba(155, 124, 255, 0.7));
 }
 
-
 /* === PLAYER SIDEBAR === */
-
-
-
-
-
-
-
-
 
 .compact-player-header {
   display: flex;
@@ -1057,24 +1045,6 @@ position: relative;
   width: 100%;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .archont-player-accent {
   position: absolute;
   inset: 0 auto 0 0;
@@ -1083,47 +1053,6 @@ position: relative;
   box-shadow: 0 0 18px var(--player-color-glow, rgba(155, 124, 255, 0.7));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* === GALACTIC MAP === */
 
 .galaxy-map {
@@ -1131,10 +1060,23 @@ position: relative;
   min-height: 640px;
   border-radius: 18px;
   border: 1px solid #343b5f;
-  background: radial-gradient(circle at 20% 20%, rgba(143, 160, 255, 0.16), transparent 24%),
-      radial-gradient(circle at 80% 30%, rgba(255, 107, 138, 0.12), transparent 20%),
-      radial-gradient(circle at 50% 80%, rgba(112, 255, 190, 0.1), transparent 22%),
-      #0b0f1d;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(143, 160, 255, 0.16),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(255, 107, 138, 0.12),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 50% 80%,
+      rgba(112, 255, 190, 0.1),
+      transparent 22%
+    ),
+    #0b0f1d;
   overflow: hidden;
 }
 
@@ -1153,16 +1095,6 @@ position: relative;
   opacity: 0.9;
   stroke-linecap: round;
 }
-
-
-
-
-
-
-
-
-
-
 
 .game-map-legend {
   display: flex;
@@ -1197,12 +1129,12 @@ position: relative;
   vertical-align: middle;
   border-radius: 999px;
   background: repeating-linear-gradient(
-      to right,
-      rgba(255, 99, 99, 0.95) 0,
-      rgba(255, 99, 99, 0.95) 6px,
-      transparent 6px,
-      transparent 11px
-    );
+    to right,
+    rgba(255, 99, 99, 0.95) 0,
+    rgba(255, 99, 99, 0.95) 6px,
+    transparent 6px,
+    transparent 11px
+  );
 }
 
 .legend-line-wraparound::before {
@@ -1214,56 +1146,16 @@ position: relative;
   vertical-align: middle;
   border-radius: 999px;
   background: repeating-linear-gradient(
-      to right,
-      rgba(255, 213, 79, 0.95) 0,
-      rgba(255, 213, 79, 0.95) 3px,
-      transparent 3px,
-      transparent 9px
-    );
+    to right,
+    rgba(255, 213, 79, 0.95) 0,
+    rgba(255, 213, 79, 0.95) 3px,
+    transparent 3px,
+    transparent 9px
+  );
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .compact-system-title {
-color: #fff;
+  color: #fff;
   font-size: 0.64rem;
   font-weight: 850;
   line-height: 1.16;
@@ -1272,7 +1164,7 @@ color: #fff;
 }
 
 .compact-system-owner {
-color: rgba(255, 255, 255, 0.64);
+  color: rgba(255, 255, 255, 0.64);
   font-size: 0.51rem;
   line-height: 1.15;
   overflow-wrap: anywhere;
@@ -1280,7 +1172,7 @@ color: rgba(255, 255, 255, 0.64);
 }
 
 .compact-system-icons {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 3px 4px;
   margin-top: 2px;
@@ -1290,7 +1182,7 @@ display: grid;
 }
 
 .compact-system-type-badge {
-display: inline-flex;
+  display: inline-flex;
   width: fit-content;
   max-width: 100%;
   padding: 2px 5px;
@@ -1302,40 +1194,6 @@ display: inline-flex;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .archont-map-legend {
   display: flex;
@@ -1384,7 +1242,6 @@ display: inline-flex;
   border-radius: 50%;
   background: #9aa4bb;
 }
-
 
 /* === SYSTEM OVERVIEW === */
 
@@ -1490,8 +1347,13 @@ display: inline-flex;
   gap: 18px;
   padding: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(120deg, var(--player-color-soft, rgba(154, 164, 187, 0.1)), transparent 52%),
-      rgba(0, 0, 0, 0.16);
+  background:
+    linear-gradient(
+      120deg,
+      var(--player-color-soft, rgba(154, 164, 187, 0.1)),
+      transparent 52%
+    ),
+    rgba(0, 0, 0, 0.16);
 }
 
 .archont-system-overview-identity {
@@ -1505,11 +1367,18 @@ display: inline-flex;
   display: grid;
   place-items: center;
   color: #fff;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.2), transparent 34%),
-      var(--player-color-deep, #24194a);
-  box-shadow: 0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.2),
+      transparent 34%
+    ),
+    var(--player-color-deep, #24194a);
+  box-shadow:
+    0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   font-weight: 900;
   letter-spacing: 0.04em;
   width: 46px;
@@ -1557,7 +1426,6 @@ display: inline-flex;
   font-size: 0.8rem;
 }
 
-
 /* === FLEETS === */
 
 .fleet-command-card {
@@ -1595,20 +1463,24 @@ display: inline-flex;
   font-size: 12px;
 }
 
-
-
-
-
-
-
 .archont-fleet-card {
   position: relative;
   overflow: hidden;
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 26%, rgba(255, 255, 255, 0.06));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9aa4bb) 26%,
+      rgba(255, 255, 255, 0.06)
+    );
   border-radius: 13px;
-  background: linear-gradient(140deg, var(--player-color-soft, rgba(154, 164, 187, 0.08)), transparent 54%),
-      rgba(255, 255, 255, 0.022);
+  background:
+    linear-gradient(
+      140deg,
+      var(--player-color-soft, rgba(154, 164, 187, 0.08)),
+      transparent 54%
+    ),
+    rgba(255, 255, 255, 0.022);
 }
 
 .archont-fleet-card.ownership-hostile {
@@ -1639,11 +1511,18 @@ display: inline-flex;
   display: grid;
   place-items: center;
   color: #fff;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.2), transparent 34%),
-      var(--player-color-deep, #24194a);
-  box-shadow: 0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.2),
+      transparent 34%
+    ),
+    var(--player-color-deep, #24194a);
+  box-shadow:
+    0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   font-weight: 900;
   letter-spacing: 0.04em;
   width: 36px;
@@ -1680,7 +1559,8 @@ display: inline-flex;
   justify-content: center;
   min-height: 22px;
   padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 32%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 32%, transparent);
   border-radius: 999px;
   color: var(--player-color, #9b7cff);
   background: var(--player-color-soft, rgba(155, 124, 255, 0.08));
@@ -1759,7 +1639,6 @@ display: inline-flex;
   color: rgba(218, 207, 231, 0.38);
   font-size: 0.49rem;
 }
-
 
 /* === UNITS & DANGER RESULTS === */
 
@@ -1850,11 +1729,21 @@ display: inline-flex;
   overflow: hidden;
   min-width: 0;
   padding: 11px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 23%, rgba(255, 255, 255, 0.06));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9aa4bb) 23%,
+      rgba(255, 255, 255, 0.06)
+    );
   border-radius: 12px;
   color: rgba(243, 236, 250, 0.8);
-  background: linear-gradient(140deg, var(--player-color-soft, rgba(154, 164, 187, 0.07)), transparent 58%),
-      rgba(255, 255, 255, 0.022);
+  background:
+    linear-gradient(
+      140deg,
+      var(--player-color-soft, rgba(154, 164, 187, 0.07)),
+      transparent 58%
+    ),
+    rgba(255, 255, 255, 0.022);
 }
 
 .archont-unit-card.ownership-hostile {
@@ -1867,8 +1756,9 @@ display: inline-flex;
 }
 
 .archont-unit-card.damaged {
-  background: linear-gradient(140deg, rgba(255, 74, 106, 0.09), transparent 58%),
-      rgba(255, 255, 255, 0.022);
+  background:
+    linear-gradient(140deg, rgba(255, 74, 106, 0.09), transparent 58%),
+    rgba(255, 255, 255, 0.022);
 }
 
 .archont-unit-card-heading {
@@ -1883,7 +1773,8 @@ display: inline-flex;
   place-items: center;
   width: 34px;
   height: 34px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 32%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 32%, transparent);
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.18);
   font-size: 1rem;
@@ -1954,7 +1845,6 @@ display: inline-flex;
   box-shadow: 0 0 8px var(--player-color-glow, rgba(155, 124, 255, 0.4));
 }
 
-
 /* === FLEET COMMAND CONSOLE === */
 
 .fleet-command-center {
@@ -1964,9 +1854,14 @@ display: inline-flex;
   padding: 20px;
   border: 1px solid rgba(170, 59, 255, 0.32);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(25, 18, 39, 0.92), rgba(9, 7, 16, 0.94));
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+  background: linear-gradient(
+    145deg,
+    rgba(25, 18, 39, 0.92),
+    rgba(9, 7, 16, 0.94)
+  );
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .fleet-command-center-header {
@@ -2156,7 +2051,11 @@ display: inline-flex;
   width: 100%;
   margin-top: 2px;
   border-color: rgba(170, 59, 255, 0.58);
-  background: linear-gradient(135deg, rgba(170, 59, 255, 0.82), rgba(98, 49, 179, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(170, 59, 255, 0.82),
+    rgba(98, 49, 179, 0.9)
+  );
   color: #fff;
   font-weight: 800;
 }
@@ -2263,7 +2162,6 @@ display: inline-flex;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-
 /* === TRANSFER WORKSPACE === */
 
 .fleet-transfer-workspace {
@@ -2272,7 +2170,11 @@ display: inline-flex;
   padding: 16px;
   border: 1px solid rgba(103, 164, 255, 0.26);
   border-radius: 16px;
-  background: linear-gradient(145deg, rgba(103, 164, 255, 0.07), rgba(170, 59, 255, 0.045));
+  background: linear-gradient(
+    145deg,
+    rgba(103, 164, 255, 0.07),
+    rgba(170, 59, 255, 0.045)
+  );
 }
 
 .fleet-transfer-section-heading {
@@ -2571,26 +2473,7 @@ display: inline-flex;
   font-size: 11px;
 }
 
-
 /* === CONSTRUCTION TERMINAL === */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .build-submit-button {
   width: 100%;
@@ -2612,7 +2495,6 @@ display: inline-flex;
   cursor: not-allowed;
 }
 
-
 /* === ACTION STATES === */
 
 .turn-actions {
@@ -2625,14 +2507,6 @@ display: inline-flex;
 .turn-actions button {
   min-width: 110px;
 }
-
-
-
-
-
-
-
-
 
 .inline-action-error {
   margin: 8px 0 0;
@@ -2655,10 +2529,15 @@ display: inline-flex;
 
 .archont-turn-actions button {
   min-height: 38px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 34%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 34%, transparent);
   border-radius: 10px;
   color: #fff;
-  background: linear-gradient(135deg, var(--player-color-deep, #24194a), rgba(24, 15, 36, 0.9));
+  background: linear-gradient(
+    135deg,
+    var(--player-color-deep, #24194a),
+    rgba(24, 15, 36, 0.9)
+  );
 }
 
 .archont-turn-actions button.secondary {
@@ -2666,7 +2545,6 @@ display: inline-flex;
   color: rgba(235, 227, 245, 0.72);
   background: rgba(255, 255, 255, 0.035);
 }
-
 
 /* === OTHER ACTIVE STYLES === */
 
@@ -2694,8 +2572,6 @@ display: inline-flex;
   min-height: 100vh;
 }
 
-
-
 .simulation-sidebar {
   background: #181c2f;
   border: 1px solid #2b3150;
@@ -2703,13 +2579,9 @@ display: inline-flex;
   padding: 16px;
 }
 
-
-
 .simulation-sidebar h2 {
   margin-top: 0;
 }
-
-
 
 .map-header {
   display: flex;
@@ -2855,11 +2727,18 @@ display: inline-flex;
   display: grid;
   place-items: center;
   color: #fff;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
-  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.2), transparent 34%),
-      var(--player-color-deep, #24194a);
-  box-shadow: 0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
+  background:
+    radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.2),
+      transparent 34%
+    ),
+    var(--player-color-deep, #24194a);
+  box-shadow:
+    0 0 22px var(--player-color-glow, rgba(155, 124, 255, 0.28)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   font-weight: 900;
   letter-spacing: 0.04em;
   grid-area: emblem;
@@ -2920,7 +2799,8 @@ display: inline-flex;
   width: 38px;
   height: 38px;
   transform: translate(-50%, -50%);
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 60%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 60%, transparent);
   border-radius: 50%;
   opacity: 0.72;
 }
@@ -2929,7 +2809,8 @@ display: inline-flex;
   content: "";
   position: absolute;
   inset: 5px -4px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 34%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 34%, transparent);
   border-radius: 50%;
   transform: rotate(48deg);
 }
@@ -2938,7 +2819,8 @@ display: inline-flex;
   content: "";
   position: absolute;
   inset: 5px -4px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9aa4bb) 34%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 34%, transparent);
   border-radius: 50%;
   transform: rotate(-48deg);
 }
@@ -2952,15 +2834,21 @@ display: inline-flex;
   height: 27px;
   border-radius: 50%;
   color: #fff;
-  background: radial-gradient(circle at 35% 30%, #ffffff, var(--player-color, #9aa4bb) 35%, var(--player-color-deep, #222938) 82%);
-  box-shadow: 0 0 12px var(--player-color-glow, rgba(154, 164, 187, 0.42)),
-      inset -4px -4px 8px rgba(0, 0, 0, 0.35);
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ffffff,
+    var(--player-color, #9aa4bb) 35%,
+    var(--player-color-deep, #222938) 82%
+  );
+  box-shadow:
+    0 0 12px var(--player-color-glow, rgba(154, 164, 187, 0.42)),
+    inset -4px -4px 8px rgba(0, 0, 0, 0.35);
   font-size: 0.52rem;
   font-weight: 900;
 }
 
 .archont-system-content {
-display: grid;
+  display: grid;
   gap: 2px;
   min-width: 0;
 }
@@ -2971,7 +2859,8 @@ display: grid;
   justify-content: center;
   min-height: 22px;
   padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 32%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 32%, transparent);
   border-radius: 999px;
   color: var(--player-color, #9b7cff);
   background: var(--player-color-soft, rgba(155, 124, 255, 0.08));
@@ -2979,8 +2868,6 @@ display: grid;
   letter-spacing: 0.08em;
   font-size: 0.46rem;
 }
-
-
 
 /* === SMALL ACTIVE UTILITIES === */
 .setup-actions {
@@ -3017,15 +2904,9 @@ display: grid;
   color: rgba(255, 190, 199, 0.96);
 }
 
-
-
 /* === RESPONSIVE === */
 
 @media (max-width: 1320px) {
-  
-
-  
-
   .archont-session-command-deck {
     grid-template-columns: 1fr 1.3fr;
   }
@@ -3033,18 +2914,9 @@ display: grid;
   .archont-active-commander {
     grid-column: 1 / -1;
   }
-
-  
-
 }
 
 @media (max-width: 1200px) {
-  
-
-  
-
-  
-
   .compact-system-title {
     font-size: 9px;
   }
@@ -3060,16 +2932,12 @@ display: grid;
   .compact-system-type-badge {
     font-size: 6.5px;
   }
-
 }
 
 @media (max-width: 1100px) {
   .galaxy-map {
     min-height: 520px;
   }
-
-  
-
 }
 
 @media (max-width: 980px) {
@@ -3082,12 +2950,6 @@ display: grid;
     display: none;
   }
 
-  
-
-  
-
-  
-
   .archont-session-command-deck {
     grid-template-columns: 1fr;
     margin-inline: 14px;
@@ -3096,9 +2958,6 @@ display: grid;
   .archont-active-commander {
     grid-column: auto;
   }
-
-  
-
 }
 
 @media (max-width: 900px) {
@@ -3147,7 +3006,6 @@ display: grid;
   .turn-actions button {
     flex: 1;
   }
-
 }
 
 @media (max-width: 768px) {
@@ -3189,7 +3047,6 @@ display: grid;
   .systems-grid {
     grid-template-columns: 1fr;
   }
-
 }
 
 @media (max-width: 720px) {
@@ -3211,12 +3068,9 @@ display: grid;
   .fleet-command-result-title em {
     text-align: left;
   }
-
 }
 
 @media (max-width: 680px) {
-  
-
   .archont-gameplay-shell .archont-corridor .corridor-track {
     stroke-width: 7px;
   }
@@ -3233,14 +3087,6 @@ display: grid;
     width: 100%;
   }
 
-  
-
-  
-
-  
-
-  
-
   .archont-command-stats {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -3255,16 +3101,15 @@ display: grid;
 
   .archont-active-commander {
     grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: "emblem copy"
-          "cp cp"
-          "actions actions";
+    grid-template-areas:
+      "emblem copy"
+      "cp cp"
+      "actions actions";
   }
 
   .archont-cp-display {
     align-items: flex-start;
   }
-
-  
 
   .archont-system-overview-header {
     align-items: flex-start;
@@ -3275,7 +3120,6 @@ display: grid;
     width: 100%;
     grid-template-columns: repeat(4, 1fr);
   }
-
 }
 
 @media (max-width: 620px) {
@@ -3290,7 +3134,6 @@ display: grid;
   .fleet-transfer-capacity span:last-child {
     text-align: left;
   }
-
 }
 
 @media (max-width: 560px) {
@@ -3305,7 +3148,6 @@ display: grid;
   .fleet-command-step-number {
     display: none;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3316,7 +3158,6 @@ display: grid;
   .archont-gameplay-shell .archont-corridor-wraparound .corridor-core {
     animation: none;
   }
-
 }
 
 /* ==========================================================================
@@ -3358,8 +3199,11 @@ display: grid;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 16px;
-  background:
-    linear-gradient(160deg, rgba(24, 17, 35, 0.94), rgba(8, 7, 13, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(24, 17, 35, 0.94),
+    rgba(8, 7, 13, 0.96)
+  );
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.26),
     inset 0 0 0 1px rgba(255, 255, 255, 0.025);
@@ -3387,7 +3231,7 @@ display: grid;
 
 .archont-gameplay-shell .compact-players-list,
 .compact-players-list {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
   gap: 10px;
   width: 100%;
@@ -3396,7 +3240,7 @@ display: grid;
 
 .compact-player-card,
 .archont-player-card {
-position: relative;
+  position: relative;
   display: grid;
   grid-template-rows: auto auto auto auto auto;
   gap: 8px;
@@ -3410,10 +3254,17 @@ position: relative;
   border-radius: 14px;
   color: rgba(244, 238, 250, 0.9);
   background:
-    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.11)), transparent 54%),
+    linear-gradient(
+      135deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.11)),
+      transparent 54%
+    ),
     rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .archont-player-card:hover {
@@ -3426,11 +3277,7 @@ position: relative;
 }
 
 .archont-player-card.selected {
-  border-color: color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 78%,
-    white 5%
-  );
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 78%, white 5%);
   background:
     linear-gradient(
       135deg,
@@ -3460,7 +3307,7 @@ position: relative;
 
 .compact-player-header,
 .archont-player-header {
-display: grid;
+  display: grid;
   grid-template-columns: 36px minmax(0, 1fr) auto;
   gap: 9px;
   align-items: center;
@@ -3468,15 +3315,20 @@ display: grid;
 }
 
 .archont-player-emblem {
-display: grid;
+  display: grid;
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 72%, white 10%);
   border-radius: 10px;
   color: #fff;
   background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), transparent 34%),
+    radial-gradient(
+      circle at 35% 25%,
+      rgba(255, 255, 255, 0.22),
+      transparent 34%
+    ),
     var(--player-color-deep, #24194a);
   box-shadow: 0 0 16px var(--player-color-glow, rgba(155, 124, 255, 0.24));
   font-size: 0.78rem;
@@ -3491,14 +3343,14 @@ display: grid;
 
 .archont-player-identity strong,
 .archont-player-identity small {
-margin-top: 2px;
+  margin-top: 2px;
   color: rgba(223, 212, 234, 0.64);
   font-size: 0.68rem;
   line-height: 1.2;
 }
 
 .archont-player-identity strong {
-color: #fff;
+  color: #fff;
   font-size: 0.88rem;
   line-height: 1.15;
 }
@@ -3509,12 +3361,13 @@ color: #fff;
 }
 
 .archont-player-state-badge {
-display: inline-flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 22px;
   padding: 0 7px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 38%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 38%, transparent);
   border-radius: 999px;
   color: var(--player-color, #9b7cff);
   background: var(--player-color-soft, rgba(155, 124, 255, 0.1));
@@ -3559,19 +3412,23 @@ display: inline-flex;
   min-height: 34px;
   padding: 5px 7px 5px 5px;
   box-sizing: border-box;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 38%,
-    rgba(255, 255, 255, 0.06)
-  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 38%,
+      rgba(255, 255, 255, 0.06)
+    );
   border-radius: 10px;
   color: var(--player-color, #9b7cff);
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.18)) 72%, transparent),
-      rgba(0, 0, 0, 0.12)
-    );
+  background: linear-gradient(
+    135deg,
+    color-mix(
+      in srgb,
+      var(--player-color-soft, rgba(155, 124, 255, 0.18)) 72%,
+      transparent
+    ),
+    rgba(0, 0, 0, 0.12)
+  );
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
 }
 
@@ -3581,11 +3438,12 @@ display: inline-flex;
   width: 25px;
   height: 25px;
   place-items: center;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 58%,
-    rgba(255, 255, 255, 0.12)
-  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 58%,
+      rgba(255, 255, 255, 0.12)
+    );
   border-radius: 8px;
   color: #fff;
   background: var(--player-color-deep, #24194a);
@@ -3643,14 +3501,14 @@ display: inline-flex;
 }
 
 .archont-player-operational-row {
-display: grid;
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 5px;
   margin: 0;
 }
 
 .archont-player-operational-row > span {
-display: grid;
+  display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 5px;
@@ -3661,7 +3519,7 @@ display: grid;
 }
 
 .archont-player-operational-row small {
-overflow: hidden;
+  overflow: hidden;
   color: rgba(218, 207, 231, 0.54);
   font-size: 0.56rem;
   letter-spacing: 0.04em;
@@ -3671,12 +3529,12 @@ overflow: hidden;
 }
 
 .archont-player-operational-row strong {
-color: rgba(250, 247, 255, 0.92);
+  color: rgba(250, 247, 255, 0.92);
   font-size: 0.72rem;
 }
 
 .archont-player-cp-row {
-display: flex;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -3787,8 +3645,11 @@ display: flex;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 16px;
-  background:
-    linear-gradient(160deg, rgba(24, 17, 35, 0.93), rgba(8, 7, 13, 0.96));
+  background: linear-gradient(
+    160deg,
+    rgba(24, 17, 35, 0.93),
+    rgba(8, 7, 13, 0.96)
+  );
   box-shadow:
     0 22px 56px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(255, 255, 255, 0.025);
@@ -3817,7 +3678,7 @@ display: flex;
 }
 
 .enhanced-galaxy-map {
-position: relative;
+  position: relative;
   min-height: clamp(660px, 74vh, 880px);
   width: 100%;
   overflow: hidden;
@@ -3827,14 +3688,45 @@ position: relative;
   border-radius: 16px;
   background-color: #070914;
   background-image:
-    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.92) 0 1px, transparent 1.6px),
-    radial-gradient(circle at 67% 23%, rgba(183, 220, 255, 0.78) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 84% 71%, rgba(255, 225, 174, 0.72) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 31% 79%, rgba(222, 191, 255, 0.7) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 50% 50%, rgba(123, 44, 255, 0.15), transparent 54%),
-    radial-gradient(circle at 16% 34%, rgba(61, 169, 255, 0.1), transparent 30%),
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(255, 255, 255, 0.92) 0 1px,
+      transparent 1.6px
+    ),
+    radial-gradient(
+      circle at 67% 23%,
+      rgba(183, 220, 255, 0.78) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 84% 71%,
+      rgba(255, 225, 174, 0.72) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 31% 79%,
+      rgba(222, 191, 255, 0.7) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(123, 44, 255, 0.15),
+      transparent 54%
+    ),
+    radial-gradient(
+      circle at 16% 34%,
+      rgba(61, 169, 255, 0.1),
+      transparent 30%
+    ),
     linear-gradient(145deg, #060811 0%, #0d1020 46%, #080713 100%);
-  background-size: 137px 137px, 193px 193px, 251px 251px, 317px 317px, auto, auto, auto;
+  background-size:
+    137px 137px,
+    193px 193px,
+    251px 251px,
+    317px 317px,
+    auto,
+    auto,
+    auto;
 }
 
 .compact-map-system-node,
@@ -3859,11 +3751,12 @@ position: relative;
   box-sizing: border-box;
   text-align: left;
   white-space: normal;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9aa4bb) 62%,
-    rgba(255, 255, 255, 0.16)
-  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9aa4bb) 62%,
+      rgba(255, 255, 255, 0.16)
+    );
   border-radius: 11px;
   color: #fff;
   background:
@@ -3883,17 +3776,9 @@ position: relative;
 .archont-system-node:hover {
   z-index: 10;
   transform: translate(-50%, -50%);
-  border-color: color-mix(
-    in srgb,
-    var(--player-color, #9aa4bb) 82%,
-    white 12%
-  );
+  border-color: color-mix(in srgb, var(--player-color, #9aa4bb) 82%, white 12%);
   box-shadow:
-    0 0 0 1px color-mix(
-      in srgb,
-      var(--player-color, #9aa4bb) 44%,
-      transparent
-    ),
+    0 0 0 1px color-mix(in srgb, var(--player-color, #9aa4bb) 44%, transparent),
     0 9px 22px rgba(0, 0, 0, 0.38);
 }
 
@@ -3929,11 +3814,8 @@ position: relative;
   height: 22px;
   place-items: center;
   align-self: center;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9aa4bb) 66%,
-    white 8%
-  );
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9aa4bb) 66%, white 8%);
   border-radius: 7px;
   color: #fff;
   background: var(--player-color-deep, #222938);
@@ -4025,9 +3907,11 @@ position: relative;
 
 .archont-gameplay-shell .build-sidebar,
 .archont-construction-ribbon {
-grid-area: auto;
+  grid-area: auto;
   display: grid;
-  grid-template-columns: auto minmax(245px, 290px) minmax(0, 1fr) minmax(180px, 230px) 124px;
+  grid-template-columns:
+    auto minmax(245px, 290px) minmax(0, 1fr) minmax(180px, 230px)
+    124px;
   grid-template-areas: "title actor buildings system submit";
   gap: 10px;
   align-items: stretch;
@@ -4038,11 +3922,15 @@ grid-area: auto;
   box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(24, 17, 35, 0.95), rgba(8, 7, 13, 0.98));
+  background: linear-gradient(
+    160deg,
+    rgba(24, 17, 35, 0.95),
+    rgba(8, 7, 13, 0.98)
+  );
 }
 
 .archont-gameplay-shell .build-sidebar > h2 {
-grid-area: title;
+  grid-area: title;
   align-self: center;
   margin: 0;
   color: rgba(245, 239, 252, 0.78);
@@ -4055,16 +3943,21 @@ grid-area: title;
 }
 
 .acting-player-card {
-grid-area: actor;
+  grid-area: actor;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 3px;
   min-width: 0;
   padding: 9px 11px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 30%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 30%, transparent);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 58%, rgba(0, 0, 0, 0.16));
+  background: color-mix(
+    in srgb,
+    var(--player-color-soft, rgba(155, 124, 255, 0.12)) 58%,
+    rgba(0, 0, 0, 0.16)
+  );
 }
 
 .acting-player-card span {
@@ -4248,7 +4141,10 @@ grid-area: actor;
 
   .archont-gameplay-shell .build-sidebar,
   .archont-construction-ribbon {
-    grid-template-columns: auto minmax(230px, 280px) minmax(0, 1fr) minmax(170px, 210px);
+    grid-template-columns: auto minmax(230px, 280px) minmax(0, 1fr) minmax(
+        170px,
+        210px
+      );
     grid-template-areas:
       "title actor system submit"
       "buildings buildings buildings buildings";
@@ -4330,7 +4226,6 @@ grid-area: actor;
   }
 }
 
-
 /* Board polish v2 responsive refinements */
 @media (max-width: 1420px) {
   .archont-gameplay-shell .compact-players-list,
@@ -4374,7 +4269,6 @@ grid-area: actor;
     transform: none;
   }
 }
-
 
 /* Unified faction-coloured resource infographic */
 @media (max-width: 1420px) {
@@ -4424,7 +4318,11 @@ grid-area: actor;
 .archont-gameplay-shell .fleet-command-center,
 .archont-gameplay-shell .fleet-command-results,
 .archont-gameplay-shell .system-overview-panel {
-  border-color: color-mix(in srgb, var(--archont-accent) 24%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(
+    in srgb,
+    var(--archont-accent) 24%,
+    rgba(255, 255, 255, 0.08)
+  );
   box-shadow:
     0 18px 46px rgba(0, 0, 0, 0.25),
     0 0 34px color-mix(in srgb, var(--archont-accent-glow) 30%, transparent),
@@ -4446,14 +4344,22 @@ grid-area: actor;
 .archont-gameplay-shell .fleet-command-summary,
 .archont-gameplay-shell .fleet-transfer-workspace,
 .archont-gameplay-shell .fleet-route-preview {
-  border-color: color-mix(in srgb, var(--archont-accent) 28%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(
+    in srgb,
+    var(--archont-accent) 28%,
+    rgba(255, 255, 255, 0.08)
+  );
 }
 
 .archont-gameplay-shell .archont-sync-button:hover:not(:disabled),
 .archont-gameplay-shell .fleet-command-add-button:hover:not(:disabled),
 .archont-gameplay-shell .fleet-command-prepare-button:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--archont-accent) 72%, white 8%);
-  background: color-mix(in srgb, var(--archont-accent-soft) 68%, rgba(10, 8, 16, 0.94));
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 68%,
+    rgba(10, 8, 16, 0.94)
+  );
 }
 
 .archont-gameplay-shell .fleet-command-step-number,
@@ -4467,7 +4373,11 @@ grid-area: actor;
 .archont-gameplay-shell .fleet-command-step-number,
 .archont-gameplay-shell .fleet-command-cost,
 .archont-gameplay-shell .acting-player-card {
-  background: color-mix(in srgb, var(--archont-accent-soft) 70%, rgba(0, 0, 0, 0.18));
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 70%,
+    rgba(0, 0, 0, 0.18)
+  );
 }
 
 .archont-gameplay-shell .fleet-command-execute-button,
@@ -4478,7 +4388,8 @@ grid-area: actor;
     color-mix(in srgb, var(--archont-accent) 86%, white 4%),
     color-mix(in srgb, var(--archont-accent-deep) 88%, black 12%)
   );
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--archont-accent-glow) 42%, transparent);
+  box-shadow: 0 10px 24px
+    color-mix(in srgb, var(--archont-accent-glow) 42%, transparent);
 }
 
 .archont-gameplay-shell .fleet-command-execute-button:hover:not(:disabled),
@@ -4495,16 +4406,28 @@ grid-area: actor;
 .archont-gameplay-shell .fleet-transfer-unit-card-reverse,
 .archont-gameplay-shell .fleet-transfer-move-option-selected {
   border-color: color-mix(in srgb, var(--archont-accent) 72%, white 8%);
-  background: color-mix(in srgb, var(--archont-accent-soft) 72%, rgba(0, 0, 0, 0.16));
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 72%,
+    rgba(0, 0, 0, 0.16)
+  );
 }
 
 .archont-gameplay-shell .building-icon,
 .archont-gameplay-shell .fleet-unit-strip span,
 .archont-gameplay-shell .turn-command-points,
 .archont-gameplay-shell .archont-mini-cp-pips i.active {
-  border-color: color-mix(in srgb, var(--archont-accent) 48%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(
+    in srgb,
+    var(--archont-accent) 48%,
+    rgba(255, 255, 255, 0.08)
+  );
   color: color-mix(in srgb, var(--archont-accent) 72%, white 28%);
-  background: color-mix(in srgb, var(--archont-accent-soft) 72%, rgba(0, 0, 0, 0.14));
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 72%,
+    rgba(0, 0, 0, 0.14)
+  );
 }
 
 /* Resource language is always MAT / ENG / SUP / DAT. */
@@ -4591,12 +4514,20 @@ grid-area: actor;
 .archont-player-card .archont-resource-badge,
 .archont-player-card .archont-player-operational-row > span,
 .archont-player-card .compact-fleet-row {
-  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 24%, rgba(255, 255, 255, 0.06));
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 24%,
+    rgba(255, 255, 255, 0.06)
+  );
 }
 
 .archont-player-card .archont-player-operational-row > span,
 .archont-player-card .compact-fleet-row {
-  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 42%, rgba(0, 0, 0, 0.18));
+  background: color-mix(
+    in srgb,
+    var(--player-color-soft, rgba(155, 124, 255, 0.12)) 42%,
+    rgba(0, 0, 0, 0.18)
+  );
 }
 
 @media (max-width: 760px) {
@@ -4605,7 +4536,6 @@ grid-area: actor;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 /* =========================================================
    Resource vertical alignment + building overview infographic
@@ -4665,11 +4595,7 @@ grid-area: actor;
 
 .system-overview-block .overview-card:hover,
 .system-overview-block .overview-card.selected {
-  border-color: color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 74%,
-    white 8%
-  );
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 74%, white 8%);
   background:
     linear-gradient(
       135deg,
@@ -4696,15 +4622,20 @@ grid-area: actor;
   width: 38px;
   height: 38px;
   place-items: center;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 58%,
-    rgba(255, 255, 255, 0.12)
-  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 58%,
+      rgba(255, 255, 255, 0.12)
+    );
   border-radius: 11px;
   color: #fff;
   background:
-    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.18), transparent 36%),
+    radial-gradient(
+      circle at 35% 24%,
+      rgba(255, 255, 255, 0.18),
+      transparent 36%
+    ),
     var(--player-color-deep, #24194a);
   box-shadow:
     0 0 16px var(--player-color-glow, rgba(155, 124, 255, 0.22)),
@@ -4728,11 +4659,7 @@ grid-area: actor;
 
 .overview-structure-copy small,
 .overview-income-caption {
-  color: color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 68%,
-    white 32%
-  );
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 68%, white 32%);
   font-size: 0.56rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -4747,11 +4674,12 @@ grid-area: actor;
   min-width: 34px;
   min-height: 28px;
   padding: 0 8px;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 38%,
-    rgba(255, 255, 255, 0.08)
-  );
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 38%,
+      rgba(255, 255, 255, 0.08)
+    );
   border-radius: 999px;
   color: #fff;
   background: color-mix(
@@ -4770,11 +4698,12 @@ grid-area: actor;
   gap: 10px;
   align-items: center;
   padding-top: 9px;
-  border-top: 1px solid color-mix(
-    in srgb,
-    var(--player-color, #9b7cff) 18%,
-    rgba(255, 255, 255, 0.06)
-  );
+  border-top: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 18%,
+      rgba(255, 255, 255, 0.06)
+    );
 }
 
 .overview-resource-income-row {
@@ -4821,10 +4750,19 @@ grid-area: actor;
   gap: 14px;
   margin: 18px 0;
   padding: 16px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 28%, rgba(255, 255, 255, 0.08));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 28%,
+      rgba(255, 255, 255, 0.08)
+    );
   border-radius: 16px;
   background:
-    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.1)), transparent 44%),
+    linear-gradient(
+      135deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.1)),
+      transparent 44%
+    ),
     rgba(8, 6, 14, 0.72);
 }
 
@@ -4870,7 +4808,12 @@ grid-area: actor;
   align-items: center;
   min-width: 0;
   padding: 11px;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 22%, rgba(255, 255, 255, 0.08));
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--player-color, #9b7cff) 22%,
+      rgba(255, 255, 255, 0.08)
+    );
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.035);
 }
@@ -4890,7 +4833,8 @@ grid-area: actor;
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
   border-radius: 10px;
   color: var(--player-color, #c895ff);
   background: var(--player-color-soft, rgba(155, 124, 255, 0.1));
@@ -4956,4 +4900,2641 @@ grid-area: actor;
   .system-building-capacity-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ========================================================================== 
+   GLOBAL PLAYER COMMAND WORKSPACE
+   Three tabs below the galaxy map: Systems, Buildings and Fleets.
+   ========================================================================== */
+
+.archont-workspace-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 7px;
+  border: 1px solid
+    color-mix(in srgb, var(--archont-accent) 24%, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  background: rgba(6, 5, 12, 0.88);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-workspace-tabs > button {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 60px;
+  padding: 9px 13px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: rgba(231, 222, 242, 0.62);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.archont-workspace-tabs > button:hover {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--archont-accent) 34%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 42%,
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.archont-workspace-tabs > button.active {
+  color: #fff;
+  border-color: color-mix(in srgb, var(--archont-accent) 72%, white 8%);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--archont-accent-soft) 82%, transparent),
+    rgba(255, 255, 255, 0.025)
+  );
+  box-shadow:
+    0 0 24px color-mix(in srgb, var(--archont-accent-glow) 42%, transparent),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-workspace-tab-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--archont-accent) 42%, transparent);
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--archont-accent) 76%, white 24%);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 62%,
+    rgba(0, 0, 0, 0.2)
+  );
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.archont-workspace-tabs > button > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.archont-workspace-tabs strong {
+  color: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.archont-workspace-tabs small {
+  overflow: hidden;
+  color: rgba(216, 205, 228, 0.46);
+  font-size: 0.63rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-workspace-panel {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid
+    color-mix(in srgb, var(--archont-accent) 24%, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--archont-accent-soft) 32%, transparent),
+      transparent 34%
+    ),
+    rgba(8, 6, 14, 0.93);
+  box-shadow:
+    0 22px 52px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.archont-workspace-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.archont-workspace-heading h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.08rem;
+}
+
+.archont-workspace-heading p {
+  max-width: 760px;
+  margin: 5px 0 0;
+  color: rgba(219, 208, 232, 0.56);
+  font-size: 0.72rem;
+  line-height: 1.48;
+}
+
+.archont-empty-workspace-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: rgba(222, 212, 234, 0.52);
+  background: rgba(255, 255, 255, 0.025);
+  text-align: center;
+  font-size: 0.72rem;
+}
+
+/* Systems tab */
+
+.archont-controlled-system-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 10px;
+}
+
+.archont-controlled-system-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-areas:
+    "mark copy"
+    "metrics metrics";
+  gap: 10px 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.035);
+  text-align: left;
+  cursor: pointer;
+}
+
+.archont-controlled-system-card:hover,
+.archont-controlled-system-card.selected {
+  border-color: color-mix(in srgb, var(--archont-accent) 70%, white 6%);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 64%,
+    rgba(255, 255, 255, 0.025)
+  );
+}
+
+.archont-controlled-system-card.selected {
+  box-shadow: 0 0 22px
+    color-mix(in srgb, var(--archont-accent-glow) 36%, transparent);
+}
+
+.archont-controlled-system-mark {
+  grid-area: mark;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--archont-accent) 54%, transparent);
+  border-radius: 12px;
+  color: #fff;
+  background: var(--archont-accent-deep);
+  font-size: 1rem;
+}
+
+.archont-controlled-system-copy {
+  grid-area: copy;
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 2px;
+}
+
+.archont-controlled-system-copy small {
+  color: color-mix(in srgb, var(--archont-accent) 70%, white 20%);
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+}
+
+.archont-controlled-system-copy strong {
+  overflow-wrap: anywhere;
+  font-size: 0.83rem;
+  line-height: 1.2;
+}
+
+.archont-controlled-system-copy em {
+  overflow: hidden;
+  color: rgba(221, 211, 232, 0.48);
+  font-size: 0.61rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-controlled-system-metrics {
+  grid-area: metrics;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-controlled-system-metrics > span {
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.archont-controlled-system-metrics > span:last-child {
+  border-right: 0;
+}
+.archont-controlled-system-metrics small {
+  color: rgba(214, 203, 226, 0.42);
+  font-size: 0.49rem;
+  letter-spacing: 0.06em;
+}
+.archont-controlled-system-metrics strong {
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.archont-systems-workspace .system-overview-panel {
+  margin: 0;
+}
+
+/* Buildings tab */
+
+.archont-building-inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 10px;
+}
+
+.archont-building-system-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.archont-building-system-card:hover,
+.archont-building-system-card.selected {
+  border-color: color-mix(in srgb, var(--archont-accent) 62%, white 6%);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 54%,
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.archont-building-system-card > header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+}
+
+.archont-building-system-emblem {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--archont-accent) 44%, transparent);
+  border-radius: 9px;
+  color: #fff;
+  background: var(--archont-accent-deep);
+}
+
+.archont-building-system-card > header > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.archont-building-system-card header strong {
+  overflow-wrap: anywhere;
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.archont-building-system-card header small {
+  color: rgba(218, 207, 230, 0.45);
+  font-size: 0.6rem;
+}
+
+.archont-building-inventory-list {
+  display: grid;
+  gap: 6px;
+}
+
+.archont-building-inventory-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.archont-building-inventory-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--archont-accent) 72%, white 28%);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 64%,
+    rgba(0, 0, 0, 0.2)
+  );
+  font-size: 0.78rem;
+}
+
+.archont-building-inventory-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.archont-building-inventory-copy strong {
+  overflow: hidden;
+  color: rgba(245, 239, 252, 0.88);
+  font-size: 0.67rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-building-inventory-copy small {
+  color: var(--archont-accent);
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+.archont-building-inventory-yield {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.archont-building-inventory-yield > small {
+  color: rgba(212, 201, 224, 0.38);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.archont-buildings-workspace .archont-construction-ribbon {
+  margin: 0;
+  border-color: color-mix(
+    in srgb,
+    var(--archont-accent) 26%,
+    rgba(255, 255, 255, 0.08)
+  );
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow: none;
+}
+
+/* Fleets tab */
+
+.archont-fleet-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.archont-fleet-slot-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  min-height: 168px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
+  text-align: left;
+}
+
+button.archont-fleet-slot-card {
+  cursor: pointer;
+}
+
+button.archont-fleet-slot-card:hover,
+.archont-fleet-slot-card.selected {
+  border-color: color-mix(in srgb, var(--archont-accent) 70%, white 6%);
+  background: color-mix(
+    in srgb,
+    var(--archont-accent-soft) 58%,
+    rgba(255, 255, 255, 0.02)
+  );
+}
+
+.archont-fleet-slot-card.selected {
+  box-shadow: 0 0 24px
+    color-mix(in srgb, var(--archont-accent-glow) 38%, transparent);
+}
+
+.archont-fleet-slot-card.acted {
+  opacity: 0.62;
+}
+.archont-fleet-slot-card.defensive {
+  box-shadow: inset 0 0 0 1px rgba(92, 190, 255, 0.26);
+}
+
+.archont-fleet-slot-index {
+  color: color-mix(in srgb, var(--archont-accent) 70%, white 20%);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.archont-fleet-slot-card > header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.archont-fleet-slot-card > header > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.archont-fleet-slot-card header strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-fleet-slot-card header small {
+  overflow: hidden;
+  color: rgba(218, 207, 230, 0.46);
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-fleet-slot-card header b {
+  color: var(--archont-accent);
+  font-size: 0.55rem;
+  font-weight: 900;
+}
+
+.archont-fleet-slot-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-fleet-slot-metrics > span {
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+.archont-fleet-slot-metrics > span:last-child {
+  border-right: 0;
+}
+.archont-fleet-slot-metrics small {
+  color: rgba(213, 202, 225, 0.4);
+  font-size: 0.48rem;
+}
+.archont-fleet-slot-metrics strong {
+  font-size: 0.72rem;
+}
+
+.archont-fleet-slot-units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.archont-fleet-slot-units > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 25px;
+  padding: 4px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 0.72rem;
+}
+
+.archont-fleet-slot-units small {
+  color: rgba(218, 207, 230, 0.48);
+  font-size: 0.48rem;
+}
+
+.archont-fleet-slot-card.empty {
+  place-content: center;
+  justify-items: center;
+  border-style: dashed;
+  color: rgba(220, 210, 232, 0.42);
+  text-align: center;
+}
+
+.archont-fleet-slot-empty-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px dashed color-mix(in srgb, var(--archont-accent) 44%, transparent);
+  border-radius: 50%;
+  color: var(--archont-accent);
+  font-size: 1.1rem;
+}
+
+.archont-fleet-slot-card.empty strong {
+  color: rgba(234, 226, 243, 0.62);
+  font-size: 0.7rem;
+}
+
+.archont-fleet-slot-card.empty small {
+  max-width: 210px;
+  font-size: 0.58rem;
+  line-height: 1.4;
+}
+
+.archont-fleets-workspace .fleet-command-center {
+  margin: 0;
+}
+
+@media (max-width: 1180px) {
+  .archont-fleet-slot-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .archont-building-inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 840px) {
+  .archont-workspace-tabs {
+    grid-template-columns: 1fr;
+  }
+  .archont-workspace-tabs > button {
+    min-height: 52px;
+  }
+  .archont-controlled-system-grid,
+  .archont-building-inventory-grid,
+  .archont-fleet-slot-grid {
+    grid-template-columns: 1fr;
+  }
+  .archont-workspace-panel {
+    padding: 11px;
+  }
+}
+
+button.archont-fleet-slot-card:disabled {
+  cursor: not-allowed;
+}
+
+button.archont-fleet-slot-card:disabled:hover {
+  border-color: rgba(255, 255, 255, 0.085);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Transfer → Move */
+.fleet-transfer-continuing-selector {
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 42%,
+    rgba(255, 255, 255, 0.08)
+  );
+  background:
+    linear-gradient(
+      145deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.1)),
+      rgba(255, 255, 255, 0.025)
+    );
+}
+
+.fleet-transfer-continuing-selector .fleet-transfer-move-option {
+  min-height: 78px;
+}
+
+.fleet-transfer-continuing-selector
+  .fleet-transfer-move-option-selected {
+  border-color: var(--player-color, #9b7cff);
+  box-shadow:
+    0 0 0 1px var(--player-color-soft, rgba(155, 124, 255, 0.16)),
+    0 10px 24px var(--player-color-glow, rgba(155, 124, 255, 0.12));
+}
+
+/* =========================================================
+   Split → Move v1
+   One source fleet creates exactly one new fleet slot.
+   ========================================================= */
+
+.fleet-split-workspace {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 38%, transparent);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.16)) 82%, transparent),
+      rgba(5, 4, 10, 0.42)
+    );
+}
+
+.fleet-split-status-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.fleet-split-status-grid article {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fleet-split-status-grid small {
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 78%, white 10%);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.fleet-split-status-grid strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fleet-split-status-grid article > span {
+  color: rgba(244, 243, 236, 0.68);
+  font-size: 12px;
+}
+
+.fleet-split-arrow {
+  display: grid;
+  min-width: 42px;
+  place-items: center;
+  color: var(--player-color, #9b7cff);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.fleet-split-unit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 8px;
+}
+
+.fleet-split-movement-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fleet-split-preview {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
+  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.16)) 68%, transparent);
+}
+
+.fleet-split-report {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 36%, transparent);
+}
+
+@media (max-width: 900px) {
+  .fleet-split-status-grid,
+  .fleet-split-movement-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-split-arrow {
+    min-height: 28px;
+    transform: rotate(90deg);
+  }
+}
+
+/* =========================================================
+   Defence + Attack + Combat MVP
+   ========================================================= */
+
+.fleet-command-attack-target {
+  align-items: start;
+}
+
+.fleet-command-ambush-warning {
+  grid-column: 2;
+  display: block;
+  margin-top: 6px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 109, 141, 0.34);
+  border-radius: 10px;
+  color: #ffd7e1;
+  background: rgba(255, 66, 111, 0.08);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.fleet-combat-report {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 38%,
+    rgba(255, 255, 255, 0.08)
+  );
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--player-color-soft, rgba(155, 124, 255, 0.14)) 64%,
+        transparent
+      ),
+      rgba(5, 4, 10, 0.54)
+    );
+}
+
+.fleet-combat-report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fleet-combat-report-header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.fleet-combat-report-header small {
+  color: color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 78%,
+    white 12%
+  );
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.fleet-combat-report-header strong {
+  color: #fff;
+  font-size: 16px;
+}
+
+.fleet-combat-report-header > span {
+  color: rgba(244, 243, 236, 0.66);
+  font-size: 12px;
+  text-align: right;
+}
+
+.fleet-combat-ambush {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border-left: 3px solid #ff6d8d;
+  border-radius: 10px;
+  background: rgba(255, 66, 111, 0.07);
+}
+
+.fleet-combat-ambush strong {
+  color: #ffd7e1;
+}
+
+.fleet-combat-ambush span {
+  color: rgba(255, 223, 231, 0.76);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.fleet-combat-rounds {
+  display: grid;
+  gap: 9px;
+}
+
+.fleet-combat-rounds article {
+  display: grid;
+  gap: 7px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fleet-combat-rounds header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fleet-combat-rounds header strong {
+  color: #fff;
+  font-size: 13px;
+}
+
+.fleet-combat-rounds header span,
+.fleet-combat-rounds p,
+.fleet-combat-rounds li {
+  color: rgba(244, 243, 236, 0.68);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.fleet-combat-rounds p,
+.fleet-combat-rounds ul {
+  margin: 0;
+}
+
+.fleet-combat-rounds ul {
+  display: grid;
+  gap: 3px;
+  padding-left: 18px;
+}
+
+.fleet-combat-report > em {
+  color: rgba(255, 216, 92, 0.9);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.combat-outcome-attacker_victory {
+  border-color: rgba(100, 230, 163, 0.46);
+}
+
+.combat-outcome-defender_victory,
+.combat-outcome-attacker_destroyed_in_transit,
+.combat-outcome-attacker_destroyed_by_ambush {
+  border-color: rgba(255, 109, 141, 0.46);
+}
+
+.combat-outcome-mutual_destruction,
+.combat-outcome-stalemate {
+  border-color: rgba(255, 207, 90, 0.42);
+}
+
+@media (max-width: 720px) {
+  .fleet-combat-report-header,
+  .fleet-combat-rounds header {
+    flex-direction: column;
+  }
+
+  .fleet-combat-report-header > span {
+    text-align: left;
+  }
+}
+
+/* =========================================================
+   Interactive danger/combat resolution modal + game logs link
+   ========================================================= */
+
+.archont-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.archont-game-logs-button {
+  text-decoration: none;
+}
+
+.archont-resolution-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 2, 8, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+.archont-resolution-modal {
+  width: min(1180px, 100%);
+  max-height: min(940px, calc(100vh - 40px));
+  overflow-y: auto;
+  padding: 24px;
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 52%, white 8%);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      var(--player-color-soft, rgba(155, 124, 255, 0.16)),
+      transparent 38%
+    ),
+    linear-gradient(160deg, rgba(24, 16, 38, 0.99), rgba(7, 5, 13, 0.99));
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.72),
+    0 0 70px var(--player-color-glow, rgba(155, 124, 255, 0.2)),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.archont-resolution-header {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.archont-resolution-header h2,
+.archont-resolution-header p {
+  margin: 0;
+}
+
+.archont-resolution-header h2 {
+  color: #fff;
+  font-size: clamp(1.55rem, 4vw, 2.2rem);
+}
+
+.archont-resolution-header p {
+  color: rgba(236, 227, 248, 0.7);
+  line-height: 1.55;
+}
+
+.archont-resolution-preview-list {
+  display: grid;
+  gap: 10px;
+}
+
+.archont-resolution-preview-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.archont-resolution-preview-card > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.archont-resolution-preview-card strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.archont-resolution-preview-card span,
+.archont-resolution-preview-card small {
+  color: rgba(236, 227, 248, 0.66);
+  line-height: 1.45;
+}
+
+.archont-danger-count {
+  display: grid;
+  min-width: 92px;
+  min-height: 72px;
+  padding: 8px;
+  place-items: center;
+  align-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  text-align: center;
+}
+
+.archont-danger-count b {
+  color: #fff;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.archont-danger-count small {
+  margin-top: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.archont-danger-count.has-danger {
+  border-color: rgba(255, 100, 126, 0.44);
+  background: rgba(255, 66, 99, 0.09);
+}
+
+.archont-danger-count.has-danger b {
+  color: #ff718d;
+}
+
+.archont-danger-count.is-safe {
+  border-color: rgba(96, 230, 172, 0.34);
+  background: rgba(69, 205, 147, 0.07);
+}
+
+.archont-danger-count.is-safe b {
+  color: #73e7b4;
+}
+
+.archont-resolution-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.archont-resolution-actions button {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-weight: 850;
+}
+
+.archont-resolution-dismiss {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  color: rgba(244, 238, 252, 0.76);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.archont-resolution-confirm {
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 76%, white 8%);
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--player-color, #9b7cff) 88%, black 8%),
+    color-mix(in srgb, var(--player-color-deep, #24194a) 86%, black 8%)
+  );
+  box-shadow: 0 10px 28px
+    var(--player-color-glow, rgba(155, 124, 255, 0.18));
+}
+
+.archont-resolution-loading {
+  display: grid;
+  min-height: 340px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.archont-resolution-loading h2,
+.archont-resolution-loading p {
+  margin: 0;
+}
+
+.archont-resolution-loading p {
+  color: rgba(236, 227, 248, 0.66);
+}
+
+.archont-resolution-spinner {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--player-color, #9b7cff);
+  border-radius: 50%;
+  animation: archont-resolution-spin 760ms linear infinite;
+}
+
+@keyframes archont-resolution-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----- Danger deck dealing table ----- */
+
+.archont-resolution-table {
+  display: grid;
+  gap: 18px;
+}
+
+.archont-resolution-table-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.archont-resolution-table-header > div {
+  display: grid;
+  gap: 5px;
+}
+
+.archont-resolution-table-header h2,
+.archont-resolution-table-header p {
+  margin: 0;
+}
+
+.archont-resolution-table-header h2 {
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.archont-resolution-table-header p {
+  max-width: 760px;
+  color: rgba(236, 227, 248, 0.68);
+  line-height: 1.5;
+}
+
+.archont-reveal-counter {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 34%, transparent);
+  border-radius: 999px;
+  color: var(--player-color, #c797ff);
+  background: var(--player-color-soft, rgba(155, 124, 255, 0.1));
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.archont-danger-deal-layout {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 10% 50%, rgba(166, 82, 255, 0.08), transparent 34%),
+    rgba(0, 0, 0, 0.2);
+}
+
+.archont-danger-deck-zone {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.archont-danger-deck-stack {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 104px;
+  aspect-ratio: 0.7;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid rgba(211, 164, 255, 0.46);
+  border-radius: 13px;
+  color: #fff;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.035) 0 6px,
+      transparent 6px 12px
+    ),
+    radial-gradient(circle, rgba(174, 76, 255, 0.24), transparent 58%),
+    #100919;
+  box-shadow:
+    -7px 7px 0 rgba(61, 31, 82, 0.9),
+    -13px 13px 0 rgba(36, 20, 48, 0.92),
+    0 18px 32px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+
+.archont-danger-deck-stack span {
+  color: rgba(225, 198, 255, 0.68);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.archont-danger-deck-stack strong {
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+}
+
+.archont-danger-deck-copy {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.archont-danger-deck-copy strong {
+  color: #fff;
+  font-size: 1.4rem;
+}
+
+.archont-danger-deck-copy span {
+  color: rgba(236, 227, 248, 0.58);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.archont-danger-card-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.archont-dealt-danger-card {
+  min-width: 0;
+  min-height: 292px;
+  perspective: 1000px;
+}
+
+.archont-dealt-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 292px;
+  transform-style: preserve-3d;
+}
+
+.archont-dealt-danger-card.is-dealing {
+  animation: archont-deal-from-deck 720ms
+    cubic-bezier(0.18, 0.78, 0.16, 1) both;
+}
+
+.archont-dealt-danger-card.is-dealing .archont-dealt-card-inner {
+  animation: archont-dealt-card-flip 920ms 260ms
+    cubic-bezier(0.2, 0.78, 0.18, 1) both;
+}
+
+.archont-dealt-danger-card.is-revealed .archont-dealt-card-inner {
+  transform: rotateY(180deg);
+}
+
+.archont-dealt-card-back,
+.archont-dealt-card-front {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.archont-dealt-card-back {
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  border: 1px solid rgba(209, 166, 255, 0.38);
+  color: #fff;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.025) 0 7px,
+      transparent 7px 14px
+    ),
+    radial-gradient(circle, rgba(171, 87, 255, 0.22), transparent 54%),
+    #100919;
+  text-align: center;
+}
+
+.archont-dealt-card-back span {
+  color: rgba(224, 195, 255, 0.66);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+}
+
+.archont-dealt-card-back strong {
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+}
+
+.archont-dealt-card-back small {
+  color: rgba(236, 227, 248, 0.46);
+}
+
+.archont-dealt-card-front {
+  grid-template-rows: auto auto auto minmax(64px, 1fr) auto;
+  gap: 8px;
+  padding: 16px;
+  transform: rotateY(180deg);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(155deg, rgba(32, 20, 47, 0.99), rgba(10, 7, 18, 0.99));
+  text-align: center;
+}
+
+.archont-dealt-card-front h3,
+.archont-dealt-card-front p {
+  margin: 0;
+}
+
+.archont-dealt-card-front h3 {
+  align-self: center;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.22;
+}
+
+.archont-card-number {
+  color: rgba(236, 227, 248, 0.44);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.archont-card-route {
+  color: var(--player-color, #c797ff);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.archont-dealt-card-front > p {
+  color: rgba(238, 228, 251, 0.66);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.archont-dealt-danger-card.tone-danger .archont-dealt-card-front {
+  border-color: rgba(255, 91, 122, 0.42);
+  box-shadow: inset 0 0 60px rgba(255, 50, 90, 0.07);
+}
+
+.archont-dealt-danger-card.tone-safe .archont-dealt-card-front {
+  border-color: rgba(94, 225, 167, 0.38);
+  box-shadow: inset 0 0 60px rgba(60, 207, 144, 0.06);
+}
+
+.archont-danger-card-slot {
+  display: grid;
+  min-height: 292px;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  border: 1px dashed rgba(255, 255, 255, 0.13);
+  border-radius: 15px;
+  color: rgba(236, 227, 248, 0.32);
+  background: rgba(255, 255, 255, 0.018);
+  text-align: center;
+}
+
+.archont-danger-card-slot span {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.archont-danger-card-slot small {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.archont-card-effect-graphic {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.22);
+  text-align: left;
+}
+
+.archont-card-effect-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.archont-card-effect-graphic > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.archont-card-effect-graphic strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-card-effect-graphic small {
+  color: rgba(236, 227, 248, 0.55);
+  font-size: 0.65rem;
+}
+
+.archont-card-effect-graphic.is-damage {
+  border-color: rgba(255, 94, 124, 0.3);
+}
+
+.archont-card-effect-graphic.is-damage .archont-card-effect-icon {
+  background: rgba(255, 67, 101, 0.22);
+}
+
+.archont-card-effect-graphic.is-energy {
+  border-color: rgba(88, 184, 255, 0.3);
+}
+
+.archont-card-effect-graphic.is-energy .archont-card-effect-icon {
+  background: rgba(66, 169, 255, 0.2);
+}
+
+.archont-card-effect-graphic.is-supply {
+  border-color: rgba(255, 204, 91, 0.3);
+}
+
+.archont-card-effect-graphic.is-supply .archont-card-effect-icon {
+  background: rgba(255, 191, 52, 0.18);
+}
+
+.archont-card-effect-graphic.is-safe {
+  border-color: rgba(89, 222, 163, 0.3);
+}
+
+.archont-card-effect-graphic.is-safe .archont-card-effect-icon {
+  background: rgba(63, 203, 143, 0.18);
+}
+
+@keyframes archont-deal-from-deck {
+  0% {
+    transform: translate(-180px, 28px) rotate(-10deg) scale(0.72);
+    opacity: 0;
+  }
+  72% {
+    transform: translate(8px, -3px) rotate(1deg) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes archont-dealt-card-flip {
+  0%,
+  28% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+.archont-no-danger-cards {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid rgba(91, 224, 166, 0.25);
+  border-radius: 18px;
+  background: rgba(60, 207, 144, 0.05);
+  text-align: center;
+}
+
+.archont-no-danger-cards > span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  color: #07150f;
+  background: #73e7b4;
+  font-size: 1.3rem;
+  font-weight: 950;
+}
+
+.archont-no-danger-cards strong {
+  color: #fff;
+}
+
+.archont-no-danger-cards p {
+  margin: 0;
+  color: rgba(236, 227, 248, 0.62);
+}
+
+/* ----- Combat reveal ----- */
+
+.archont-combat-reveal-panel {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid rgba(255, 197, 79, 0.4);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 190, 64, 0.12), transparent 44%),
+    rgba(0, 0, 0, 0.24);
+  box-shadow: inset 0 0 70px rgba(255, 166, 36, 0.06);
+  text-align: center;
+  animation: archont-combat-result-enter 620ms ease both;
+}
+
+.archont-combat-reveal-panel h2,
+.archont-combat-reveal-panel p {
+  margin: 0;
+}
+
+.archont-combat-reveal-panel h2 {
+  color: #ffd878;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+}
+
+.archont-combat-reveal-panel > strong {
+  color: #fff;
+}
+
+.archont-combat-reveal-panel > p {
+  color: rgba(236, 227, 248, 0.67);
+}
+
+.archont-combat-reveal-result {
+  width: min(620px, 100%);
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.archont-combat-reveal-result span {
+  color: rgba(236, 227, 248, 0.46);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.archont-combat-reveal-result p {
+  margin: 5px 0 0;
+  color: #fff;
+  font-weight: 750;
+}
+
+@keyframes archont-combat-result-enter {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ----- Full result inside modal ----- */
+
+.archont-modal-command-report {
+  display: grid;
+  gap: 14px;
+}
+
+.archont-modal-order-report {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #9b7cff) 26%, rgba(255,255,255,.08));
+  border-radius: 17px;
+  background:
+    linear-gradient(
+      145deg,
+      var(--player-color-soft, rgba(155, 124, 255, 0.06)),
+      transparent 48%
+    ),
+    rgba(255, 255, 255, 0.025);
+}
+
+.archont-modal-order-report.is-destroyed {
+  border-color: rgba(255, 87, 119, 0.48);
+  background: rgba(255, 55, 91, 0.055);
+}
+
+.archont-modal-order-report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.archont-modal-order-report-header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.archont-modal-order-report-header small {
+  color: var(--player-color, #c797ff);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.archont-modal-order-report-header strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.archont-modal-order-report-header > span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(236, 227, 248, 0.72);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.archont-modal-route-list,
+.archont-modal-combat-rounds,
+.archont-modal-drawn-card-list {
+  display: grid;
+  gap: 9px;
+}
+
+.archont-modal-route-step {
+  display: grid;
+  gap: 9px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.archont-modal-route-step > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.archont-modal-route-step > header strong {
+  color: #fff;
+}
+
+.archont-modal-route-step > header span {
+  color: rgba(236, 227, 248, 0.76);
+}
+
+.archont-modal-route-step > header small {
+  color: rgba(236, 227, 248, 0.48);
+  text-align: right;
+}
+
+.archont-modal-safe-passage {
+  margin: 0;
+  padding: 10px;
+  border-radius: 10px;
+  color: #73e7b4;
+  background: rgba(60, 207, 144, 0.055);
+}
+
+.archont-modal-drawn-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr);
+  gap: 12px;
+  align-items: center;
+  padding: 11px;
+  border-left: 3px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-modal-drawn-card > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.archont-modal-drawn-card strong {
+  color: #fff;
+}
+
+.archont-modal-drawn-card span {
+  color: rgba(236, 227, 248, 0.6);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.archont-modal-drawn-card.effect-none {
+  border-left-color: #73e7b4;
+}
+
+.archont-modal-drawn-card.effect-damage_front_unit {
+  border-left-color: #ff718d;
+}
+
+.archont-modal-drawn-card.effect-lose_energy {
+  border-left-color: #64bdff;
+}
+
+.archont-modal-drawn-card.effect-lose_food {
+  border-left-color: #ffd05b;
+}
+
+.archont-modal-operation-summary,
+.archont-modal-combat-report {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.archont-modal-operation-summary > header,
+.archont-modal-combat-report > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.archont-modal-operation-summary > header > div,
+.archont-modal-combat-report > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.archont-modal-operation-summary small,
+.archont-modal-combat-report small {
+  color: rgba(236, 227, 248, 0.46);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.archont-modal-operation-summary strong,
+.archont-modal-combat-report strong {
+  color: #fff;
+}
+
+.archont-modal-operation-summary p,
+.archont-modal-operation-summary em,
+.archont-modal-combat-report em {
+  margin: 0;
+  color: rgba(236, 227, 248, 0.68);
+  line-height: 1.45;
+}
+
+.archont-modal-operation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.archont-modal-operation-grid > span {
+  display: grid;
+  gap: 3px;
+  padding: 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.archont-modal-operation-grid small {
+  color: rgba(236, 227, 248, 0.56);
+  line-height: 1.4;
+}
+
+.archont-modal-combat-report {
+  border-color: rgba(255, 197, 79, 0.28);
+  background: rgba(255, 166, 36, 0.04);
+}
+
+.archont-modal-combat-report > header > span {
+  color: rgba(236, 227, 248, 0.58);
+}
+
+.archont-modal-ambush-summary {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border-left: 3px solid #ff718d;
+  border-radius: 9px;
+  background: rgba(255, 67, 101, 0.07);
+}
+
+.archont-modal-ambush-summary span {
+  color: rgba(236, 227, 248, 0.62);
+  font-size: 0.78rem;
+}
+
+.archont-modal-combat-rounds article {
+  display: grid;
+  gap: 7px;
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-modal-combat-rounds header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.archont-modal-combat-rounds header span {
+  color: rgba(236, 227, 248, 0.55);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.archont-modal-combat-rounds p {
+  margin: 0;
+  color: rgba(236, 227, 248, 0.68);
+}
+
+.archont-modal-combat-rounds ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archont-modal-combat-rounds li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  color: rgba(236, 227, 248, 0.62);
+  font-size: 0.77rem;
+}
+
+.archont-modal-combat-rounds li strong {
+  text-align: right;
+}
+
+.archont-resolution-actions.is-final {
+  position: sticky;
+  bottom: -24px;
+  z-index: 4;
+  margin: 18px -24px -24px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    to top,
+    rgba(7, 5, 13, 1) 72%,
+    rgba(7, 5, 13, 0.86)
+  );
+}
+
+.archont-resolution-actions.is-final .archont-resolution-confirm {
+  min-width: 250px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archont-resolution-spinner,
+  .archont-dealt-danger-card.is-dealing,
+  .archont-dealt-danger-card.is-dealing .archont-dealt-card-inner,
+  .archont-combat-reveal-panel {
+    animation: none !important;
+  }
+
+  .archont-dealt-danger-card.is-dealing .archont-dealt-card-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .archont-danger-deal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .archont-danger-deck-zone {
+    grid-template-columns: auto auto;
+    justify-content: center;
+  }
+
+  .archont-danger-deck-stack {
+    width: 76px;
+  }
+
+  .archont-danger-card-row {
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  }
+
+  .archont-modal-drawn-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .archont-resolution-overlay {
+    padding: 8px;
+  }
+
+  .archont-resolution-modal {
+    max-height: calc(100vh - 16px);
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .archont-resolution-preview-card {
+    grid-template-columns: 1fr;
+  }
+
+  .archont-danger-count {
+    grid-template-columns: auto auto;
+    min-height: auto;
+    min-width: 0;
+    justify-content: start;
+    gap: 8px;
+  }
+
+  .archont-resolution-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .archont-resolution-actions.is-final {
+    grid-template-columns: 1fr;
+    bottom: -15px;
+    margin: 16px -15px -15px;
+    padding: 12px 15px 15px;
+  }
+
+  .archont-resolution-actions button {
+    width: 100%;
+  }
+
+  .archont-resolution-table-header,
+  .archont-modal-order-report-header,
+  .archont-modal-operation-summary > header,
+  .archont-modal-combat-report > header,
+  .archont-modal-combat-rounds header {
+    display: grid;
+  }
+
+  .archont-modal-route-step > header {
+    grid-template-columns: 1fr;
+  }
+
+  .archont-modal-route-step > header small,
+  .archont-modal-combat-rounds header span {
+    text-align: left;
+  }
+
+  .archont-danger-card-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archont-dealt-danger-card,
+  .archont-dealt-card-inner,
+  .archont-danger-card-slot {
+    min-height: 270px;
+  }
+
+  .archont-dealt-card-front {
+    padding: 12px;
+  }
+
+  .archont-modal-operation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 470px) {
+  .archont-danger-card-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Single-exchange combat + retreat resolution
+   ========================================================= */
+
+.fleet-route-preview.is-combat-engagement {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 44%, rgba(255, 255, 255, 0.12));
+  background:
+    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.14)), transparent 70%),
+    rgba(8, 6, 14, 0.74);
+}
+
+.archont-danger-deal-layout.is-complete {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(4, 3, 8, 0.5);
+}
+
+.archont-danger-deal-layout.is-complete .archont-dealt-card-inner {
+  transform: rotateY(180deg);
+}
+
+.archont-resolution-final-summary {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.archont-resolution-total-effects,
+.archont-resolution-order-summaries > article {
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 26%, rgba(255, 255, 255, 0.08));
+  border-radius: 17px;
+  background:
+    linear-gradient(145deg, var(--player-color-soft, rgba(155, 124, 255, 0.08)), transparent 56%),
+    rgba(10, 7, 17, 0.88);
+}
+
+.archont-resolution-total-effects {
+  padding: 16px;
+}
+
+.archont-resolution-total-effects h3 {
+  margin: 3px 0 0;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.archont-resolution-metric-grid,
+.archont-resolution-combat-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(90px, 1fr));
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.archont-resolution-metric-grid > span,
+.archont-resolution-combat-metrics > span {
+  display: grid;
+  gap: 4px;
+  min-height: 72px;
+  padding: 10px;
+  place-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  text-align: center;
+}
+
+.archont-resolution-metric-grid strong,
+.archont-resolution-combat-metrics strong {
+  color: #fff;
+  font-size: 1.35rem;
+}
+
+.archont-resolution-metric-grid small,
+.archont-resolution-combat-metrics small {
+  color: rgba(238, 229, 249, 0.58);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-resolution-destroyed-units {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.archont-resolution-destroyed-units > strong {
+  color: rgba(255, 151, 169, 0.94);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-resolution-destroyed-units > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.archont-resolution-destroyed-units span {
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 92, 116, 0.3);
+  border-radius: 999px;
+  color: #ffd8df;
+  background: rgba(255, 92, 116, 0.08);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.archont-resolution-no-losses,
+.archont-resolution-movement-result {
+  margin: 12px 0 0;
+  color: rgba(235, 228, 246, 0.7);
+  line-height: 1.45;
+}
+
+.archont-resolution-order-summaries {
+  display: grid;
+  gap: 12px;
+}
+
+.archont-resolution-order-summaries > article {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+}
+
+.archont-resolution-order-summaries > article > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.archont-resolution-order-summaries > article > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.archont-resolution-order-summaries > article > header small {
+  color: var(--player-color, #c792ff);
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.archont-resolution-order-summaries > article > header strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.archont-resolution-order-summaries > article > header > span {
+  color: rgba(235, 228, 246, 0.62);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.archont-resolution-retreat-summary,
+.archont-resolution-combat-summary {
+  display: grid;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.archont-resolution-retreat-summary strong,
+.archont-resolution-combat-summary > div:first-child strong {
+  color: #fff;
+}
+
+.archont-resolution-retreat-summary p,
+.archont-resolution-retreat-summary span,
+.archont-resolution-combat-summary > div:first-child span,
+.archont-resolution-combat-losses p {
+  margin: 0;
+  color: rgba(235, 228, 246, 0.7);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.archont-resolution-combat-summary > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.archont-resolution-combat-summary > div:first-child small {
+  color: rgba(255, 204, 93, 0.9);
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.archont-resolution-combat-summary.outcome-engagement_continues {
+  border-color: color-mix(in srgb, var(--player-color, #9b7cff) 42%, rgba(255, 255, 255, 0.08));
+}
+
+.archont-resolution-combat-summary.outcome-attacker_victory {
+  border-color: rgba(107, 232, 174, 0.34);
+}
+
+.archont-resolution-combat-summary.outcome-defender_victory,
+.archont-resolution-combat-summary.outcome-attacker_destroyed_in_transit,
+.archont-resolution-combat-summary.outcome-attacker_destroyed_by_ambush {
+  border-color: rgba(255, 92, 116, 0.38);
+}
+
+.archont-resolution-combat-summary em {
+  padding: 9px 10px;
+  border-left: 3px solid var(--player-color, #9b7cff);
+  color: rgba(244, 237, 252, 0.84);
+  background: var(--player-color-soft, rgba(155, 124, 255, 0.08));
+  font-size: 0.78rem;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+
+/* Fleet location and combat ownership clarity */
+.archont-fleet-slot-card.engaged {
+  border-color: rgba(255, 92, 116, 0.46);
+  background:
+    linear-gradient(145deg, rgba(255, 70, 104, 0.08), transparent 54%),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 92, 116, 0.1);
+}
+
+.archont-fleet-location {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, var(--archont-accent, #9b7cff)) 26%,
+    rgba(255, 255, 255, 0.07)
+  );
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--player-color-soft, var(--archont-accent-soft, rgba(155, 124, 255, 0.1))) 54%,
+    rgba(0, 0, 0, 0.18)
+  );
+}
+
+.archont-fleet-location.engaged {
+  border-color: rgba(255, 92, 116, 0.42);
+  background: rgba(255, 70, 104, 0.075);
+}
+
+.archont-fleet-location-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, var(--archont-accent, #9b7cff)) 52%,
+    white 8%
+  );
+  border-radius: 9px;
+  color: #fff;
+  background: var(--player-color-deep, var(--archont-accent-deep, #24194a));
+  font-size: 0.9rem;
+  box-shadow: 0 0 13px
+    color-mix(
+      in srgb,
+      var(--player-color-glow, var(--archont-accent-glow, rgba(155, 124, 255, 0.25))) 52%,
+      transparent
+    );
+}
+
+.archont-fleet-location.engaged .archont-fleet-location-icon {
+  border-color: rgba(255, 110, 137, 0.65);
+  color: #ffe6eb;
+  background: #4b1726;
+  box-shadow: 0 0 15px rgba(255, 74, 111, 0.26);
+}
+
+.archont-fleet-location-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.archont-fleet-location-copy small {
+  color: color-mix(
+    in srgb,
+    var(--player-color, var(--archont-accent, #9b7cff)) 70%,
+    white 20%
+  );
+  font-size: 0.5rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.archont-fleet-location.engaged .archont-fleet-location-copy small {
+  color: #ff91a9;
+}
+
+.archont-fleet-location-copy strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-fleet-location-copy em {
+  overflow: hidden;
+  color: rgba(227, 216, 239, 0.62);
+  font-size: 0.58rem;
+  font-style: normal;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-fleet-location.engaged .archont-fleet-location-copy em {
+  color: rgba(255, 210, 220, 0.78);
+}
+
+.archont-resolution-combat-heading {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+
+.archont-resolution-combat-location {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 204, 93, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 204, 93, 0.055);
+}
+
+.archont-resolution-combat-location > span {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 204, 93, 0.34);
+  border-radius: 11px;
+  color: #ffe2a0;
+  background: rgba(85, 56, 12, 0.46);
+  font-size: 1rem;
+}
+
+.archont-resolution-combat-location > div {
+  display: grid;
+  gap: 2px;
+}
+
+.archont-resolution-combat-location small {
+  color: rgba(255, 214, 121, 0.82);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.archont-resolution-combat-location strong {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.archont-resolution-combat-location em {
+  color: rgba(235, 226, 244, 0.62);
+  font-size: 0.67rem;
+  font-style: normal;
+}
+
+.archont-resolution-combat-participants {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.archont-resolution-combat-participant {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 12px 13px 12px 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--player-color, #9b7cff) 48%,
+    rgba(255, 255, 255, 0.08)
+  );
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.13)), transparent 68%),
+    rgba(0, 0, 0, 0.18);
+}
+
+.archont-resolution-combat-participant::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--player-color, #9b7cff);
+  box-shadow: 0 0 12px var(--player-color-glow, rgba(155, 124, 255, 0.4));
+}
+
+.archont-resolution-combat-participant small {
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 74%, white 18%);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.archont-resolution-combat-player {
+  overflow: hidden;
+  color: rgba(238, 230, 248, 0.68);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-resolution-combat-participant strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-resolution-combat-participant em {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--player-color, #9b7cff) 62%, white 26%);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archont-resolution-combat-vs {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  align-self: center;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 229, 176, 0.92);
+  background: #130d1d;
+  font-size: 0.6rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 760px) {
+  .archont-resolution-combat-participants {
+    grid-template-columns: 1fr;
+  }
+
+  .archont-resolution-combat-vs {
+    margin: -3px auto;
+  }
+
+  .archont-fleet-location-copy em,
+  .archont-fleet-location-copy strong {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 760px) {
+  .archont-resolution-metric-grid,
+  .archont-resolution-combat-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .archont-resolution-order-summaries > article > header {
+    display: grid;
+  }
+
+  .archont-resolution-order-summaries > article > header > span {
+    text-align: left;
+  }
+}
+
+/* Hostile Move → Move warning and interception result */
+.archont-hostile-entry-warning {
+  display: grid;
+  gap: 5px;
+  margin-top: 9px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #ff6d8d 58%, transparent);
+  border-radius: 11px;
+  background: rgba(255, 79, 112, 0.09);
+  color: rgba(255, 239, 244, 0.92);
+}
+
+.archont-hostile-entry-warning > strong {
+  color: #ff92a9;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+}
+
+.archont-hostile-entry-warning > span {
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.archont-hostile-entry-warning > small {
+  color: rgba(255, 226, 234, 0.74);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.archont-resolution-interception-summary {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgba(255, 104, 133, 0.38);
+  border-radius: 15px;
+  background:
+    linear-gradient(145deg, rgba(255, 66, 101, 0.095), transparent 56%),
+    rgba(13, 8, 18, 0.72);
+}
+
+.archont-resolution-interception-summary > p,
+.archont-resolution-interception-summary > em {
+  margin: 0;
+  color: rgba(245, 236, 250, 0.76);
+  line-height: 1.5;
+}
+
+.archont-resolution-interception-summary > em {
+  color: rgba(255, 192, 207, 0.9);
+  font-style: normal;
+  font-weight: 800;
+}
+
+.archont-defense-response-ready {
+  display: block;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 42%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--player-color-soft, rgba(155, 124, 255, 0.12)) 70%, transparent);
+  color: rgba(246, 239, 255, 0.94) !important;
+}
+/* Move → Move: first-step interception warning */
+
+.archont-hostile-first-step-warning {
+  display: grid;
+  gap: 5px;
+
+  padding: 12px 14px;
+
+  border: 1px solid rgba(255, 103, 126, 0.5);
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 72, 104, 0.14),
+      rgba(63, 10, 25, 0.42)
+    );
+
+  box-shadow:
+    inset 3px 0 0 rgba(255, 103, 126, 0.86);
+}
+
+.archont-hostile-first-step-warning strong {
+  color: #ff9daf;
+
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.archont-hostile-first-step-warning span {
+  color: #ffffff;
+
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.archont-hostile-first-step-warning small {
+  color: rgba(255, 230, 235, 0.75);
+
+  font-size: 0.78rem;
+  line-height: 1.45;
 }

@@ -37,15 +37,25 @@ export type SessionFleet = {
 export type FleetOrderType =
   | "move_defend"
   | "move_move"
-  | "move_transfer";
+  | "move_transfer"
+  | "transfer_move"
+  | "split_move"
+  | "defend"
+  | "move_attack"
+  | "continue_combat"
+  | "retreat";
 
 export type FleetCommandOrder = {
   fleet_id: number;
   order_type: FleetOrderType;
-  target_system_id: number;
+  target_system_id?: number;
   second_target_system_id?: number;
   transfer_fleet_id?: number;
   transfer_fleet_target_system_id?: number;
+  continuing_fleet_id?: number;
+  target_fleet_id?: number;
+  split_fleet_target_system_id?: number;
+  split_unit_ids?: number[];
   unit_ids_to_transfer_fleet?: number[];
   unit_ids_to_command_fleet?: number[];
 };
@@ -84,6 +94,8 @@ export type FleetMovementStepReport = {
   to_system_name: string | null;
   corridor_type: "safe" | "dangerous" | "wraparound";
   danger_cards: number;
+  corridor_danger_cards?: number;
+  pursuit_danger_cards?: number;
   drawn_cards: DangerCardResult[];
 };
 
@@ -110,7 +122,127 @@ export type FleetTransferReport = {
   partner_final_system_id: number;
   partner_final_system_name: string | null;
   partner_fleet_destroyed: boolean;
+  continuing_fleet_id?: number;
+  continuing_fleet_name?: string;
+  continuing_movement_used?: boolean;
+  continuing_movement_step?: FleetMovementStepReport | null;
+  continuing_final_system_id?: number;
+  continuing_final_system_name?: string | null;
+  continuing_fleet_destroyed?: boolean;
   completed: boolean;
+};
+
+
+export type FleetSplitReport = {
+  new_fleet_id: number;
+  new_fleet_number: number;
+  new_fleet_name: string;
+  moved_to_new_fleet: TransferUnitSummary[];
+  source_movement_used: boolean;
+  source_movement_step: FleetMovementStepReport | null;
+  source_final_system_id: number;
+  source_final_system_name: string | null;
+  source_fleet_destroyed: boolean;
+  new_fleet_movement_used: boolean;
+  new_fleet_movement_step: FleetMovementStepReport | null;
+  new_fleet_final_system_id: number;
+  new_fleet_final_system_name: string | null;
+  new_fleet_destroyed: boolean;
+  completed: boolean;
+};
+
+
+export type CombatDamageEvent = {
+  unit_id: number;
+  unit_type: string;
+  unit_name: string;
+  damage: number;
+  hp_before: number;
+  hp_after: number;
+  destroyed: boolean;
+};
+
+export type CombatRoundReport = {
+  round: number;
+  attacker_attack: number;
+  attacker_defense: number;
+  defender_attack: number;
+  defender_defense: number;
+  damage_to_defender: number;
+  damage_to_attacker: number;
+  defender_damage_events: CombatDamageEvent[];
+  attacker_damage_events: CombatDamageEvent[];
+};
+
+export type CombatOutcome =
+  | "attacker_victory"
+  | "defender_victory"
+  | "mutual_destruction"
+  | "stalemate"
+  | "attacker_destroyed_in_transit"
+  | "attacker_destroyed_by_ambush"
+  | "engagement_continues";
+
+export type FleetCombatReport = {
+  defender_fleet_id: number;
+  defender_fleet_name: string;
+  defender_owner_player_id: number;
+  defender_was_defensive: boolean;
+  defensive_position_consumed: boolean;
+  ambush_cards: DangerCardResult[];
+  rounds: CombatRoundReport[];
+  exchange?: CombatRoundReport | null;
+  outcome: CombatOutcome;
+  attacker_destroyed: boolean;
+  defender_destroyed: boolean;
+  engagement_continues?: boolean;
+  defender_response_ready?: boolean;
+  attacker_retreat: boolean;
+  retreat_reason: string | null;
+  attacker_retreat_system_id: number | null;
+  attacker_retreat_system_name: string | null;
+  hostile_fleets_remaining: number;
+};
+
+
+export type FleetInterceptionDamageEvent = {
+  unit_id: number;
+  unit_type: string;
+  unit_name: string;
+  damage: number;
+  hp_before: number;
+  hp_after: number;
+  destroyed: boolean;
+};
+
+export type FleetInterceptionReport = {
+  interception_step?: 1 | 2;
+  movement_ended_early?: boolean;
+  hostile_controlled: boolean;
+  destination_owner_player_id: number | null;
+  destination_owner_name: string | null;
+  interceptor_fleet_id: number | null;
+  interceptor_fleet_name: string | null;
+  interceptor_owner_player_id: number | null;
+  interceptor_owner_name: string | null;
+  interceptor_was_defensive: boolean;
+  attack_power: number;
+  target_defense: number;
+  damage: number;
+  damage_events: FleetInterceptionDamageEvent[];
+  moving_fleet_destroyed: boolean;
+  engagement_created: boolean;
+  no_return_fire: boolean;
+};
+
+export type FleetRetreatReport = {
+  pursuing_fleet_id: number;
+  pursuing_fleet_name: string;
+  retreating_unit_count: number;
+  pursuing_unit_count: number;
+  pursuit_danger_cards: number;
+  corridor_danger_cards: number;
+  total_danger_cards: number;
 };
 
 export type FleetCommandOrderReport = {
@@ -125,6 +257,10 @@ export type FleetCommandOrderReport = {
   fleet_destroyed: boolean;
   order_completed: boolean;
   transfer: FleetTransferReport | null;
+  split: FleetSplitReport | null;
+  retreat?: FleetRetreatReport | null;
+  combat: FleetCombatReport | null;
+  interception?: FleetInterceptionReport | null;
 };
 
 export type FleetCommandResponse = {
@@ -350,4 +486,33 @@ export type MapEditorSavedMap = {
   can_delete: boolean;
   systems: MapEditorSavedSystem[];
   connections: MapEditorSavedConnection[];
+};
+
+export type GameLogActorSnapshot = {
+  session_player_id: number;
+  user_id: number;
+  nickname: string | null;
+  faction_name: string;
+  civilization_id: number | null;
+};
+
+export type GameLogPayload = {
+  actor?: GameLogActorSnapshot | null;
+  [key: string]: unknown;
+};
+
+export type GameLogEntry = {
+  id: number;
+  session_id: number;
+  round_number: number;
+  actor_player_id: number | null;
+  event_type: string;
+  payload: GameLogPayload;
+  created_at: string | null;
+};
+
+export type GameLogsResponse = {
+  session_id: number;
+  session_name: string;
+  logs: GameLogEntry[];
 };

@@ -1,0 +1,421 @@
+.game-logs-page {
+  min-height: 100vh;
+  padding: 32px clamp(18px, 4vw, 64px) 72px;
+  color: #f5efff;
+  background:
+    radial-gradient(circle at 12% 3%, rgba(145, 73, 255, 0.2), transparent 30%),
+    radial-gradient(circle at 88% 20%, rgba(55, 194, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, #08050e, #0d0815 48%, #06040a);
+}
+
+.game-logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  max-width: 1500px;
+  margin: 0 auto 24px;
+}
+
+.game-logs-header > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
+.game-logs-header span {
+  color: rgba(209, 174, 255, 0.7);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.game-logs-header h1,
+.game-logs-header p {
+  margin: 0;
+}
+
+.game-logs-header h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: 0.04em;
+}
+
+.game-logs-header p {
+  color: rgba(234, 224, 247, 0.64);
+}
+
+.game-logs-header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.game-logs-header-actions a,
+.game-logs-header-actions button {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0 16px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(191, 128, 255, 0.3);
+  border-radius: 12px;
+  color: #f7efff;
+  background: rgba(27, 17, 41, 0.82);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.game-logs-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+  max-width: 1500px;
+  margin: 0 auto 26px;
+}
+
+.game-logs-stat-grid article {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.game-logs-stat-grid span {
+  color: rgba(231, 218, 245, 0.56);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.game-logs-stat-grid strong {
+  font-size: 1.8rem;
+}
+
+.game-logs-error,
+.game-logs-empty {
+  max-width: 1500px;
+  margin: 0 auto 20px;
+  padding: 18px;
+  border-radius: 15px;
+}
+
+.game-logs-error {
+  border: 1px solid rgba(255, 90, 120, 0.35);
+  background: rgba(255, 49, 87, 0.08);
+}
+
+.game-logs-empty {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.game-logs-empty h2,
+.game-logs-empty p {
+  margin: 0;
+}
+
+.game-logs-empty p {
+  margin-top: 6px;
+  color: rgba(231, 218, 245, 0.62);
+}
+
+.game-logs-timeline {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.game-logs-timeline::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 29px;
+  width: 1px;
+  background: linear-gradient(rgba(185, 116, 255, 0.42), rgba(185, 116, 255, 0.04));
+}
+
+.game-log-event {
+  position: relative;
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.game-log-timeline-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(187, 121, 255, 0.38);
+  border-radius: 18px;
+  background: #120b1d;
+  box-shadow: 0 0 22px rgba(151, 70, 255, 0.14);
+}
+
+.game-log-timeline-marker::before {
+  content: "ROUND";
+  position: absolute;
+  top: 8px;
+  color: rgba(223, 200, 250, 0.48);
+  font-size: 0.42rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.game-log-timeline-marker span {
+  padding-top: 10px;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.game-log-event-body {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(147, 71, 255, 0.055), transparent 38%),
+    rgba(18, 12, 28, 0.94);
+}
+
+.game-log-event-body > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.game-log-event-body > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.game-log-event-body header span {
+  color: #c893ff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.game-log-event-body h2,
+.game-log-event-body p {
+  margin: 0;
+}
+
+.game-log-event-body h2 {
+  font-size: 1.2rem;
+}
+
+.game-log-event-body > p {
+  color: rgba(235, 224, 248, 0.72);
+  line-height: 1.55;
+}
+
+.game-log-event-body time {
+  color: rgba(235, 224, 248, 0.48);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.game-log-orders {
+  display: grid;
+  gap: 12px;
+}
+
+.game-log-order-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.game-log-order-card > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.game-log-order-card > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.game-log-order-card h3 {
+  margin: 0;
+}
+
+.game-log-order-card header b {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.game-log-order-card header b.is-complete {
+  color: #83e9b9;
+  background: rgba(58, 205, 138, 0.1);
+}
+
+.game-log-order-card header b.is-incomplete {
+  color: #ff8199;
+  background: rgba(255, 61, 96, 0.1);
+}
+
+.game-log-route {
+  color: rgba(237, 226, 250, 0.74);
+}
+
+.game-log-order-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.game-log-order-metrics > span {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.game-log-order-metrics small {
+  color: rgba(235, 224, 248, 0.48);
+  font-size: 0.62rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.game-log-order-card details {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 10px;
+}
+
+.game-log-order-card summary {
+  cursor: pointer;
+  color: rgba(222, 191, 255, 0.84);
+  font-weight: 800;
+}
+
+.game-log-card-list,
+.game-log-loss-list {
+  display: grid;
+  gap: 6px;
+  margin: 9px 0 0;
+}
+
+.game-log-card-list > div,
+.game-log-loss-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.game-log-card-list span,
+.game-log-loss-list span {
+  color: rgba(235, 224, 248, 0.58);
+  text-align: right;
+}
+
+.game-log-loss-list {
+  padding: 0;
+  list-style: none;
+}
+
+.game-log-combat-result {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(255, 188, 72, 0.22);
+  border-radius: 11px;
+  background: rgba(255, 158, 37, 0.055);
+}
+
+.game-log-combat-result span {
+  color: rgba(255, 215, 143, 0.6);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.game-log-combat-result strong {
+  text-transform: uppercase;
+}
+
+.game-log-combat-result small {
+  color: rgba(240, 226, 247, 0.58);
+}
+
+@media (max-width: 760px) {
+  .game-logs-page {
+    padding: 22px 12px 60px;
+  }
+
+  .game-logs-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .game-logs-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .game-logs-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .game-log-event {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .game-logs-timeline::before {
+    left: 20px;
+  }
+
+  .game-log-timeline-marker {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+
+  .game-log-timeline-marker::before {
+    display: none;
+  }
+
+  .game-log-timeline-marker span {
+    padding: 0;
+  }
+
+  .game-log-event-body {
+    padding: 13px;
+  }
+
+  .game-log-event-body > header,
+  .game-log-order-card > header {
+    flex-direction: column;
+  }
+
+  .game-log-event-body time {
+    white-space: normal;
+  }
+
+  .game-log-order-metrics {
+    grid-template-columns: 1fr;
+  }
+}

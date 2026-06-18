@@ -3,7 +3,8 @@ export type PatchNoteType =
   | "backend"
   | "frontend"
   | "system"
-  | "balance";
+  | "balance"
+  | "gameplay";
 
 export type LocalizedText = {
   en: string;
@@ -243,5 +244,114 @@ export const patchNotes: PatchNote[] = [
       text("Custom system names, usernames and session names remain unchanged in both languages.", "Пользовательские названия систем, имена пользователей и названия сессий не переводятся."),
       text("Patch Notes entries now store English and Russian text as first-class localized data.", "Записи патч-ноутов теперь хранят английский и русский тексты как полноценные локализованные данные.")
     ]
-  }
+  },
+
+  {
+  id: "fleet-combat-and-starting-scout",
+  date: "2026-06-17",
+  type: "game-design",
+  title: text(
+    "Fleet combat, defensive positions and starting Scouts",
+    "Бой флотов, оборонительные позиции и стартовые Разведчики"
+  ),
+  summary: text(
+    "The fleet command system now covers peaceful movement, defensive positioning and direct attacks, while every player begins the game with one Scout Drone in Fleet 1.",
+    "Система команд флотов теперь охватывает мирное перемещение, занятие оборонительной позиции и прямые атаки, а каждый игрок начинает партию с одним Разведывательным дроном во Флоте 1."
+  ),
+  changes: [
+    text(
+      "Added a Defensive Position order that lets a ready fleet hold its current system and prepare an ambush.",
+      "Добавлен приказ «Оборонительная позиция», позволяющий готовому флоту остаться в текущей системе и подготовить засаду."
+    ),
+    text(
+      "Added Move → Attack with an explicit destination and target enemy fleet.",
+      "Добавлен приказ «Движение → Атака» с явным выбором системы назначения и вражеского флота-цели."
+    ),
+    text(
+      "A defensive fleet forces the attacker to resolve one additional danger card before combat; the defensive position is then consumed.",
+      "Обороняющийся флот заставляет атакующего разыграть одну дополнительную карту опасности перед боем, после чего оборонительная позиция считается использованной."
+    ),
+    text(
+      "Combat is resolved in simultaneous deterministic rounds using total fleet Attack and Defense, with damage applied to front units in formation order.",
+      "Бой проходит одновременными детерминированными раундами с использованием суммарных Атаки и Защиты флотов; урон получают передние юниты согласно порядку построения."
+    ),
+    text(
+      "A defeated or stalled surviving attacker automatically retreats to its origin system without drawing an additional corridor card.",
+      "Выживший атакующий при поражении или патовой ситуации автоматически отступает в исходную систему без дополнительной карты коридора."
+    ),
+    text(
+      "Peaceful movement orders can no longer enter a system containing an enemy fleet; such movement must use Move → Attack.",
+      "Мирные приказы перемещения больше не могут входить в систему с вражеским флотом — для этого требуется приказ «Движение → Атака»."
+    ),
+    text(
+      "Every player now starts with Fleet 1 containing one free Scout Drone in their starting system.",
+      "Теперь каждый игрок начинает партию с Флотом 1, содержащим одного бесплатного Разведывательного дрона в стартовой системе."
+    )
+  ]
+},
+
+{
+  id: "interactive-combat-and-hostile-movement",
+  date: "2026-06-18",
+  type: "gameplay",
+  title: {
+    en: "Interactive danger resolution and hostile fleet movement",
+    ru: "Интерактивное разрешение опасностей и враждебное перемещение флотов",
+  },
+  summary: {
+    en: "Danger cards, combat contact and hostile movement are now resolved through an interactive modal flow. Fleet battles use a single simultaneous damage exchange, surviving fleets remain engaged, and players may later continue combat or retreat.",
+    ru: "Карты опасности, боевой контакт и враждебное перемещение теперь разрешаются через интерактивное модальное окно. Сражение состоит из одного одновременного обмена уроном, выжившие флоты остаются в контакте, а игроки позднее могут продолжить бой или отступить.",
+  },
+  changes: [
+    {
+      en: "Added a confirmation modal for every movement affected by danger cards, including dangerous and wraparound corridors.",
+      ru: "Добавлено окно подтверждения для каждого перемещения, на которое влияют карты опасности, включая опасные и wraparound-коридоры.",
+    },
+    {
+      en: "Danger cards are dealt from a visible deck, placed in a row and revealed one by one with their effects and results.",
+      ru: "Карты опасности визуально выкладываются из колоды в ряд и последовательно раскрываются с отображением эффекта и результата.",
+    },
+    {
+      en: "The modal now shows a compact combined danger summary: total cards, fleet HP lost, resources lost and destroyed units.",
+      ru: "В модальном окне теперь показывается компактный суммарный результат: количество карт, потерянные HP флота, потерянные ресурсы и уничтоженные юниты.",
+    },
+    {
+      en: "Combat now resolves as one simultaneous damage exchange per action instead of continuing until one fleet is destroyed.",
+      ru: "Бой теперь разрешается как один одновременный обмен уроном за действие, а не продолжается автоматически до уничтожения одного из флотов.",
+    },
+    {
+      en: "If both fleets survive, they remain engaged in the same system and may later choose Continue Combat or Retreat.",
+      ru: "Если оба флота выжили, они остаются в боевом контакте в одной системе и позднее могут выбрать «Продолжить бой» или «Отступить».",
+    },
+    {
+      en: "Retreating fleets draw pursuit danger cards equal to the positive difference between the largest enemy fleet and the retreating fleet.",
+      ru: "Отступающий флот тянет карты преследования в количестве, равном положительной разнице между крупнейшим вражеским флотом и отступающим флотом.",
+    },
+    {
+      en: "Move → Move may now enter a hostile system after either the first or second movement step.",
+      ru: "Приказ «Перемещение → Перемещение» теперь может привести во вражескую систему как после первого, так и после второго шага.",
+    },
+    {
+      en: "Before hostile movement is confirmed, the player sees the interception step, enemy fleet owner and estimated one-way damage.",
+      ru: "Перед подтверждением враждебного перемещения игрок видит шаг перехвата, владельца вражеского флота и предполагаемый односторонний урон.",
+    },
+    {
+      en: "A fleet intercepted during Move → Move receives one enemy attack without return fire. If interception happens after step one, the second movement is cancelled.",
+      ru: "Флот, перехваченный во время «Перемещение → Перемещение», получает одну атаку противника без ответного удара. Если перехват произошёл после первого шага, второе перемещение отменяется.",
+    },
+    {
+      en: "Defensive fleets that survive an attack may make their own combat decision on their next turn instead of remaining permanently activated.",
+      ru: "Флот в защитной стойке, переживший атаку, может принять собственное боевое решение в свой следующий ход вместо постоянной блокировки в состоянии Activated.",
+    },
+    {
+      en: "Combat result cards now show the owner, faction, fleet name and battle location for both sides.",
+      ru: "Карточка результата боя теперь показывает владельца, фракцию, название флота и место сражения для обеих сторон.",
+    },
+    {
+      en: "Added persistent Game Logs with chronological records of movement, danger cards, combat damage, destroyed units, construction and production.",
+      ru: "Добавлен постоянный журнал Game Logs с хронологией перемещений, карт опасности, боевого урона, уничтоженных юнитов, строительства и производства.",
+    },
+  ],
+},
+
 ];

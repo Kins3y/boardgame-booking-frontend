@@ -12,6 +12,7 @@ import CreateSession from "./pages/CreateSession";
 import { useAuth } from "./auth/AuthContext";
 import Profile from "./pages/Profile";
 import PatchNotes from "./pages/PatchNotes";
+import GameLogs from "./pages/GameLogs";
 import "./App.css";
 
 export default function App() {
@@ -110,6 +111,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/game/sessions/:sessionId/logs"
+  element={
+    <ProtectedRoute>
+      <GameLogs />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/map-editor"

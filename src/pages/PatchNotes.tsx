@@ -7,12 +7,13 @@ export default function PatchNotes() {
   const { language, t } = useI18n();
 
   const typeLabels: Record<PatchNoteType, string> = {
-    "game-design": t("patchNotes.game-design"),
-    backend: t("patchNotes.backend"),
-    frontend: t("patchNotes.frontend"),
-    system: t("patchNotes.system"),
-    balance: t("patchNotes.balance")
-  };
+  "game-design": "Game Design",
+  backend: "Backend",
+  frontend: "Frontend",
+  system: "System",
+  balance: "Balance",
+  gameplay: "Gameplay",
+};
 
   return (
     <div className="patch-notes-page">
