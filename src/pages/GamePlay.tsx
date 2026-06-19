@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   buildBuilding,
+  claimArchonCore,
   colonizeSystemWithArk,
   endTurn,
   getEditorMap,
@@ -10,7 +11,9 @@ import {
   packColonyBuildingIntoArk,
   produceUnitFromBuilding,
   passTurn,
+  researchArchiveBlueprint,
 } from "../api/gameApi";
+import { researchTechnology } from "../api/technologyApi";
 import type {
   BuildingType,
   DangerCardResult,
@@ -845,6 +848,13 @@ export default function GamePlay() {
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBuilding, setIsBuilding] = useState<boolean>(false);
+  const [selectedTechnologyKey, setSelectedTechnologyKey] = useState<string | null>(null);
+  const [isResearchingTechnology, setIsResearchingTechnology] =
+    useState<boolean>(false);
+  const [isResearchingArchive, setIsResearchingArchive] =
+    useState<boolean>(false);
+  const [isClaimingArchonCore, setIsClaimingArchonCore] =
+    useState<boolean>(false);
   const [isTurnActionLoading, setIsTurnActionLoading] =
     useState<boolean>(false);
   const [isUnitActionLoading, setIsUnitActionLoading] =
@@ -924,6 +934,46 @@ export default function GamePlay() {
     return getBuildingsForPlayer(session, currentPlayer.id);
   }, [session, currentPlayer]);
 
+  const technologyCatalog = useMemo(() => {
+    return session?.technology_catalog ?? [];
+  }, [session]);
+
+  const currentPlayerTechnologyKeys = useMemo(() => {
+    return new Set((currentPlayer?.technologies ?? []).map((technology) => technology.key));
+  }, [currentPlayer]);
+
+  const selectedTechnology = useMemo(() => {
+    if (!selectedTechnologyKey) {
+      return technologyCatalog[0] ?? null;
+    }
+
+    return (
+      technologyCatalog.find(
+        (technology) => technology.key === selectedTechnologyKey,
+      ) ??
+      technologyCatalog[0] ??
+      null
+    );
+  }, [technologyCatalog, selectedTechnologyKey]);
+
+  const currentPlayerBuildingTypes = useMemo(() => {
+    return new Set(
+      currentPlayerBuildings.map((building) => building.building_type),
+    );
+  }, [currentPlayerBuildings]);
+
+  const selectedTechnologyResourceError = selectedTechnology
+    ? getResourceShortageMessage(currentPlayer, selectedTechnology.cost)
+    : null;
+
+  const selectedTechnologyAlreadyResearched = selectedTechnology
+    ? currentPlayerTechnologyKeys.has(selectedTechnology.key)
+    : false;
+
+  const selectedTechnologyBuildingMissing = selectedTechnology
+    ? !currentPlayerBuildingTypes.has(selectedTechnology.building_type)
+    : false;
+
   const selectedSystem = useMemo(() => {
     if (!session || selectedSystemId === null) {
       return null;
@@ -934,6 +984,104 @@ export default function GamePlay() {
       null
     );
   }, [session, selectedSystemId]);
+
+  const selectedMapSystem = useMemo(() => {
+    if (!mapDetails || selectedSystemId === null) {
+      return null;
+    }
+
+    return mapDetails.systems.find((system) => system.id === selectedSystemId) ?? null;
+  }, [mapDetails, selectedSystemId]);
+
+  const currentPlayerBlueprintLevels = useMemo(() => {
+    return new Set(
+      (currentPlayer?.archon_blueprints ?? []).map(
+        (blueprint) => blueprint.level,
+      ),
+    );
+  }, [currentPlayer]);
+
+  const selectedArchiveLevel =
+    selectedMapSystem?.system_type === "archive"
+      ? selectedMapSystem.archive_level ?? null
+      : null;
+
+  const selectedArchiveBlueprint =
+    selectedArchiveLevel !== null
+      ? session?.archon_blueprint_catalog?.find(
+          (blueprint) => blueprint.level === selectedArchiveLevel,
+        ) ?? null
+      : null;
+
+  const archiveResearchEnergyCost = currentPlayerTechnologyKeys.has(
+    "archive_decoding",
+  )
+    ? 2
+    : 3;
+
+  const selectedArchiveAlreadyDiscovered =
+    selectedArchiveLevel !== null &&
+    currentPlayerBlueprintLevels.has(selectedArchiveLevel);
+
+  const selectedArchiveDataReward = selectedArchiveAlreadyDiscovered ? 3 : 1;
+  const selectedArchiveDominanceReward = selectedArchiveAlreadyDiscovered
+    ? 0
+    : selectedArchiveBlueprint?.dominance_points ?? 0;
+
+  const selectedArchiveResearchError = getResourceShortageMessage(
+    currentPlayer,
+    { energy: archiveResearchEnergyCost },
+  );
+
+  const selectedArchiveControlledByCurrentPlayer =
+    Boolean(selectedSystem) &&
+    Boolean(currentPlayer) &&
+    selectedSystem?.owner_player_id === currentPlayer?.id;
+
+  const archonCoreClaim = session?.victory_framework?.archon_core_claim ?? null;
+  const isArchonCoreClaimed = Boolean(archonCoreClaim);
+  const selectedSystemIsHeartOfTheGalaxy =
+    selectedMapSystem?.system_type === "archive" &&
+    selectedMapSystem.archive_level === 5;
+  const currentPlayerHasAllBlueprints =
+    (currentPlayer?.blueprint_count ?? 0) >=
+    (currentPlayer?.blueprints_required ?? 5);
+  const canCurrentPlayerClaimArchonCore =
+    Boolean(currentPlayer) &&
+    session?.status === "started" &&
+    !isArchonCoreClaimed &&
+    currentPlayerHasAllBlueprints &&
+    selectedSystemIsHeartOfTheGalaxy &&
+    selectedArchiveControlledByCurrentPlayer &&
+    (currentPlayer?.command_points_left ?? 0) > 0;
+
+  const archonCoreClaimHint = (() => {
+    if (isArchonCoreClaimed) {
+      return `Archon Core claimed by ${archonCoreClaim?.player_faction ?? "unknown faction"}.`;
+    }
+
+    if (!currentPlayerHasAllBlueprints) {
+      return `Need all ${currentPlayer?.blueprints_required ?? 5} Archon Blueprints.`;
+    }
+
+    if (!selectedSystemIsHeartOfTheGalaxy) {
+      return "Select the Heart of the Galaxy / Archive V system.";
+    }
+
+    if (!selectedArchiveControlledByCurrentPlayer) {
+      return "Current player must control the Heart of the Galaxy.";
+    }
+
+    if ((currentPlayer?.command_points_left ?? 0) <= 0) {
+      return "Current player has no command points left.";
+    }
+
+    if (session?.status !== "started") {
+      return "Archon Core can only be claimed during an active 4X phase.";
+    }
+
+    return "All Ascension requirements are met.";
+  })();
 
   const canBuildInSelectedSystem =
     Boolean(selectedSystem) &&
@@ -1001,6 +1149,134 @@ export default function GamePlay() {
       setError(err instanceof Error ? err.message : "Failed to load game");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleResearchArchiveBlueprint() {
+    if (!session || !selectedSystem || !currentPlayer) {
+      return;
+    }
+
+    if (!selectedArchiveBlueprint || selectedArchiveLevel === null) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archiveResearch: "Select an archive system.",
+      }));
+      return;
+    }
+
+    if (!selectedArchiveControlledByCurrentPlayer) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archiveResearch: "Current player must control this archive system.",
+      }));
+      return;
+    }
+
+    if (selectedArchiveResearchError) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archiveResearch: selectedArchiveResearchError,
+      }));
+      return;
+    }
+
+    try {
+      setIsResearchingArchive(true);
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archiveResearch: "",
+      }));
+
+      const updatedSession = await researchArchiveBlueprint(
+        session.id,
+        selectedSystem.system_id,
+      );
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to research archive";
+
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archiveResearch: message,
+      }));
+    } finally {
+      setIsResearchingArchive(false);
+    }
+  }
+
+  async function handleClaimArchonCore() {
+    if (!session || !currentPlayer || !selectedSystem) {
+      return;
+    }
+
+    if (!canCurrentPlayerClaimArchonCore) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archonCore: archonCoreClaimHint,
+      }));
+      return;
+    }
+
+    try {
+      setIsClaimingArchonCore(true);
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archonCore: "",
+      }));
+
+      const updatedSession = await claimArchonCore(
+        session.id,
+        selectedSystem.system_id,
+      );
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to claim Archon Core";
+
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archonCore: message,
+      }));
+    } finally {
+      setIsClaimingArchonCore(false);
+    }
+  }
+
+  async function handleResearchTechnology() {
+    if (!session || !selectedTechnology || !currentPlayer) {
+      return;
+    }
+
+    try {
+      setIsResearchingTechnology(true);
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        technology: "",
+      }));
+
+      const updatedSession = await researchTechnology(
+        session.id,
+        selectedTechnology.key,
+      );
+
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to research technology";
+
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        technology: message,
+      }));
+    } finally {
+      setIsResearchingTechnology(false);
     }
   }
 
@@ -3652,8 +3928,8 @@ export default function GamePlay() {
             <div className="archont-command-stats" aria-label="Game status">
               <article>
                 <span>ROUND</span>
-                <strong>{session.current_round}</strong>
-                <small>Operational cycle</small>
+                <strong>{session.current_round}/{session.max_rounds ?? 12}</strong>
+                <small>Fallback victory after round {session.max_rounds ?? 12}</small>
               </article>
               <article>
                 <span>CONTROL</span>
@@ -3663,13 +3939,31 @@ export default function GamePlay() {
               <article>
                 <span>FLEETS</span>
                 <strong>{totalFleetCount}</strong>
-                <small>Across the board</small>
+                <small>{totalUnitCount} units across the board</small>
               </article>
               <article>
-                <span>UNITS</span>
-                <strong>{totalUnitCount}</strong>
-                <small>Deployed assets</small>
+                <span>ASCENSION</span>
+                <strong>
+                  {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5}
+                </strong>
+                <small>Archon blueprints</small>
               </article>
+              <article>
+                <span>DOMINANCE</span>
+                <strong>{currentPlayer?.dominance_points ?? 0}</strong>
+                <small>Fallback victory points</small>
+              </article>
+            </div>
+
+            <div className="archont-victory-foundation">
+              <span>Victory paths</span>
+              <strong>Ascension · Resistance · Dominion</strong>
+              <small>
+                Archon {archonCoreClaim?.player_faction ?? session.victory_framework?.archon_state ?? "inactive"} ·
+                Core {archonCoreClaim ? `claimed at ${archonCoreClaim.core_system_name ?? "Heart of the Galaxy"}` : session.victory_framework?.core_state ?? "unclaimed"} ·
+                Blueprints {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5} ·
+                Highest DP wins if no Archon is activated by round {session.max_rounds ?? 12}
+              </small>
             </div>
 
             <div className="archont-active-commander">
@@ -3814,6 +4108,10 @@ export default function GamePlay() {
                         <span>
                           <small>Fleets</small>
                           <strong>{player.fleets?.length ?? 0}/4</strong>
+                        </span>
+                        <span>
+                          <small>DP</small>
+                          <strong>{player.dominance_points ?? 0}</strong>
                         </span>
                       </div>
 
@@ -4279,6 +4577,141 @@ export default function GamePlay() {
                       );
                     })}
                   </div>
+
+                  <section className="archont-technologies-panel">
+                    <header className="archont-technologies-heading">
+                      <div>
+                        <span className="archont-eyebrow">Technology program</span>
+                        <h2>Technologies</h2>
+                        <p>
+                          Research permanent upgrades through your buildings.
+                          Each completed technology adds Dominance Points.
+                        </p>
+                      </div>
+                      <strong className="archont-dominance-pill">
+                        DP {currentPlayer?.dominance_points ?? 0}
+                      </strong>
+                    </header>
+
+                    <div className="archont-technology-grid">
+                      {technologyCatalog.map((technology) => {
+                        const isSelected = selectedTechnology?.key === technology.key;
+                        const isResearched = currentPlayerTechnologyKeys.has(
+                          technology.key,
+                        );
+                        const hasRequiredBuilding = currentPlayerBuildingTypes.has(
+                          technology.building_type,
+                        );
+
+                        return (
+                          <button
+                            key={technology.key}
+                            type="button"
+                            className={[
+                              "archont-technology-card",
+                              isSelected ? "selected" : "",
+                              isResearched ? "researched" : "",
+                              !hasRequiredBuilding ? "locked" : "",
+                            ].join(" ")}
+                            onClick={() => {
+                              setSelectedTechnologyKey(technology.key);
+                              setActionErrors((currentErrors) => ({
+                                ...currentErrors,
+                                technology: "",
+                              }));
+                            }}
+                          >
+                            <span className="archont-technology-type">
+                              {technology.category}
+                            </span>
+                            <strong>{technology.name}</strong>
+                            <small>{technology.effect_summary}</small>
+
+                            <span className="archont-technology-requirement">
+                              Requires {technology.building_name}
+                            </span>
+
+                            <span className="archont-technology-cost">
+                              {RESOURCE_ORDER.map((kind) => {
+                                const amount = technology.cost[kind] ?? 0;
+
+                                return amount > 0 ? (
+                                  <ResourceBadge
+                                    key={kind}
+                                    kind={kind}
+                                    value={amount}
+                                    compact
+                                  />
+                                ) : null;
+                              })}
+                            </span>
+
+                            <span className="archont-technology-status">
+                              {isResearched
+                                ? "Researched"
+                                : hasRequiredBuilding
+                                  ? `+${technology.dominance_points} DP`
+                                  : "Locked"}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {selectedTechnology && (
+                      <aside className="archont-technology-research-card">
+                        <div>
+                          <span className="archont-eyebrow">Selected technology</span>
+                          <h3>{selectedTechnology.name}</h3>
+                          <p>{selectedTechnology.description}</p>
+                          <small>{selectedTechnology.effect_summary}</small>
+                        </div>
+
+                        {selectedTechnologyAlreadyResearched && (
+                          <p className="action-hint">
+                            This technology is already researched.
+                          </p>
+                        )}
+
+                        {selectedTechnologyBuildingMissing && (
+                          <p className="action-hint">
+                            Build or control a {selectedTechnology.building_name} to research this technology.
+                          </p>
+                        )}
+
+                        {selectedTechnologyResourceError && (
+                          <p className="inline-action-error">
+                            {selectedTechnologyResourceError}
+                          </p>
+                        )}
+
+                        {actionErrors.technology && (
+                          <p className="inline-action-error">
+                            {actionErrors.technology}
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          className="build-submit-button archont-research-submit-button"
+                          onClick={handleResearchTechnology}
+                          disabled={
+                            isResearchingTechnology ||
+                            session.status !== "started" ||
+                            !currentPlayer ||
+                            !selectedTechnology ||
+                            selectedTechnologyAlreadyResearched ||
+                            selectedTechnologyBuildingMissing ||
+                            Boolean(selectedTechnologyResourceError)
+                          }
+                        >
+                          {isResearchingTechnology
+                            ? "Researching..."
+                            : "Research technology · 1 CP"}
+                        </button>
+                      </aside>
+                    )}
+                  </section>
 
                   <aside
                     className="simulation-sidebar build-sidebar archont-construction-ribbon"
@@ -5977,6 +6410,191 @@ export default function GamePlay() {
                       </p>
                     )}
                   </div>
+
+                  <section className="archont-archive-research-panel">
+                    <header className="archont-archive-research-heading">
+                      <div>
+                        <span className="archont-eyebrow">Ascension research</span>
+                        <h2>Archive Research</h2>
+                        <p>
+                          Control Archive I-V systems to discover the matching
+                          Archon Blueprint. Repeat research extracts Data only.
+                        </p>
+                      </div>
+                      <strong className="archont-blueprint-progress-pill">
+                        {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5} BP
+                      </strong>
+                    </header>
+
+                    <div className="archont-blueprint-track">
+                      {(session.archon_blueprint_catalog ?? []).map((blueprint) => {
+                        const isDiscovered = currentPlayerBlueprintLevels.has(
+                          blueprint.level,
+                        );
+
+                        return (
+                          <span
+                            key={blueprint.key}
+                            className={[
+                              "archont-blueprint-chip",
+                              isDiscovered ? "discovered" : "",
+                            ].join(" ")}
+                          >
+                            <small>{blueprint.archive_label}</small>
+                            <strong>{blueprint.name}</strong>
+                          </span>
+                        );
+                      })}
+                    </div>
+
+                    {selectedMapSystem?.system_type === "archive" && selectedArchiveBlueprint ? (
+                      <div className="archont-archive-action-card">
+                        <div>
+                          <span className="archont-eyebrow">Selected archive</span>
+                          <h3>{selectedSystem?.system_name ?? selectedMapSystem.name}</h3>
+                          <p>
+                            {selectedArchiveAlreadyDiscovered
+                              ? `${selectedArchiveBlueprint.name} is already secured. Repeat research extracts archive Data.`
+                              : `${selectedArchiveBlueprint.archive_label} contains ${selectedArchiveBlueprint.name}.`}
+                          </p>
+                          <small>
+                            Cost: ENG {archiveResearchEnergyCost} · Reward: DAT +{selectedArchiveDataReward}
+                            {selectedArchiveDominanceReward > 0
+                              ? ` · +${selectedArchiveDominanceReward} DP`
+                              : " · no new Blueprint / DP"}
+                          </small>
+                        </div>
+
+                        {!selectedArchiveControlledByCurrentPlayer && (
+                          <p className="action-hint">
+                            The current player must control this archive before researching it.
+                          </p>
+                        )}
+
+                        {selectedArchiveAlreadyDiscovered && (
+                          <p className="action-hint">
+                            Blueprint already discovered. This action will extract +3 Data instead.
+                          </p>
+                        )}
+
+                        {selectedArchiveResearchError && (
+                          <p className="inline-action-error">
+                            {selectedArchiveResearchError}
+                          </p>
+                        )}
+
+                        {actionErrors.archiveResearch && (
+                          <p className="inline-action-error">
+                            {actionErrors.archiveResearch}
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          className="build-submit-button archont-archive-research-button"
+                          onClick={handleResearchArchiveBlueprint}
+                          disabled={
+                            isResearchingArchive ||
+                            session.status !== "started" ||
+                            !currentPlayer ||
+                            !selectedArchiveControlledByCurrentPlayer ||
+                            Boolean(selectedArchiveResearchError)
+                          }
+                        >
+                          {isResearchingArchive
+                            ? selectedArchiveAlreadyDiscovered
+                              ? "Extracting archive data..."
+                              : "Researching archive..."
+                            : selectedArchiveAlreadyDiscovered
+                              ? "Extract archive data · 1 CP"
+                              : "Research archive · 1 CP"}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="archont-empty-workspace-note">
+                        Select a controlled archive system to search for an Archon Blueprint.
+                      </p>
+                    )}
+                  </section>
+
+                  <section className="archont-core-claim-panel">
+                    <header className="archont-archive-research-heading">
+                      <div>
+                        <span className="archont-eyebrow">Ascension trigger</span>
+                        <h2>Archon Core</h2>
+                        <p>
+                          The Core is unique. A player with all five Blueprints
+                          can claim it only while controlling the Heart of the Galaxy.
+                        </p>
+                      </div>
+                      <strong
+                        className={[
+                          "archont-core-state-pill",
+                          isArchonCoreClaimed ? "claimed" : "",
+                        ].join(" ")}
+                      >
+                        {isArchonCoreClaimed ? "CLAIMED" : "UNCLAIMED"}
+                      </strong>
+                    </header>
+
+                    <div className="archont-core-requirement-grid">
+                      <span className={currentPlayerHasAllBlueprints ? "met" : ""}>
+                        <small>Blueprints</small>
+                        <strong>
+                          {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5}
+                        </strong>
+                      </span>
+                      <span className={selectedSystemIsHeartOfTheGalaxy ? "met" : ""}>
+                        <small>Location</small>
+                        <strong>Heart / Archive V</strong>
+                      </span>
+                      <span className={selectedArchiveControlledByCurrentPlayer ? "met" : ""}>
+                        <small>Control</small>
+                        <strong>Current player</strong>
+                      </span>
+                      <span className={!isArchonCoreClaimed ? "met" : ""}>
+                        <small>Core</small>
+                        <strong>{isArchonCoreClaimed ? "Taken" : "Available"}</strong>
+                      </span>
+                    </div>
+
+                    <div className="archont-archive-action-card archont-core-action-card">
+                      <div>
+                        <span className="archont-eyebrow">Core status</span>
+                        <h3>
+                          {isArchonCoreClaimed
+                            ? `${archonCoreClaim?.player_faction ?? "Unknown faction"} became the Archon`
+                            : selectedSystemIsHeartOfTheGalaxy
+                              ? selectedSystem?.system_name ?? "Heart of the Galaxy"
+                              : "Select the Heart of the Galaxy"}
+                        </h3>
+                        <p>{archonCoreClaimHint}</p>
+                        <small>
+                          Claim cost: 1 CP · Result: Archon Player vs Resistance phase
+                        </small>
+                      </div>
+
+                      {actionErrors.archonCore && (
+                        <p className="inline-action-error">
+                          {actionErrors.archonCore}
+                        </p>
+                      )}
+
+                      <button
+                        type="button"
+                        className="build-submit-button archont-core-claim-button"
+                        onClick={handleClaimArchonCore}
+                        disabled={
+                          isClaimingArchonCore ||
+                          !canCurrentPlayerClaimArchonCore
+                        }
+                      >
+                        {isClaimingArchonCore
+                          ? "Claiming Archon Core..."
+                          : "Claim Archon Core · 1 CP"}
+                      </button>
+                    </div>
+                  </section>
 
                   {selectedSystem &&
                     selectedSystem.owner_player_id === currentPlayer?.id && (

@@ -34,6 +34,52 @@ export type SessionFleet = {
 };
 
 
+export type ResourceCost = {
+  matter?: number;
+  energy?: number;
+  data?: number;
+  food?: number;
+};
+
+export type TechnologyCategory = "combat" | "archive" | "logistics" | "economy";
+
+export type Technology = {
+  key: string;
+  name: string;
+  category: TechnologyCategory;
+  building_type: string;
+  building_name: string;
+  cost: ResourceCost;
+  effect_summary: string;
+  description: string;
+  dominance_points: number;
+};
+
+
+export type ArchonBlueprintCatalogItem = {
+  level: number;
+  key: string;
+  name: string;
+  archive_label: string;
+  dominance_points: number;
+};
+
+export type SessionPlayerArchonBlueprint = ArchonBlueprintCatalogItem & {
+  id: number;
+  archive_system_id: number | null;
+  discovered_round: number;
+};
+
+export type ArchonCoreClaim = {
+  id: number;
+  session_id: number;
+  player_id: number;
+  player_faction: string | null;
+  core_system_id: number | null;
+  core_system_name: string | null;
+  claimed_round: number;
+};
+
 export type FleetOrderType =
   | "move_defend"
   | "move_move"
@@ -292,6 +338,13 @@ export type SessionPlayer = {
 
   command_points_left: number;
   has_passed: boolean;
+  dominance_points?: number;
+  technologies?: Technology[];
+  archon_blueprints?: SessionPlayerArchonBlueprint[];
+  blueprint_count?: number;
+  blueprints_required?: number;
+  is_archon_player?: boolean;
+  is_resistance_player?: boolean;
   fleets: SessionFleet[];
 };
 
@@ -322,6 +375,19 @@ export type FullGameSession = {
   name: string;
   status: string;
   current_round: number;
+  max_rounds?: number;
+  victory_framework?: {
+    max_rounds: number;
+    fallback_victory: string;
+    archon_state: string;
+    core_state: string;
+    archon_player_id?: number | null;
+    archon_player_faction?: string | null;
+    archon_core_claim?: ArchonCoreClaim | null;
+    resistance_player_ids?: number[];
+  };
+  technology_catalog?: Technology[];
+  archon_blueprint_catalog?: ArchonBlueprintCatalogItem[];
 
   play_mode: string;
   round_phase: string;

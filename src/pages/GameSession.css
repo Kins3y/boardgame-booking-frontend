@@ -952,6 +952,36 @@
   line-height: 1;
 }
 
+.archont-victory-foundation {
+  display: grid;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--player-color, #9b7cff) 28%, transparent);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, var(--player-color-soft, rgba(155, 124, 255, 0.16)), rgba(255, 255, 255, 0.025)),
+    rgba(0, 0, 0, 0.2);
+}
+
+.archont-victory-foundation span {
+  color: rgba(225, 217, 238, 0.52);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.archont-victory-foundation strong {
+  color: #fff;
+  font-size: 0.82rem;
+}
+
+.archont-victory-foundation small {
+  color: rgba(225, 217, 238, 0.62);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
 .archont-active-commander {
   position: relative;
   min-width: 0;
@@ -2509,15 +2539,37 @@
 }
 
 .inline-action-error {
+  position: relative;
   margin: 8px 0 0;
-  padding: 8px 10px;
-  border: 1px solid rgba(229, 72, 93, 0.24);
-  border-radius: 10px;
-  color: #c92a3a;
-  background: #fff7f8;
+  padding: 9px 11px 9px 34px;
+  border: 1px solid rgba(255, 91, 122, 0.32);
+  border-radius: 12px;
+  color: #ffd8df;
+  background:
+    linear-gradient(135deg, rgba(255, 91, 122, 0.14), rgba(255, 255, 255, 0.025)),
+    rgba(19, 9, 18, 0.76);
+  box-shadow: 0 10px 28px rgba(255, 91, 122, 0.09);
   font-size: 12px;
   font-weight: 800;
   line-height: 1.35;
+}
+
+.inline-action-error::before {
+  content: "!";
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border: 1px solid rgba(255, 91, 122, 0.5);
+  border-radius: 999px;
+  color: #ff9bad;
+  background: rgba(255, 91, 122, 0.12);
+  font-size: 10px;
+  font-weight: 950;
+  transform: translateY(-50%);
 }
 
 .archont-turn-actions {
@@ -7562,6 +7614,7 @@ button.archont-fleet-slot-card:disabled:hover {
   line-height: 1;
 }
 
+
 .archont-active-engagements {
   display: grid;
   gap: 10px;
@@ -7766,6 +7819,174 @@ button.archont-fleet-slot-card:disabled:hover {
   }
 }
 
+
+/* Technologies v1 foundation */
+
+.archont-technologies-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(113, 87, 255, 0.08), rgba(255, 255, 255, 0.025)),
+    rgba(8, 7, 15, 0.38);
+}
+
+.archont-technologies-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.archont-technologies-heading h2 {
+  margin: 2px 0 4px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.archont-technologies-heading p {
+  margin: 0;
+  max-width: 680px;
+  color: rgba(225, 217, 238, 0.62);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.archont-dominance-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--archont-accent) 34%, transparent);
+  border-radius: 999px;
+  color: #fff;
+  background: color-mix(in srgb, var(--archont-accent-soft) 46%, rgba(0, 0, 0, 0.18));
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-technology-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 9px;
+}
+
+.archont-technology-card {
+  position: relative;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  color: inherit;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.028);
+  cursor: pointer;
+}
+
+.archont-technology-card:hover,
+.archont-technology-card.selected {
+  border-color: color-mix(in srgb, var(--archont-accent) 56%, white 5%);
+  background: color-mix(in srgb, var(--archont-accent-soft) 48%, rgba(255, 255, 255, 0.025));
+}
+
+.archont-technology-card.locked {
+  opacity: 0.62;
+}
+
+.archont-technology-card.researched {
+  border-color: rgba(111, 230, 173, 0.34);
+  background: linear-gradient(145deg, rgba(111, 230, 173, 0.08), rgba(255, 255, 255, 0.025));
+}
+
+.archont-technology-type {
+  width: fit-content;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--archont-accent) 70%, white 30%);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-technology-card strong {
+  color: #fff;
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
+
+.archont-technology-card small {
+  color: rgba(225, 217, 238, 0.58);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.archont-technology-requirement {
+  color: rgba(226, 218, 239, 0.5);
+  font-size: 0.56rem;
+}
+
+.archont-technology-cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.archont-technology-status {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.54rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.archont-technology-card.researched .archont-technology-status {
+  color: #d8ffe9;
+  background: rgba(111, 230, 173, 0.14);
+}
+
+.archont-technology-research-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-technology-research-card h3 {
+  margin: 2px 0 5px;
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.archont-technology-research-card p {
+  margin: 0;
+  color: rgba(225, 217, 238, 0.64);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.archont-technology-research-card small {
+  color: rgba(225, 217, 238, 0.48);
+  font-size: 0.65rem;
+}
+
+.archont-research-submit-button {
+  justify-self: start;
+}
+
 /* Compact fleet slot card layout */
 
 .archont-fleet-slot-card {
@@ -7801,8 +8022,6 @@ button.archont-fleet-slot-card:disabled:hover {
   white-space: nowrap;
 }
 
-/* Location becomes a compact pill, not a full info card */
-
 .archont-fleet-location {
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 7px;
@@ -7836,11 +8055,12 @@ button.archont-fleet-slot-card:disabled:hover {
 
 .archont-fleet-location-copy em {
   max-width: 100%;
+  overflow: hidden;
   font-size: 0.52rem;
   line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-/* Decision state should be a small status line */
 
 .archont-fleet-decision-strip {
   display: inline-flex;
@@ -7860,8 +8080,6 @@ button.archont-fleet-slot-card:disabled:hover {
   display: none;
 }
 
-/* Metrics are compact */
-
 .archont-fleet-slot-metrics {
   border-radius: 8px;
 }
@@ -7878,8 +8096,6 @@ button.archont-fleet-slot-card:disabled:hover {
 .archont-fleet-slot-metrics strong {
   font-size: 0.64rem;
 }
-
-/* Units stay inside one compact row */
 
 .archont-fleet-slot-units {
   display: flex;
@@ -7904,8 +8120,6 @@ button.archont-fleet-slot-card:disabled:hover {
   white-space: nowrap;
 }
 
-/* On narrow screens cards may still breathe normally */
-
 @media (max-width: 980px) {
   .archont-fleet-slot-card {
     padding: 11px;
@@ -7918,4 +8132,207 @@ button.archont-fleet-slot-card:disabled:hover {
   .archont-fleet-decision-strip small {
     display: inline;
   }
+}
+/* Archive Research v1 */
+
+.archont-archive-research-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(68, 214, 255, 0.085), rgba(255, 255, 255, 0.025)),
+    rgba(8, 7, 15, 0.38);
+}
+
+.archont-archive-research-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.archont-archive-research-heading h2 {
+  margin: 2px 0 4px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.archont-archive-research-heading p {
+  margin: 0;
+  max-width: 680px;
+  color: rgba(225, 217, 238, 0.62);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.archont-blueprint-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(68, 214, 255, 0.34);
+  border-radius: 999px;
+  color: #e9fbff;
+  background: rgba(68, 214, 255, 0.11);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-blueprint-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.archont-blueprint-chip {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.archont-blueprint-chip small {
+  color: rgba(225, 217, 238, 0.45);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-blueprint-chip strong {
+  color: rgba(248, 243, 254, 0.72);
+  font-size: 0.72rem;
+}
+
+.archont-blueprint-chip.discovered {
+  border-color: rgba(111, 230, 173, 0.34);
+  background:
+    linear-gradient(145deg, rgba(111, 230, 173, 0.1), rgba(255, 255, 255, 0.025)),
+    rgba(0, 0, 0, 0.16);
+  box-shadow: 0 0 18px rgba(111, 230, 173, 0.08);
+}
+
+.archont-blueprint-chip.discovered strong {
+  color: #e3ffef;
+}
+
+.archont-archive-action-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(68, 214, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.archont-archive-action-card h3 {
+  margin: 2px 0 5px;
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.archont-archive-action-card p {
+  margin: 0;
+  color: rgba(225, 217, 238, 0.66);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.archont-archive-action-card small {
+  color: rgba(225, 217, 238, 0.52);
+  font-size: 0.62rem;
+}
+
+.archont-archive-research-button {
+  width: fit-content;
+}
+
+/* Archon Core v1 */
+
+.archont-core-claim-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 207, 90, 0.15);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 207, 90, 0.13), transparent 32%),
+    linear-gradient(145deg, rgba(155, 124, 255, 0.09), rgba(255, 255, 255, 0.025)),
+    rgba(8, 7, 15, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.archont-core-state-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 207, 90, 0.34);
+  border-radius: 999px;
+  color: #fff4ca;
+  background: rgba(255, 207, 90, 0.11);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.archont-core-state-pill.claimed {
+  border-color: rgba(255, 91, 122, 0.38);
+  color: #ffd8df;
+  background: rgba(255, 91, 122, 0.13);
+  box-shadow: 0 0 22px rgba(255, 91, 122, 0.1);
+}
+
+.archont-core-requirement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.archont-core-requirement-grid span {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.028);
+}
+
+.archont-core-requirement-grid span.met {
+  border-color: rgba(111, 230, 173, 0.34);
+  background:
+    linear-gradient(145deg, rgba(111, 230, 173, 0.1), rgba(255, 255, 255, 0.025)),
+    rgba(0, 0, 0, 0.16);
+}
+
+.archont-core-requirement-grid small {
+  color: rgba(225, 217, 238, 0.45);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archont-core-requirement-grid strong {
+  color: rgba(248, 243, 254, 0.78);
+  font-size: 0.72rem;
+}
+
+.archont-core-requirement-grid span.met strong {
+  color: #e3ffef;
+}
+
+.archont-core-action-card {
+  border-color: rgba(255, 207, 90, 0.2);
+}
+
+.archont-core-claim-button {
+  width: fit-content;
 }

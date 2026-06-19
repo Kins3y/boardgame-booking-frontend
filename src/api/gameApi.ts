@@ -409,6 +409,59 @@ export async function produceUnitFromBuilding(
   return data.session;
 }
 
+
+export async function researchArchiveBlueprint(
+  sessionId: number,
+  systemId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/archives/research`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        system_id: systemId
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
+export async function claimArchonCore(
+  sessionId: number,
+  systemId: number | null
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/archon-core/claim`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        system_id: systemId
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+
+  return data.session;
+}
+
 export async function getEditorMaps(): Promise<MapEditorMapSummary[]> {
   const response = await fetch(`${API_URL}/game/maps/editor/`, {
     headers: getAuthHeaders()

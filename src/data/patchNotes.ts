@@ -354,4 +354,89 @@ export const patchNotes: PatchNote[] = [
   ],
 },
 
+{
+  id: "technologies-v1-foundation",
+  date: "2026-06-18",
+  type: "gameplay",
+  title: {
+    en: "Technologies v1 foundation",
+    ru: "Основа технологий v1",
+  },
+  summary: {
+    en: "Added the first technology framework: players can research permanent upgrades through existing buildings, spend resources and command points, and gain Dominance Points as a fallback victory score.",
+    ru: "Добавлена первая основа системы технологий: игроки могут исследовать постоянные улучшения через существующие здания, тратить ресурсы и командные очки, а также получать очки Доминирования как запасной путь победы.",
+  },
+  changes: [
+    {
+      en: "Added a 12-round victory framework indicator to the game screen.",
+      ru: "На экран игры добавлен индикатор победной рамки на 12 раундов.",
+    },
+    {
+      en: "Added Dominance Points as a fallback victory score if the Archon is not activated before the round limit.",
+      ru: "Добавлены очки Доминирования как запасной способ победы, если Архонт не активирован до лимита раундов.",
+    },
+    {
+      en: "Added the first static technology catalog with combat, archive and logistics technologies.",
+      ru: "Добавлен первый статический каталог технологий с боевыми, архивными и логистическими улучшениями.",
+    },
+    {
+      en: "Players can research technologies through required buildings such as Barracks, Spaceport, Research Center and Supply Depot.",
+      ru: "Игроки могут исследовать технологии через необходимые здания: казармы, космопорт, исследовательский центр и склад снабжения.",
+    },
+    {
+      en: "Technology research costs resources and 1 command point, then advances the turn like other major actions.",
+      ru: "Исследование технологии стоит ресурсы и 1 командное очко, после чего передаёт ход как другие крупные действия.",
+    },
+  ],
+},
+
+{
+  id: "archive-research-and-archon-core-v1",
+  date: "2026-06-19",
+  type: "gameplay",
+  title: {
+    en: "Archive Research and Archon Core v1",
+    ru: "Исследование архивов и Ядро Архонта v1",
+  },
+  summary: {
+    en: "Added the first full Ascension path foundation: players can research archive systems for Archon Blueprints, extract Data from already decoded archives, and claim the unique Archon Core after completing all five Blueprints.",
+    ru: "Добавлена первая полноценная основа пути Вознесения: игроки могут исследовать архивные системы ради чертежей Архонта, добывать Данные из уже расшифрованных архивов и забрать уникальное Ядро Архонта после сбора всех пяти чертежей.",
+  },
+  changes: [
+    {
+      en: "Added Archive Research as a major action that costs Energy and 1 Command Point.",
+      ru: "Добавлено исследование архивов как крупное действие, требующее Энергию и 1 Командное Очко.",
+    },
+    {
+      en: "Archive I, II, III, IV and V now provide matching Archon Blueprints for each player.",
+      ru: "Архивы I, II, III, IV и V теперь дают соответствующие чертежи Архонта для каждого игрока.",
+    },
+    {
+      en: "Blueprints are player-specific rather than globally unique, allowing multiple players to progress toward Ascension.",
+      ru: "Чертежи привязаны к игроку и не являются глобально уникальными, поэтому несколько игроков могут одновременно двигаться к Вознесению.",
+    },
+    {
+      en: "Researching an archive for the first time grants a Blueprint, Data and Dominance Points.",
+      ru: "Первое исследование архива даёт чертёж, Данные и Очки Доминирования.",
+    },
+    {
+      en: "Repeating archive research after the matching Blueprint has already been found now extracts Data instead of blocking the action.",
+      ru: "Повторное исследование архива после получения соответствующего чертежа теперь добывает Данные вместо блокировки действия.",
+    },
+    {
+      en: "Added the unique Archon Core claim flow: a player with all five Blueprints can claim the Core in Archive V / Heart of the Galaxy.",
+      ru: "Добавлен процесс получения уникального Ядра Архонта: игрок со всеми пятью чертежами может забрать Ядро в Архиве V / Сердце Галактики.",
+    },
+    {
+      en: "Claiming the Archon Core marks the claiming player as the Archon Player and moves the session into the archon_activated phase.",
+      ru: "Получение Ядра Архонта делает игрока Архонт-игроком и переводит сессию в фазу archon_activated.",
+    },
+    {
+      en: "The game screen now exposes Ascension progress, Core status, Archon Player and Resistance state.",
+      ru: "Игровой экран теперь показывает прогресс Вознесения, статус Ядра, Архонт-игрока и состояние Сопротивления.",
+    },
+  ],
+},
+
+
 ];
