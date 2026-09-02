@@ -482,4 +482,279 @@ export const patchNotes: PatchNote[] = [
   ]
 },
 
+{
+  id: "backend-rules-ai-lab-v054-2026-09",
+  date: "2026-09-02",
+  type: "backend",
+  title: text(
+    "Conquest, Victory Framework & AI Lab v0.5.4",
+    "Завоевание, Victory Framework и AI Lab v0.5.4"
+  ),
+  summary: text(
+    "A major backend update consolidating the current ARCHONT conquest rules, Home invasion and elimination flow, Archive interactions, asymmetric ARCHONT endgame, persistent gameplay state and the new AI Lab v0.5.4 neural self-play curriculum.",
+    "Крупное обновление бэкенда, объединяющее актуальные правила завоевания ARCHONT, вторжение на Home и устранение игроков, взаимодействие с Архивами, асимметричный эндгейм ARCHONT, сохранение игрового состояния и новую систему нейросетевого self-play в AI Lab v0.5.4."
+  ),
+  changes: [
+    text(
+      "Integrated the current conquest rules into the main gameplay backend and synchronized them with the session victory framework.",
+      "Актуальные правила завоевания интегрированы в основной игровой бэкенд и синхронизированы с системой определения победы игровой сессии."
+    ),
+
+    text(
+      "Home Worlds no longer function as conventional combat units with their own attack, defense or normal combat participation.",
+      "Home Worlds больше не работают как обычные боевые единицы со своей атакой, защитой или стандартным участием в бою."
+    ),
+
+    text(
+      "A defending Home must first be cleared of enemy fleets through normal combat before an invasion can be completed.",
+      "Перед вторжением на защищённый Home необходимо сначала уничтожить или вытеснить обороняющиеся флоты обычным боем."
+    ),
+
+    text(
+      "Home conquest is now resolved through a dedicated invasion flow rather than by treating the Home itself as another combat target.",
+      "Завоевание Home теперь происходит через отдельную механику вторжения, а не через атаку Home как обычной боевой цели."
+    ),
+
+    text(
+      "Marine presence is required to complete a Home invasion, making ground-assault capability a strategic requirement for eliminating another player.",
+      "Для завершения вторжения на Home требуется Marine, поэтому возможность наземного штурма становится обязательным стратегическим условием полного уничтожения другого игрока."
+    ),
+
+    text(
+      "Successful Home invasion can eliminate a player from the pre-ARCHONT phase of the game.",
+      "Успешное вторжение на Home может полностью устранить игрока из партии до начала фазы ARCHONT."
+    ),
+
+    text(
+      "Player elimination now propagates through persistent game state instead of existing only as a temporary combat result.",
+      "Устранение игрока теперь сохраняется в постоянном состоянии игровой сессии, а не существует только как временный результат боя."
+    ),
+
+    text(
+      "The backend now tracks Home state per session and player, including destruction status, destruction round and the player responsible for the conquest.",
+      "Бэкенд теперь хранит состояние Home отдельно для каждой игровой сессии и игрока, включая факт уничтожения, раунд уничтожения и игрока, совершившего завоевание."
+    ),
+
+    text(
+      "Extended the persisted Home World model with current HP, maximum HP, destroyed state, destroyed round and destroyed-by-player information for compatibility with the current victory framework.",
+      "Модель сохранённого состояния Home World расширена полями текущего HP, максимального HP, состояния уничтожения, раунда уничтожения и информации об уничтожившем игроке для совместимости с актуальным Victory Framework."
+    ),
+
+    text(
+      "Added database migration support for existing PostgreSQL installations where the session_home_worlds table was created before the latest Home-state fields existed.",
+      "Добавлена миграция базы данных для существующих PostgreSQL-инсталляций, в которых таблица session_home_worlds была создана до появления новых полей состояния Home."
+    ),
+
+    text(
+      "The Home World schema migration is idempotent and can safely add missing columns without deleting existing game sessions or rebuilding the database.",
+      "Миграция схемы Home World идемпотентна и может безопасно добавить недостающие колонки без удаления существующих партий или пересоздания базы данных."
+    ),
+
+    text(
+      "Fixed a backend failure where full session requests returned HTTP 500 because the SQLAlchemy model expected Home World columns that were missing from an older PostgreSQL schema.",
+      "Исправлена ошибка бэкенда, из-за которой запрос полной игровой сессии возвращал HTTP 500: SQLAlchemy-модель ожидала новые колонки Home World, отсутствовавшие в старой схеме PostgreSQL."
+    ),
+
+    text(
+      "Updated the full game-session response to expose the current victory framework state required by the gameplay client.",
+      "Обновлён полный ответ игровой сессии: теперь он содержит актуальное состояние Victory Framework, необходимое игровому клиенту."
+    ),
+
+    text(
+      "Separated normal conquest victory logic from the asymmetric ARCHONT endgame so the game can correctly transition between these two strategic phases.",
+      "Логика обычной победы через завоевание отделена от асимметричного эндгейма ARCHONT, чтобы партия корректно переходила между этими двумя стратегическими фазами."
+    ),
+
+    text(
+      "ARCHONT activation now acts as a structural phase transition: the activating player becomes the ARCHONT while the remaining players become the Resistance.",
+      "Активация ARCHONT теперь является полноценным переходом между фазами: активировавший игрок становится ARCHONT, а оставшиеся игроки переходят на сторону Resistance."
+    ),
+
+    text(
+      "The asymmetric ARCHONT versus Resistance state is preserved separately from normal pre-ARCHONT player-versus-player conquest.",
+      "Асимметричное состояние ARCHONT против Resistance теперь обрабатывается отдельно от обычного противостояния игроков до активации ARCHONT."
+    ),
+
+    text(
+      "The backend keeps the round-limit and fallback victory framework compatible with the current ARCHONT endgame structure.",
+      "Бэкенд сохраняет совместимость ограничения по раундам и резервного условия победы с актуальной структурой эндгейма ARCHONT."
+    ),
+
+    text(
+      "Fleet Ready and Activated states remain part of the authoritative backend game state, preventing unrestricted repeated fleet activation within the same round.",
+      "Состояния флота Ready и Activated остаются частью авторитетного состояния игры на бэкенде и предотвращают неограниченное повторное использование одного флота в течение одного раунда."
+    ),
+
+    text(
+      "Archive systems remain non-colonizable and are handled separately from normal colony systems.",
+      "Системы Архивов остаются неколонизируемыми и обрабатываются отдельно от обычных систем, пригодных для создания колоний."
+    ),
+
+    text(
+      "Archive control is based on fleet presence instead of colony ownership.",
+      "Контроль Архива определяется присутствием флота, а не владением колонией."
+    ),
+
+    text(
+      "Archive Research requires an appropriate ready Scout and consumes the relevant fleet activation.",
+      "Исследование Архива требует подходящий готовый Scout и расходует активацию соответствующего флота."
+    ),
+
+    text(
+      "After Archive Research, the researching fleet can remain in the Archive as persistent Archive Defense instead of disappearing from the strategic board state.",
+      "После исследования Архива исследовавший флот может оставаться в системе как постоянная Archive Defense, сохраняя своё присутствие на стратегической карте."
+    ),
+
+    text(
+      "Updated backend gameplay state handling so Archive research, fleet state, conquest and victory calculations operate on the same authoritative session data.",
+      "Обновлена обработка игрового состояния на бэкенде: исследование Архивов, состояния флотов, завоевание и расчёт победы теперь работают с единым авторитетным состоянием игровой сессии."
+    ),
+
+    text(
+      "AI Lab has been upgraded to v0.5.4 with a redesigned learning curriculum focused on producing more competent self-play agents before large-scale balance testing.",
+      "AI Lab обновлён до v0.5.4 с переработанной программой обучения, направленной на получение более компетентных self-play агентов до запуска масштабных тестов баланса."
+    ),
+
+    text(
+      "The v0.5.4 AI update changes the learning pipeline rather than introducing a separate set of game rules, keeping neural simulations aligned with the current ARCHONT ruleset.",
+      "Обновление AI v0.5.4 изменяет процесс обучения, а не создаёт отдельную версию игровых правил, благодаря чему нейросетевые симуляции остаются синхронизированы с актуальным ruleset ARCHONT."
+    ),
+
+    text(
+      "Teacher imitation data can now be stored as disk-backed replay chunks instead of requiring the complete training dataset to remain in memory.",
+      "Данные imitation learning от teacher-ботов теперь могут храниться на диске в виде replay-чанков вместо необходимости удерживать весь обучающий датасет в оперативной памяти."
+    ),
+
+    text(
+      "Expanded teacher-data collection allows substantially larger imitation datasets to be generated before neural self-play begins.",
+      "Расширенный сбор teacher-данных позволяет формировать значительно более крупные imitation-датасеты до начала нейросетевого self-play."
+    ),
+
+    text(
+      "Teacher replay can be reused across bootstrap attempts, reducing the need to repeatedly regenerate expensive imitation data after a failed candidate.",
+      "Teacher replay может повторно использоваться между попытками bootstrap, уменьшая необходимость заново генерировать дорогостоящие imitation-данные после неудачного кандидата."
+    ),
+
+    text(
+      "Added a stronger bootstrap competence gate so a neural candidate must demonstrate meaningful imitation accuracy before progressing into PPO self-play.",
+      "Добавлен более строгий bootstrap competence gate: нейросетевой кандидат должен продемонстрировать достаточную точность imitation learning до перехода к PPO self-play."
+    ),
+
+    text(
+      "Bootstrap validation now evaluates gameplay safety and behavioral quality in addition to raw supervised-learning accuracy.",
+      "Проверка bootstrap теперь оценивает не только точность supervised learning, но также игровую безопасность и качество поведения агента."
+    ),
+
+    text(
+      "Introduced additional protection against stalled or non-functional neural policies entering the main self-play training lineage.",
+      "Добавлена дополнительная защита от попадания зависающих или фактически неиграбельных нейросетевых политик в основную линию self-play обучения."
+    ),
+
+    text(
+      "Added a teacher-anchor objective to early PPO generations so the policy does not immediately forget useful behavior learned during imitation bootstrap.",
+      "В ранние поколения PPO добавлен teacher-anchor objective, чтобы политика не забывала сразу после bootstrap полезное поведение, полученное через imitation learning."
+    ),
+
+    text(
+      "Teacher-anchor influence gradually decays during training, allowing the neural agent to move from guided behavior toward strategies discovered through self-play.",
+      "Влияние teacher anchor постепенно уменьшается в ходе обучения, позволяя нейросетевому агенту переходить от направляемого поведения к стратегиям, самостоятельно найденным через self-play."
+    ),
+
+    text(
+      "Self-play training keeps zero-sum normalized outcomes so improvements are evaluated around the competitive result of the game rather than absolute reward accumulation.",
+      "Self-play обучение сохраняет zero-sum нормализацию результатов, благодаря чему улучшения оцениваются относительно конкурентного исхода партии, а не простого накопления абсолютной награды."
+    ),
+
+    text(
+      "Candidate evaluation now uses mirrored games to reduce seat, map-position and matchup bias when comparing a new policy against the current champion.",
+      "Оценка кандидатов теперь использует зеркальные партии, чтобы уменьшить влияние позиции игрока, стартового места на карте и особенностей matchup при сравнении новой политики с текущим champion."
+    ),
+
+    text(
+      "Candidate and champion policies can be compared throughout training instead of relying only on a final end-of-run evaluation.",
+      "Candidate и champion политики теперь могут сравниваться непосредственно во время обучения, а не только в рамках финальной проверки после завершения всего прогона."
+    ),
+
+    text(
+      "Champion promotion now requires both competitive performance and acceptable safety behavior, preventing a technically winning but fundamentally broken policy from automatically becoming the new best model.",
+      "Повышение нового champion теперь требует одновременно конкурентоспособных результатов и приемлемого безопасного поведения, чтобы формально побеждающая, но фундаментально сломанная политика не становилась автоматически новой лучшей моделью."
+    ),
+
+    text(
+      "Introduced clearer checkpoint semantics for bootstrap, latest training state, promoted champion and historical Hall of Fame models.",
+      "Введено более чёткое разделение checkpoint-файлов для bootstrap, последнего состояния обучения, текущего champion и исторических моделей Hall of Fame."
+    ),
+
+    text(
+      "bootstrap.pt now represents the validated imitation model that successfully passed the bootstrap gate.",
+      "bootstrap.pt теперь представляет проверенную imitation-модель, успешно прошедшую bootstrap gate."
+    ),
+
+    text(
+      "bootstrap_candidate.pt can preserve a candidate that did not pass validation, making failed bootstrap runs easier to inspect and diagnose.",
+      "bootstrap_candidate.pt может сохранять кандидата, не прошедшего проверку, что упрощает анализ и диагностику неудачных bootstrap-прогонов."
+    ),
+
+    text(
+      "latest.pt represents the latest PPO training state while best.pt represents the promoted champion used as the primary evaluation model.",
+      "latest.pt хранит последнее состояние PPO-обучения, тогда как best.pt представляет повышенного champion, используемого как основная модель для оценки."
+    ),
+
+    text(
+      "Hall of Fame storage is reserved for policies that actually achieved promotion rather than every intermediate training checkpoint.",
+      "Hall of Fame теперь предназначен для политик, действительно прошедших повышение, а не для каждого промежуточного checkpoint обучения."
+    ),
+
+    text(
+      "Older v0.5.2 and v0.5.3 neural training lineages are intentionally rejected for direct v0.5.4 resume to avoid silently mixing incompatible learning semantics.",
+      "Старые линии нейросетевого обучения v0.5.2 и v0.5.3 намеренно не принимаются для прямого resume в v0.5.4, чтобы не смешивать несовместимые семантики обучения."
+    ),
+
+    text(
+      "Improved neural training observability with clearer progress information for teacher collection, bootstrap, generations, evaluation and promotion.",
+      "Улучшена наблюдаемость нейросетевого обучения: прогресс сбора teacher-данных, bootstrap, поколений, evaluation и promotion стал значительно прозрачнее."
+    ),
+
+    text(
+      "Optimized teacher-data collection and neural preprocessing to reduce unnecessary overhead during large automated training runs.",
+      "Оптимизированы сбор teacher-данных и нейросетевая предобработка для снижения лишних накладных расходов во время крупных автоматизированных обучающих прогонов."
+    ),
+
+    text(
+      "Static topology and reusable encoder information can be cached instead of being repeatedly reconstructed for every decision.",
+      "Статическая топология и повторно используемая информация энкодера могут кэшироваться вместо повторного построения на каждом отдельном решении."
+    ),
+
+    text(
+      "Added explicit smoke and fast training profiles for quickly validating the neural pipeline before committing resources to larger experiments.",
+      "Добавлены явные профили smoke и fast для быстрой проверки neural pipeline перед запуском более ресурсоёмких экспериментов."
+    ),
+
+    text(
+      "Generated neural models, teacher replay datasets, training reports and PyTorch checkpoints are treated as runtime artifacts and are not intended to be stored in the application source repository.",
+      "Сгенерированные нейросетевые модели, teacher replay датасеты, отчёты обучения и PyTorch checkpoints рассматриваются как runtime-артефакты и не предназначены для хранения в основном репозитории исходного кода."
+    ),
+
+    text(
+      "Extended backend regression coverage across the core AI Lab, adaptive agents and neural pipeline.",
+      "Расширено регрессионное покрытие бэкенда для основного AI Lab, adaptive-агентов и neural pipeline."
+    ),
+
+    text(
+      "Added rules, audit and map validation to the backend verification workflow so game-rule regressions can be detected separately from conventional application test failures.",
+      "В процесс проверки бэкенда добавлены rules, audit и map validation, позволяющие обнаруживать регрессии игровых правил отдельно от обычных ошибок приложения."
+    ),
+
+    text(
+      "The current update establishes a common backend foundation for human gameplay and automated bot simulations instead of maintaining separate interpretations of the ARCHONT rules.",
+      "Текущее обновление формирует единый backend-фундамент для партий людей и автоматизированных симуляций ботов вместо поддержки нескольких различных интерпретаций правил ARCHONT."
+    ),
+
+    text(
+      "This creates the basis for large-scale automated balance testing where repeated games, edge cases, dominant strategies and abnormal game states can be discovered through simulation rather than relying exclusively on manual playtesting.",
+      "Это создаёт основу для масштабного автоматизированного тестирования баланса, где повторяющиеся партии, edge cases, доминирующие стратегии и аномальные игровые состояния могут обнаруживаться через симуляции, а не исключительно через ручные плейтесты."
+    )
+  ]
+},
+
 ];
