@@ -1,6 +1,25 @@
 import type { AppLanguage } from "./I18nContext";
 
 const RU_EXACT: Record<string, string> = {
+  "ENDGAME": "ЭНДГЕЙМ",
+  "ARCHONT vs RESISTANCE": "АРХОНТ против СОПРОТИВЛЕНИЯ",
+  "ARCHONT HP": "HP АРХОНТА",
+  "ARCHONT COMMAND": "КОМАНДА АРХОНТА",
+  "RESISTANCE": "СОПРОТИВЛЕНИЕ",
+  "All non-ARCHONT players are allied": "Все игроки, кроме АРХОНТА, являются союзниками",
+  "Already acted this round": "Уже действовал в этом раунде",
+  "Select an adjacent system": "Выберите соседнюю систему",
+  "ARCHONT VICTORY": "ПОБЕДА АРХОНТА",
+  "RESISTANCE VICTORY": "ПОБЕДА СОПРОТИВЛЕНИЯ",
+  "All Resistance Home Worlds were destroyed.": "Все домашние миры Сопротивления уничтожены.",
+  "The ARCHONT was destroyed.": "АРХОНТ уничтожен.",
+  "ALLIED CONTROL": "КОНТРОЛЬ СОЮЗНИКА",
+  "ENEMY CONTROL": "КОНТРОЛЬ ВРАГА",
+  "Claim Archon Core · 6/6/6 · 1 CP": "Активировать Ядро Архонта · 6/6/6 · 1 КО",
+  "Claim cost: 6 MAT · 6 ENG · 6 DAT · 1 CP · Result: ARCHONT vs Resistance":
+    "Цена активации: 6 Материи · 6 Энергии · 6 Данных · 1 КО · Результат: АРХОНТ против Сопротивления",
+  "Core activation requires all five Blueprints, control of the Heart, 6 MAT, 6 ENG, 6 DAT and 1 CP.":
+    "Для активации Ядра нужны все пять чертежей, контроль Сердца, 6 Материи, 6 Энергии, 6 Данных и 1 КО.",
   "HOSTILE ARRIVAL": "ВРАЖДЕБНОЕ ПРИБЫТИЕ",
   "INTERCEPTION FIRE": "ОГОНЬ ПЕРЕХВАТА",
   "One-way defensive strike": "Односторонний защитный удар",
@@ -417,8 +436,6 @@ const RU_EXACT: Record<string, string> = {
   "The new fleet movement must use a connected corridor.":
     "Новый флот должен перемещаться по связанному коридору.",
 
-  "Defensive Position": "Оборонительная позиция",
-  "Move → Attack": "Движение → Атака",
   "Enemy fleet": "Вражеский флот",
   "Defensive ambush": "Оборонительная засада",
   "Defensive ambush: the attacker draws 1 additional danger card before combat.":
@@ -481,8 +498,6 @@ const RU_EXACT: Record<string, string> = {
   "Received": "Получено",
   "None": "Нет",
 
-  "Continue Combat": "Продолжить бой",
-  Retreat: "Отступить",
   "Retreat destination": "Система отступления",
   "Combat target": "Цель боя",
   "Combat engagement": "Боевое столкновение",
@@ -515,6 +530,85 @@ const RU_EXACT: Record<string, string> = {
     "Просмотрите итог карт опасности, урон флотам и результат боя перед передачей хода следующему игроку.",
   "Select an enemy fleet in the current system.":
     "Выберите вражеский флот в текущей системе.",
+
+  // HUD v1.5 — compact gameplay workspaces
+  Infrastructure: "Инфраструктура",
+  Build: "Строительство",
+  Technologies: "Технологии",
+  "Selected system": "Выбранная система",
+  "Available buildings": "Доступные здания",
+  "Select one blueprint": "Выберите здание",
+  "Selected building": "Выбранное здание",
+  "Selected technology": "Выбранная технология",
+  "Ready to construct.": "Можно строить.",
+  "Ready to research.": "Можно исследовать.",
+  "Already researched.": "Уже исследовано.",
+  "Research · 1 CP": "Исследовать · 1 КО",
+  "Researching…": "Исследование…",
+  "No technologies available.": "Нет доступных технологий.",
+  "No production available": "Нет доступного производства",
+  "Build Barracks or Spaceport in this system, or select another controlled system.":
+    "Постройте Казармы или Космопорт в этой системе либо выберите другую подконтрольную систему.",
+  "Fleet slots": "Слоты флотов",
+  "Select a ready fleet to prepare an order.": "Выберите готовый флот и подготовьте приказ.",
+  "Select a ready fleet": "Выберите готовый флот",
+  "Movement, defense, transfer and attack": "Движение, оборона, передача и атака",
+  "COMMAND FLEET": "ОТДАТЬ ПРИКАЗ",
+  "Prepare orders": "Подготовка приказов",
+  "Choose a fleet, order and destination. The whole command package costs 1 CP.":
+    "Выберите флот, приказ и цель. Весь пакет приказов стоит 1 КО.",
+  Fleet: "Флот",
+  Order: "Приказ",
+  "First movement": "Первое перемещение",
+  "Continue Combat": "Продолжить бой",
+  Retreat: "Отступить",
+  "Defensive Position": "Оборонительная позиция",
+  "Move → Attack": "Движение → Атака",
+  Clear: "Очистить",
+  "Add at least one fleet order. The full package costs 1 CP.":
+    "Добавьте хотя бы один приказ. Весь пакет стоит 1 КО.",
+  "COMMAND": "КОМАНДА",
+  "SLOT 1": "СЛОТ 1",
+  "SLOT 2": "СЛОТ 2",
+  "SLOT 3": "СЛОТ 3",
+  "SLOT 4": "СЛОТ 4",
+  "Choose a building to construct": "Выберите здание для строительства",
+  "Built here": "Построено в системе",
+  "No buildings yet.": "Зданий пока нет.",
+  "Production in": "Производство в системе",
+  "Only production structures in this system are shown.": "Показаны только производственные здания выбранной системы.",
+  "Production structures": "Производственные здания",
+  "No production structures here.": "В этой системе нет производственных зданий.",
+  "Available actions": "Доступные действия",
+  "Each action costs 1 CP": "Каждое действие стоит 1 КО",
+  Produce: "Произвести",
+  Pack: "Упаковать",
+  "Pack into Ark": "Упаковать в Ковчег",
+  "Convert this Colony into a mobile Ark.": "Преобразовать Колонию в мобильный Ковчег.",
+
+  Combat: "Бой",
+  Archive: "Архив",
+  Logistics: "Логистика",
+  "Reinforced Marine Armor": "Усиленная броня пехоты",
+  "Marine squads gain +1 max HP in future combat calculations.":
+    "Отряды морской пехоты получают +1 к максимальным ОЗ в последующих боях.",
+  "Frigate Targeting Protocol": "Протокол наведения фрегатов",
+  "Frigates gain +1 attack in future combat calculations.":
+    "Фрегаты получают +1 к атаке в последующих боях.",
+  "Archive Decoding": "Декодирование архивов",
+  "Archive research actions will cost -1 Energy once archive research is implemented.":
+    "Исследование архивов будет стоить на 1 Энергию меньше.",
+  "Supply Chain Stabilizers": "Стабилизаторы снабжения",
+  "Future logistics upgrades may reduce retreat and danger-card penalties.":
+    "Логистические улучшения снижают штрафы от отступления и карт опасности.",
+  "Requires Barracks": "Требуются Казармы",
+  "Requires Barracks.": "Требуются Казармы.",
+  "Requires Spaceport": "Требуется Космопорт",
+  "Requires Spaceport.": "Требуется Космопорт.",
+  "Requires Research Center": "Требуется Исследовательский центр",
+  "Requires Research Center.": "Требуется Исследовательский центр.",
+  "Requires Supply Depot": "Требуется Склад снабжения",
+  "Requires Supply Depot.": "Требуется Склад снабжения.",
 
 };
 

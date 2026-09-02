@@ -24,20 +24,24 @@ export default function App() {
   const isRegisterPage = location.pathname === "/register";
   const isProfilePage = location.pathname === "/profile";
   const isPatchNotesPage = location.pathname === "/patch-notes";
+  const isGameplayPage = /^\/game\/sessions\/[^/]+\/play$/.test(location.pathname);
+  const isGameLogsPage = /^\/game\/sessions\/[^/]+\/logs$/.test(location.pathname);
+  const isGameContextPage = isGameplayPage || isGameLogsPage;
 
   const shouldShowNavigationButton =
     !isLoginPage &&
     !isHomePage &&
     !isRegisterPage &&
     !isProfilePage &&
-    !isPatchNotesPage;
+    !isPatchNotesPage &&
+    !isGameContextPage;
 
   const navigationButtonTarget = "/";
   const navigationButtonText = "Back to Home page";
 
   return (
-    <div className="app-shell">
-      {user?.admin_badge && (
+    <div className={`app-shell${isGameplayPage ? " gameplay-app-shell" : ""}`}>
+      {user?.admin_badge && !isGameContextPage && (
         <div className="admin-top-badge">
           {user.admin_badge}
         </div>
@@ -51,7 +55,7 @@ export default function App() {
         </nav>
       )}
 
-      <main className="app-content">
+      <main className={`app-content${isGameplayPage ? " gameplay-app-content" : ""}`}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

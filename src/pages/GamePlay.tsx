@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
+import { createPortal } from "react-dom";
 import {
   buildBuilding,
   claimArchonCore,
+  commandArchont,
   colonizeSystemWithArk,
   endTurn,
   getEditorMap,
@@ -12,6 +14,7 @@ import {
   produceUnitFromBuilding,
   passTurn,
   researchArchiveBlueprint,
+  resistanceAttackArchont,
 } from "../api/gameApi";
 import { researchTechnology } from "../api/technologyApi";
 import type {
@@ -31,6 +34,7 @@ import type {
   UnitType,
 } from "../types/game";
 import "./GameSession.css";
+import "./GamePlayHud.css";
 
 const UNIT_ACTION_ENERGY_COST = 3;
 const COMMAND_POINTS_PER_ROUND = 3;
@@ -105,14 +109,14 @@ function getFactionInitials(name: string | null | undefined): string {
 
 function getUnitIcon(unit: SessionUnit): string {
   if (unit.unit_type === "ark" || unit.state === "ark") {
-    return "🚀";
+    return "A";
   }
 
   const icons: Record<string, string> = {
-    scout: "🛸",
-    marine: "🪖",
-    frigate: "🚢",
-    cruiser: "🛳️",
+    scout: "S",
+    marine: "M",
+    frigate: "F",
+    cruiser: "C",
   };
 
   return icons[unit.unit_type] ?? "◆";
@@ -140,6 +144,7 @@ type ResourceCost = {
 type ResourceKind = "matter" | "energy" | "data" | "food";
 
 type WorkspaceTab = "systems" | "buildings" | "fleets";
+type BuildingWorkspaceMode = "construct" | "production" | "technologies";
 
 type ActiveEngagement = {
   systemId: number;
@@ -217,7 +222,7 @@ const RESOURCE_INFO: Record<
   energy: {
     label: "Energy",
     shortLabel: "ENG",
-    icon: "ϟ",
+    icon: "⚡",
   },
   data: {
     label: "Data",
@@ -298,6 +303,11 @@ const BUILDING_COSTS: Record<BuildingType, ResourceCost> = {
     energy: 4,
     data: 1,
   },
+  research_center: {
+    matter: 8,
+    energy: 4,
+    data: 1,
+  },
 };
 
 function getResourceShortageMessage(
@@ -343,7 +353,7 @@ const BUILDING_OPTIONS: {
   {
     type: "mine",
     name: "Mine",
-    icon: "⛏️",
+    icon: "MN",
     cost: "6 MAT / 2 ENG",
     income: "+2 MAT / round",
   },
@@ -357,23 +367,30 @@ const BUILDING_OPTIONS: {
   {
     type: "storage",
     name: "Supply Depot",
-    icon: "📦",
+    icon: "SUP",
     cost: "3 MAT / 2 ENG",
     income: "+1 SUP / round",
   },
   {
     type: "barracks",
     name: "Barracks",
-    icon: "🛡️",
+    icon: "BAR",
     cost: "8 MAT / 3 ENG",
     income: "Produces light units / Ark",
   },
   {
     type: "spaceport",
     name: "Spaceport",
-    icon: "🛰️",
+    icon: "SP",
     cost: "10 MAT / 4 ENG / 1 DAT",
     income: "Produces medium / heavy units",
+  },
+  {
+    type: "research_center",
+    name: "Research Center",
+    icon: "RC",
+    cost: "8 MAT / 4 ENG / 1 DAT",
+    income: "+1 DAT / round · enables Archive Decoding",
   },
 ];
 
@@ -387,73 +404,6 @@ const BUILDING_DISPLAY_NAMES: Record<string, string> = {
   spaceport: "Spaceport",
   orbital_defense: "Orbital Defense",
   colony: "Colony",
-};
-
-const BUILDING_DETAILS: Record<
-  string,
-  {
-    income: string;
-    produces: string[];
-    technologies: string[];
-    description: string;
-  }
-> = {
-  mine: {
-    income: "+2 MAT / round",
-    produces: [],
-    technologies: [],
-    description: "Basic matter production building.",
-  },
-  power_plant: {
-    income: "+2 ENG / round",
-    produces: [],
-    technologies: [],
-    description: "Basic energy production building.",
-  },
-  energy_plant: {
-    income: "+2 ENG / round",
-    produces: [],
-    technologies: [],
-    description: "Alternative energy production building.",
-  },
-  storage: {
-    income: "+1 SUP / round",
-    produces: [],
-    technologies: [],
-    description:
-      "Supply building. Up to 2 Supply Depots can be built in one system.",
-  },
-  research_center: {
-    income: "+1 DAT / round",
-    produces: [],
-    technologies: ["Blueprint research", "Civilization upgrades"],
-    description: "Allows research actions and technology progression.",
-  },
-  barracks: {
-    income: "No direct income",
-    produces: ["Scout Drone", "Marine Squad", "Ark"],
-    technologies: ["Light unit tactics", "Expansion logistics"],
-    description: "Light-unit and Ark production building.",
-  },
-  spaceport: {
-    income: "No direct income",
-    produces: ["Frigate", "Cruiser"],
-    technologies: ["Fleet warfare", "Heavy ship construction"],
-    description:
-      "Orbital production building for medium and heavy fleet units.",
-  },
-  orbital_defense: {
-    income: "No direct income",
-    produces: [],
-    technologies: ["Defense protocols"],
-    description: "Defensive orbital structure.",
-  },
-  colony: {
-    income: "+2 MAT / round, +2 ENG / round",
-    produces: [],
-    technologies: [],
-    description: "A deployed colony makes the system colonized. It has no HP.",
-  },
 };
 
 type BuildingIncomeResource = {
@@ -517,9 +467,9 @@ const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
   {
     unit_type: "scout",
     name: "Scout Drone",
-    icon: "🛸",
+    icon: "S",
     producedBy: "barracks",
-    costText: "4 🧱 / 2 ⚡",
+    costText: "4 MAT / 2 ENG",
     statsText: "ATK 1 · DEF 0 · HP 2",
     resourceCost: {
       matter: 4,
@@ -529,9 +479,9 @@ const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
   {
     unit_type: "marine",
     name: "Marine Squad",
-    icon: "🪖",
+    icon: "M",
     producedBy: "barracks",
-    costText: "5 🧱 / 2 ⚡",
+    costText: "5 MAT / 2 ENG",
     statsText: "ATK 1 · DEF 1 · HP 3",
     resourceCost: {
       matter: 5,
@@ -541,9 +491,9 @@ const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
   {
     unit_type: "ark",
     name: "Ark",
-    icon: "🚀",
+    icon: "A",
     producedBy: "barracks",
-    costText: "8 🧱 / 6 ⚡ / 1 💾",
+    costText: "8 MAT / 6 ENG / 1 DAT",
     statsText: "ATK 0 · DEF 1 · HP 10 · non-combat",
     resourceCost: {
       matter: 8,
@@ -554,9 +504,9 @@ const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
   {
     unit_type: "frigate",
     name: "Frigate",
-    icon: "🚢",
+    icon: "F",
     producedBy: "spaceport",
-    costText: "8 🧱 / 5 ⚡ / 1 💾",
+    costText: "8 MAT / 5 ENG / 1 DAT",
     statsText: "ATK 2 · DEF 1 · HP 4",
     resourceCost: {
       matter: 8,
@@ -567,9 +517,9 @@ const UNIT_PRODUCTION_OPTIONS: UnitProductionOption[] = [
   {
     unit_type: "cruiser",
     name: "Cruiser",
-    icon: "🛳️",
+    icon: "C",
     producedBy: "spaceport",
-    costText: "14 🧱 / 9 ⚡ / 2 💾",
+    costText: "14 MAT / 9 ENG / 2 DAT",
     statsText: "ATK 4 · DEF 2 · HP 8",
     resourceCost: {
       matter: 14,
@@ -802,14 +752,15 @@ export default function GamePlay() {
   const [mapDetails, setMapDetails] = useState<MapEditorSavedMap | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
   const [activeWorkspaceTab, setActiveWorkspaceTab] =
-    useState<WorkspaceTab>("systems");
+    useState<WorkspaceTab | null>(null);
+  const [fleetConsoleOpen, setFleetConsoleOpen] = useState<boolean>(false);
+  const [buildingWorkspaceMode, setBuildingWorkspaceMode] =
+    useState<BuildingWorkspaceMode>("construct");
   const [selectedBuildingType, setSelectedBuildingType] =
     useState<BuildingType>("mine");
   const [selectedSystemId, setSelectedSystemId] = useState<number | null>(null);
-  const [selectedStructureKey, setSelectedStructureKey] = useState<
-    string | null
-  >(null);
-  const [selectedUnitId, setSelectedUnitId] = useState<number | null>(null);
+  const [, setSelectedStructureKey] = useState<string | null>(null);
+  const [, setSelectedUnitId] = useState<number | null>(null);
   const [selectedCommandFleetId, setSelectedCommandFleetId] = useState<
     number | null
   >(null);
@@ -854,6 +805,8 @@ export default function GamePlay() {
   const [isResearchingArchive, setIsResearchingArchive] =
     useState<boolean>(false);
   const [isClaimingArchonCore, setIsClaimingArchonCore] =
+    useState<boolean>(false);
+  const [isArchontActionLoading, setIsArchontActionLoading] =
     useState<boolean>(false);
   const [isTurnActionLoading, setIsTurnActionLoading] =
     useState<boolean>(false);
@@ -1034,12 +987,32 @@ export default function GamePlay() {
   );
 
   const selectedArchiveControlledByCurrentPlayer =
+    Boolean(selectedMapSystem?.system_type === "archive") &&
     Boolean(selectedSystem) &&
     Boolean(currentPlayer) &&
-    selectedSystem?.owner_player_id === currentPlayer?.id;
+    currentPlayer!.fleets.some(
+      (fleet) =>
+        fleet.system_id === selectedSystem!.system_id &&
+        fleet.units.length > 0,
+    ) &&
+    getEnemyFleetsInSystem(selectedSystem?.system_id ?? null).length === 0;
 
   const archonCoreClaim = session?.victory_framework?.archon_core_claim ?? null;
   const isArchonCoreClaimed = Boolean(archonCoreClaim);
+  const archontState = session?.victory_framework?.archont ?? null;
+  const homeWorlds = session?.victory_framework?.home_worlds ?? [];
+  const isArchontEndgame =
+    Boolean(archontState) && session?.round_phase === "archont_endgame";
+  const coreActivationCost = session?.victory_framework?.core_activation_cost ?? {
+    matter: 6,
+    energy: 6,
+    data: 6,
+    command_points: 1,
+  };
+  const coreResourceError = getResourceShortageMessage(
+    currentPlayer,
+    coreActivationCost,
+  );
   const selectedSystemIsHeartOfTheGalaxy =
     selectedMapSystem?.system_type === "archive" &&
     selectedMapSystem.archive_level === 5;
@@ -1053,6 +1026,7 @@ export default function GamePlay() {
     currentPlayerHasAllBlueprints &&
     selectedSystemIsHeartOfTheGalaxy &&
     selectedArchiveControlledByCurrentPlayer &&
+    !coreResourceError &&
     (currentPlayer?.command_points_left ?? 0) > 0;
 
   const archonCoreClaimHint = (() => {
@@ -1070,6 +1044,10 @@ export default function GamePlay() {
 
     if (!selectedArchiveControlledByCurrentPlayer) {
       return "Current player must control the Heart of the Galaxy.";
+    }
+
+    if (coreResourceError) {
+      return coreResourceError;
     }
 
     if ((currentPlayer?.command_points_left ?? 0) <= 0) {
@@ -1094,9 +1072,23 @@ export default function GamePlay() {
   );
 
   function openWorkspaceTab(tab: WorkspaceTab) {
-    setActiveWorkspaceTab(tab);
+    if (activeWorkspaceTab === tab) {
+      setActiveWorkspaceTab(null);
+      setFleetConsoleOpen(false);
+      setBuildingWorkspaceMode("construct");
+      if (tab === "systems") {
+        setSelectedSystemId(null);
+        setSelectedStructureKey(null);
+        setSelectedUnitId(null);
+      }
+      return;
+    }
 
-    if ((tab === "systems" || tab === "buildings") && currentPlayer) {
+    setActiveWorkspaceTab(tab);
+    setFleetConsoleOpen(false);
+    setBuildingWorkspaceMode("construct");
+
+    if (tab === "buildings" && currentPlayer) {
       const selectedIsControlled =
         selectedSystem?.owner_player_id === currentPlayer.id;
 
@@ -1245,6 +1237,63 @@ export default function GamePlay() {
       }));
     } finally {
       setIsClaimingArchonCore(false);
+    }
+  }
+
+  async function handleArchontCommand(
+    actionType: "move" | "attack",
+    targetSystemId: number,
+  ) {
+    if (!session || !archontState || !currentPlayer) {
+      return;
+    }
+
+    try {
+      setIsArchontActionLoading(true);
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archontEndgame: "",
+      }));
+      const updatedSession = await commandArchont(
+        session.id,
+        actionType,
+        targetSystemId,
+      );
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archontEndgame:
+          err instanceof Error ? err.message : "Failed to command ARCHONT",
+      }));
+    } finally {
+      setIsArchontActionLoading(false);
+    }
+  }
+
+  async function handleResistanceAttackArchont(fleetId: number) {
+    if (!session || !archontState || !currentPlayer) {
+      return;
+    }
+
+    try {
+      setIsArchontActionLoading(true);
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archontEndgame: "",
+      }));
+      const updatedSession = await resistanceAttackArchont(session.id, fleetId);
+      setSession(updatedSession);
+      selectCurrentPlayerFromSession(updatedSession);
+    } catch (err) {
+      setActionErrors((currentErrors) => ({
+        ...currentErrors,
+        archontEndgame:
+          err instanceof Error ? err.message : "Failed to attack ARCHONT",
+      }));
+    } finally {
+      setIsArchontActionLoading(false);
     }
   }
 
@@ -1577,11 +1626,11 @@ export default function GamePlay() {
     }
 
     return session.players.flatMap((player) =>
-      player.id === currentPlayer.id
-        ? []
-        : (player.fleets ?? []).filter(
+      isPlayerHostileToCurrent(player.id)
+        ? (player.fleets ?? []).filter(
             (fleet) => fleet.system_id === systemId && fleet.units.length > 0,
-          ),
+          )
+        : [],
     );
   }
 
@@ -1594,6 +1643,35 @@ export default function GamePlay() {
 
     return getConnectedSystems(fleet.system_id).filter(
       (system) => getEnemyFleetsInSystem(system.system_id).length > 0,
+    );
+  }
+
+  function getLivingEnemyHomeWorldInSystem(systemId: number | null) {
+    if (!currentPlayer || systemId === null || isArchonCoreClaimed) {
+      return null;
+    }
+
+    return (
+      homeWorlds.find(
+        (home) =>
+          !home.destroyed &&
+          home.player_id !== currentPlayer.id &&
+          home.system_id === systemId,
+      ) ?? null
+    );
+  }
+
+  function getAttackableHomeConnectedSystems(
+    fleet: SessionFleet | null | undefined,
+  ): SessionSystem[] {
+    if (!fleet || isArchonCoreClaimed) {
+      return [];
+    }
+
+    return getConnectedSystems(fleet.system_id).filter(
+      (system) =>
+        Boolean(getLivingEnemyHomeWorldInSystem(system.system_id)) &&
+        getEnemyFleetsInSystem(system.system_id).length === 0,
     );
   }
 
@@ -1720,6 +1798,8 @@ export default function GamePlay() {
     const firstConnectedSystem = fleet
       ? nextOrderType === "move_attack"
         ? getAttackableConnectedSystems(fleet)[0]
+        : nextOrderType === "move_attack_home"
+          ? getAttackableHomeConnectedSystems(fleet)[0]
         : nextOrderType === "continue_combat"
           ? null
           : nextOrderType === "move_move"
@@ -1801,6 +1881,12 @@ export default function GamePlay() {
       setSelectedAttackTargetFleetId(
         getEnemyFleetsInSystem(attackSystem?.system_id ?? null)[0]?.id ?? null,
       );
+    } else if (orderType === "move_attack_home") {
+      const homeSystem =
+        getAttackableHomeConnectedSystems(selectedFleet)[0] ?? null;
+      setSelectedCommandTargetSystemId(homeSystem?.system_id ?? null);
+      setSelectedCommandSecondTargetSystemId(null);
+      setSelectedAttackTargetFleetId(null);
     } else if (orderType === "retreat") {
       const retreatSystem = selectedFleet
         ? getNonHostileConnectedSystems(selectedFleet.system_id)[0] ?? null
@@ -2060,6 +2146,8 @@ export default function GamePlay() {
     const firstStepSystems =
       selectedCommandOrderType === "move_attack"
         ? getAttackableConnectedSystems(fleet)
+        : selectedCommandOrderType === "move_attack_home"
+          ? getAttackableHomeConnectedSystems(fleet)
         : selectedCommandOrderType === "move_move"
           ? getConnectedSystems(fleet.system_id)
           : getNonHostileConnectedSystems(fleet.system_id);
@@ -2513,7 +2601,7 @@ export default function GamePlay() {
       const isHostileEntry = Boolean(
         hostileEntrySystem &&
           ((hostileEntrySystem.owner_player_id !== null &&
-            hostileEntrySystem.owner_player_id !== currentPlayer?.id) ||
+            isPlayerHostileToCurrent(hostileEntrySystem.owner_player_id)) ||
             interceptor),
       );
       const interceptorAttack = interceptor
@@ -2877,6 +2965,35 @@ export default function GamePlay() {
     } as CSSProperties;
   }
 
+  function arePlayersHostile(
+    firstPlayerId: number | null | undefined,
+    secondPlayerId: number | null | undefined,
+  ): boolean {
+    if (
+      firstPlayerId === null ||
+      firstPlayerId === undefined ||
+      secondPlayerId === null ||
+      secondPlayerId === undefined ||
+      firstPlayerId === secondPlayerId
+    ) {
+      return false;
+    }
+
+    if (!archontState) {
+      return true;
+    }
+
+    const firstIsArchont = firstPlayerId === archontState.owner_player_id;
+    const secondIsArchont = secondPlayerId === archontState.owner_player_id;
+    return firstIsArchont !== secondIsArchont;
+  }
+
+  function isPlayerHostileToCurrent(
+    otherPlayerId: number | null | undefined,
+  ): boolean {
+    return Boolean(currentPlayer) && arePlayersHostile(currentPlayer?.id, otherPlayerId);
+  }
+
   function getOwnershipRelation(
     ownerPlayerId: number | null | undefined,
   ): "friendly" | "hostile" | "neutral" {
@@ -2884,7 +3001,7 @@ export default function GamePlay() {
       return "neutral";
     }
 
-    if (currentPlayer && ownerPlayerId === currentPlayer.id) {
+    if (!currentPlayer || !arePlayersHostile(currentPlayer.id, ownerPlayerId)) {
       return "friendly";
     }
 
@@ -2895,11 +3012,14 @@ export default function GamePlay() {
     const relation = getOwnershipRelation(ownerPlayerId);
 
     if (relation === "friendly") {
+      if (currentPlayer && ownerPlayerId !== currentPlayer.id && archontState) {
+        return "ALLIED CONTROL";
+      }
       return "YOUR CONTROL";
     }
 
     if (relation === "hostile") {
-      return "RIVAL CONTROL";
+      return archontState ? "ENEMY CONTROL" : "RIVAL CONTROL";
     }
 
     return "UNCHARTED";
@@ -3067,6 +3187,8 @@ export default function GamePlay() {
   const selectedCommandDestinationSystems =
     selectedCommandOrderType === "move_attack"
       ? getAttackableConnectedSystems(selectedCommandFleet)
+      : selectedCommandOrderType === "move_attack_home"
+        ? getAttackableHomeConnectedSystems(selectedCommandFleet)
       : selectedCommandOrderType === "continue_combat"
         ? []
         : selectedCommandOrderType === "move_move"
@@ -3299,6 +3421,8 @@ export default function GamePlay() {
         return "Defensive Position";
       case "move_attack":
         return "Move → Attack";
+      case "move_attack_home":
+        return "Move → Attack Home";
       case "continue_combat":
         return "Continue Combat";
       case "retreat":
@@ -3743,24 +3867,6 @@ export default function GamePlay() {
     })
     .filter((order) => order !== null);
 
-  const totalFleetCount = session
-    ? session.players.reduce(
-        (total, player) => total + (player.fleets?.length ?? 0),
-        0,
-      )
-    : 0;
-  const totalUnitCount = session
-    ? session.systems.reduce(
-        (total, system) => total + (system.units?.length ?? 0),
-        0,
-      )
-    : 0;
-  const currentPlayerOwnedSystems =
-    session && currentPlayer
-      ? session.systems.filter(
-          (system) => system.owner_player_id === currentPlayer.id,
-        ).length
-      : 0;
   const selectedSystemOwner = selectedSystem
     ? getPlayerById(selectedSystem.owner_player_id)
     : null;
@@ -3782,17 +3888,23 @@ export default function GamePlay() {
             fleet.system_id === system.system_id && fleet.units.length > 0,
         ),
       );
-      const ownerIds = new Set(
-        systemFleets.map((fleet) => fleet.owner_player_id),
+      const ownerIds = [
+        ...new Set(systemFleets.map((fleet) => fleet.owner_player_id)),
+      ];
+
+      const hasHostilePair = ownerIds.some((ownerId, index) =>
+        ownerIds.slice(index + 1).some((otherOwnerId) =>
+          arePlayersHostile(ownerId, otherOwnerId),
+        ),
       );
 
-      if (ownerIds.size > 1) {
+      if (hasHostilePair) {
         conflictSystemIds.add(system.system_id);
       }
     }
 
     return conflictSystemIds;
-  }, [session]);
+  }, [session, archontState?.owner_player_id]);
 
   const activeEngagements = useMemo<ActiveEngagement[]>(() => {
     if (!session || !currentPlayer) {
@@ -3811,7 +3923,7 @@ export default function GamePlay() {
           (fleet) => fleet.owner_player_id === currentPlayer.id,
         );
         const rivalFleets = systemFleets.filter(
-          (fleet) => fleet.owner_player_id !== currentPlayer.id,
+          (fleet) => isPlayerHostileToCurrent(fleet.owner_player_id),
         );
 
         if (friendlyFleets.length === 0 || rivalFleets.length === 0) {
@@ -3870,37 +3982,111 @@ export default function GamePlay() {
       className="game-page game-simulation-page archont-gameplay-shell"
       style={getPlayerVisualStyle(currentPlayer?.id)}
     >
-      <header className="game-header archont-command-header">
-        <div className="archont-brand-lockup">
-          <div className="archont-brand-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-
-          <div>
-            <span className="archont-eyebrow">Tabletop command interface</span>
-            <h1>ARCHONT</h1>
-            <p>Lead a civilization through the ruins of a fractured galaxy.</p>
-          </div>
+      <header className="archont-game-hud" style={getPlayerVisualStyle(currentPlayer?.id)}>
+        <div className="archont-hud-brand">
+          <span className="archont-hud-logo" aria-hidden="true">A</span>
+          <span className="archont-hud-session">
+            <strong>ARCHONT</strong>
+            <small>{session?.name ?? `Session ${numericSessionId}`}</small>
+          </span>
         </div>
 
-        <div className="archont-header-actions">
+        <div className="archont-hud-status" aria-label="Game status">
+          <span className="archont-hud-round">
+            <small>ROUND</small>
+            <strong>
+              {session?.current_round ?? "—"}
+              {session?.max_rounds ? `/${session.max_rounds}` : ""}
+            </strong>
+          </span>
+
+          {currentPlayer && (
+            <div className="archont-hud-resources" aria-label="Active player resources">
+              <ResourceBadge kind="matter" value={currentPlayer.matter} compact />
+              <ResourceBadge kind="energy" value={currentPlayer.energy} compact />
+              <ResourceBadge kind="food" value={currentPlayer.food} compact />
+              <ResourceBadge kind="data" value={currentPlayer.data} compact />
+            </div>
+          )}
+
+          <span className="archont-hud-ascension" title="Archont blueprints">
+            <small>ARCHONT</small>
+            <span className="archont-hud-blueprint-pips" aria-hidden="true">
+              {Array.from({ length: currentPlayer?.blueprints_required ?? 5 }).map((_, index) => (
+                <i
+                  key={index}
+                  className={index < (currentPlayer?.blueprint_count ?? 0) ? "active" : ""}
+                />
+              ))}
+            </span>
+            <strong>{currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5}</strong>
+          </span>
+
+          <span className="archont-hud-cp" title="Command points">
+            <small>CP</small>
+            <span className="archont-hud-cp-pips" aria-hidden="true">
+              {Array.from({ length: COMMAND_POINTS_PER_ROUND }).map((_, index) => (
+                <i
+                  key={index}
+                  className={index < (currentPlayer?.command_points_left ?? 0) ? "active" : ""}
+                />
+              ))}
+            </span>
+            <strong>{currentPlayer?.command_points_left ?? 0}/{COMMAND_POINTS_PER_ROUND}</strong>
+          </span>
+        </div>
+
+        <div className="archont-hud-actions">
+          <Link
+            to="/"
+            className="archont-hud-menu-button"
+            title="Main menu"
+            aria-label="Main menu"
+          >
+            <span className="archont-hud-menu-icon" aria-hidden="true">⌂</span>
+            <strong>MENU</strong>
+          </Link>
           <Link
             to={`/game/sessions/${numericSessionId}/logs`}
-            className="archont-sync-button archont-game-logs-button"
+            className="archont-hud-icon-button"
+            title="Game logs"
+            aria-label="Game logs"
           >
-            <span aria-hidden="true">☷</span>
-            Game logs
+            ☷
           </Link>
-
           <button
-            className="archont-sync-button"
+            type="button"
+            className="archont-hud-icon-button"
             onClick={loadSession}
             disabled={isLoading}
+            title="Synchronize board"
+            aria-label="Synchronize board"
           >
-            <span aria-hidden="true">↻</span>
-            {isLoading ? "Synchronizing..." : "Synchronize board"}
+            ↻
+          </button>
+          <button
+            type="button"
+            className="archont-hud-pass-button"
+            onClick={handlePassTurn}
+            disabled={
+              isTurnActionLoading ||
+              session?.status !== "started" ||
+              !currentPlayer
+            }
+          >
+            PASS
+          </button>
+          <button
+            type="button"
+            className="archont-hud-end-turn"
+            onClick={handleEndTurn}
+            disabled={
+              isTurnActionLoading ||
+              session?.status !== "started" ||
+              !currentPlayer
+            }
+          >
+            {isTurnActionLoading ? "PROCESSING" : "END TURN · 1 CP"}
           </button>
         </div>
       </header>
@@ -3910,129 +4096,8 @@ export default function GamePlay() {
       {session && (
         <>
           <section
-            className="game-panel archont-session-command-deck"
-            style={getPlayerVisualStyle(currentPlayer?.id)}
+            className={`simulation-layout archont-game-board-layout archont-board-stack workspace-${activeWorkspaceTab ?? "closed"}`}
           >
-            <div className="archont-session-identity">
-              <span className="archont-eyebrow">
-                Session {session.id} · {session.play_mode}
-              </span>
-              <h2>{session.name}</h2>
-              <div className="archont-session-tags">
-                <span>{session.status}</span>
-                <span>{session.round_phase} phase</span>
-                <span>{session.players_count} commanders</span>
-              </div>
-            </div>
-
-            <div className="archont-command-stats" aria-label="Game status">
-              <article>
-                <span>ROUND</span>
-                <strong>{session.current_round}/{session.max_rounds ?? 12}</strong>
-                <small>Fallback victory after round {session.max_rounds ?? 12}</small>
-              </article>
-              <article>
-                <span>CONTROL</span>
-                <strong>{currentPlayerOwnedSystems}</strong>
-                <small>Your systems</small>
-              </article>
-              <article>
-                <span>FLEETS</span>
-                <strong>{totalFleetCount}</strong>
-                <small>{totalUnitCount} units across the board</small>
-              </article>
-              <article>
-                <span>ASCENSION</span>
-                <strong>
-                  {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5}
-                </strong>
-                <small>Archon blueprints</small>
-              </article>
-              <article>
-                <span>DOMINANCE</span>
-                <strong>{currentPlayer?.dominance_points ?? 0}</strong>
-                <small>Fallback victory points</small>
-              </article>
-            </div>
-
-            <div className="archont-victory-foundation">
-              <span>Victory paths</span>
-              <strong>Ascension · Resistance · Dominion</strong>
-              <small>
-                Archon {archonCoreClaim?.player_faction ?? session.victory_framework?.archon_state ?? "inactive"} ·
-                Core {archonCoreClaim ? `claimed at ${archonCoreClaim.core_system_name ?? "Heart of the Galaxy"}` : session.victory_framework?.core_state ?? "unclaimed"} ·
-                Blueprints {currentPlayer?.blueprint_count ?? 0}/{currentPlayer?.blueprints_required ?? 5} ·
-                Highest DP wins if no Archon is activated by round {session.max_rounds ?? 12}
-              </small>
-            </div>
-
-            <div className="archont-active-commander">
-              <div className="archont-commander-emblem">
-                {getFactionInitials(currentPlayer?.faction_name)}
-              </div>
-
-              <div className="archont-commander-copy">
-                <span>Active commander</span>
-                <strong>
-                  {currentPlayer?.faction_name ?? "No active player"}
-                </strong>
-                <small>
-                  {currentPlayer?.civilization_name ?? "No civilization"}
-                </small>
-              </div>
-
-              <div className="archont-cp-display">
-                <span>Command points</span>
-                <div className="archont-cp-pips">
-                  {Array.from({ length: COMMAND_POINTS_PER_ROUND }).map(
-                    (_, index) => (
-                      <i
-                        key={index}
-                        className={
-                          index < (currentPlayer?.command_points_left ?? 0)
-                            ? "active"
-                            : ""
-                        }
-                      />
-                    ),
-                  )}
-                </div>
-                <strong>
-                  {currentPlayer?.command_points_left ?? 0}/
-                  {COMMAND_POINTS_PER_ROUND}
-                </strong>
-              </div>
-
-              <div className="turn-actions archont-turn-actions">
-                <button
-                  type="button"
-                  onClick={handleEndTurn}
-                  disabled={
-                    isTurnActionLoading ||
-                    session.status !== "started" ||
-                    !currentPlayer
-                  }
-                >
-                  {isTurnActionLoading ? "Processing..." : "End turn · 1 CP"}
-                </button>
-
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={handlePassTurn}
-                  disabled={
-                    isTurnActionLoading ||
-                    session.status !== "started" ||
-                    !currentPlayer
-                  }
-                >
-                  {isTurnActionLoading ? "Processing..." : "Pass round"}
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section className="simulation-layout archont-game-board-layout archont-board-stack">
             <aside className="simulation-sidebar players-sidebar archont-players-ribbon">
               <h2>Players</h2>
 
@@ -4301,9 +4366,17 @@ export default function GamePlay() {
                         (fleet) => fleet.owner_player_id === currentPlayer.id,
                       ).length
                     : 0;
+                  const alliedFleetCount =
+                    currentPlayer && archontState
+                      ? systemFleets.filter(
+                          (fleet) =>
+                            fleet.owner_player_id !== currentPlayer.id &&
+                            !isPlayerHostileToCurrent(fleet.owner_player_id),
+                        ).length
+                      : 0;
                   const hostileFleetCount = currentPlayer
-                    ? systemFleets.filter(
-                        (fleet) => fleet.owner_player_id !== currentPlayer.id,
+                    ? systemFleets.filter((fleet) =>
+                        isPlayerHostileToCurrent(fleet.owner_player_id),
                       ).length
                     : systemFleets.length;
                   const ownerPlayer = getPlayerById(system.owner_player_id);
@@ -4312,6 +4385,9 @@ export default function GamePlay() {
                   );
                   const hasActiveConflict = activeConflictSystemIds.has(
                     system.system_id,
+                  );
+                  const systemHomeWorld = homeWorlds.find(
+                    (home) => home.system_id === system.system_id,
                   );
 
                   const systemVisualClass = getGameplaySystemVisualClass(
@@ -4330,6 +4406,8 @@ export default function GamePlay() {
                         `ownership-${ownershipRelation}`,
                         systemVisualClass,
                         hasActiveConflict ? "in-conflict" : "",
+                        systemHomeWorld ? "has-home-world" : "",
+                        systemHomeWorld?.destroyed ? "home-world-destroyed" : "",
                         isSelected ? "selected" : "",
                         isControlledBySelectedPlayer ? "selectable" : "",
                       ].join(" ")}
@@ -4340,14 +4418,36 @@ export default function GamePlay() {
                       }}
                       title={`${system.system_name} · ${
                         system.owner_faction ? system.owner_faction : "Neutral"
-                      }`}
+                      }${systemHomeWorld ? ` · ${systemHomeWorld.destroyed ? "DESTROYED HOME WORLD" : "HOME WORLD"}` : ""}`}
                       onClick={() => {
+                        const isClosingSelectedSystem =
+                          selectedSystemId === system.system_id &&
+                          activeWorkspaceTab === "systems";
+
+                        if (isClosingSelectedSystem) {
+                          setSelectedSystemId(null);
+                          setSelectedStructureKey(null);
+                          setSelectedUnitId(null);
+                          setActiveWorkspaceTab(null);
+                          return;
+                        }
+
                         setSelectedSystemId(system.system_id);
                         setSelectedStructureKey(null);
                         setSelectedUnitId(null);
+                        setActiveWorkspaceTab("systems");
                       }}
                     >
                       <span className="archont-system-orbit" />
+                      {archontState?.system_id === system.system_id && (
+                        <span
+                          className="archont-map-entity"
+                          title={`ARCHONT · ${archontState.current_hp}/${archontState.max_hp} HP`}
+                        >
+                          <b>A</b>
+                          <small>{archontState.current_hp}/{archontState.max_hp}</small>
+                        </span>
+                      )}
                       <span className="archont-system-core">
                         {getFactionInitials(ownerPlayer?.faction_name)}
                       </span>
@@ -4368,6 +4468,14 @@ export default function GamePlay() {
                         </span>
 
                         <span className="compact-system-icons">
+                          {systemHomeWorld && (
+                            <span
+                              className={`home-world-presence ${systemHomeWorld.destroyed ? "destroyed" : ""}`}
+                              title={systemHomeWorld.destroyed ? "Destroyed Home World" : "Home World · conquest target"}
+                            >
+                              {systemHomeWorld.destroyed ? "×⌂" : "⌂ HOME"}
+                            </span>
+                          )}
                           {buildingsCount > 0 && (
                             <span title="Structures">▦ {buildingsCount}</span>
                           )}
@@ -4380,6 +4488,14 @@ export default function GamePlay() {
                               title="Your fleets"
                             >
                               ▲ {friendlyFleetCount}
+                            </span>
+                          )}
+                          {alliedFleetCount > 0 && (
+                            <span
+                              className="allied-presence"
+                              title="Allied Resistance fleets"
+                            >
+                              ⬡ {alliedFleetCount}
                             </span>
                           )}
                           {hostileFleetCount > 0 && (
@@ -4395,20 +4511,175 @@ export default function GamePlay() {
                     </button>
                   );
                 })}
+
+                {session?.status === "finished" &&
+                  session.victory_framework?.winner_side === "conquest" && (
+                    <aside className="archont-endgame-console archont-conquest-result-console">
+                      <header className="archont-endgame-console-header">
+                        <div>
+                          <span className="archont-eyebrow">CONQUEST</span>
+                          <strong>HOME WORLD VICTORY</strong>
+                        </div>
+                      </header>
+                      <div className="archont-endgame-home-row">
+                        {homeWorlds.map((home) => (
+                          <span
+                            key={home.player_id}
+                            className={home.destroyed ? "destroyed" : ""}
+                          >
+                            <i aria-hidden="true">{home.destroyed ? "×" : "⌂"}</i>
+                            {home.player_faction ?? `P${home.player_id}`}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="archont-endgame-result">
+                        <b>
+                          {getPlayerById(session.victory_framework.winner_player_ids?.[0] ?? null)?.faction_name ??
+                            "Last Home World standing"}
+                        </b>
+                        <small>All rival Home Worlds were destroyed before ARCHONT activation.</small>
+                      </div>
+                    </aside>
+                  )}
+
+                {archontState && (isArchontEndgame || session?.status === "finished") && (
+                  <aside className="archont-endgame-console">
+                    <header className="archont-endgame-console-header">
+                      <div>
+                        <span className="archont-eyebrow">ENDGAME</span>
+                        <strong>ARCHONT vs RESISTANCE</strong>
+                      </div>
+                      <span className="archont-endgame-hp">
+                        <small>ARCHONT HP</small>
+                        <b>{archontState.current_hp}/{archontState.max_hp}</b>
+                      </span>
+                    </header>
+
+                    <div className="archont-endgame-home-row">
+                      {homeWorlds
+                        .filter((home) => home.is_victory_target)
+                        .map((home) => (
+                          <span
+                            key={home.player_id}
+                            className={home.destroyed ? "destroyed" : ""}
+                            title={home.system_name ?? "Resistance Home World"}
+                          >
+                            <i aria-hidden="true">{home.destroyed ? "×" : "⌂"}</i>
+                            {home.player_faction ?? `P${home.player_id}`}
+                          </span>
+                        ))}
+                    </div>
+
+                    {session?.victory_framework?.winner_side ? (
+                      <div className="archont-endgame-result">
+                        <b>
+                          {session.victory_framework.winner_side === "archont"
+                            ? "ARCHONT VICTORY"
+                            : "RESISTANCE VICTORY"}
+                        </b>
+                        <small>
+                          {session.victory_framework.winner_side === "archont"
+                            ? "All Resistance Home Worlds were destroyed."
+                            : "The ARCHONT was destroyed."}
+                        </small>
+                      </div>
+                    ) : currentPlayer?.id === archontState.owner_player_id ? (
+                      <div className="archont-endgame-action-row">
+                        <span>
+                          <small>ARCHONT COMMAND</small>
+                          <b>
+                            {archontState.has_acted_this_round
+                              ? "Already acted this round"
+                              : "Select an adjacent system"}
+                          </b>
+                        </span>
+                        {selectedSystem &&
+                          getConnectedSystems(archontState.system_id).some(
+                            (system) => system.system_id === selectedSystem.system_id,
+                          ) &&
+                          !archontState.has_acted_this_round &&
+                          (() => {
+                            const defenders = getFleetsInSystem(selectedSystem.system_id).filter(
+                              (fleet) => fleet.owner_player_id !== archontState.owner_player_id,
+                            );
+                            const livingHome = homeWorlds.find(
+                              (home) =>
+                                home.is_victory_target &&
+                                !home.destroyed &&
+                                home.system_id === selectedSystem.system_id,
+                            );
+                            const actionType: "move" | "attack" =
+                              defenders.length > 0 || livingHome ? "attack" : "move";
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleArchontCommand(actionType, selectedSystem.system_id)
+                                }
+                                disabled={isArchontActionLoading}
+                              >
+                                {actionType === "attack" ? "ATTACK" : "MOVE"} · {selectedSystem.system_name}
+                              </button>
+                            );
+                          })()}
+                      </div>
+                    ) : (
+                      <div className="archont-endgame-resistance-row">
+                        <span>
+                          <small>RESISTANCE</small>
+                          <b>All non-ARCHONT players are allied</b>
+                        </span>
+                        <div>
+                          {(currentPlayer?.fleets ?? [])
+                            .filter((fleet) => {
+                              if (fleet.has_acted_this_round || fleet.units.length === 0) {
+                                return false;
+                              }
+                              if (fleet.system_id === archontState.system_id) {
+                                return true;
+                              }
+                              return getConnectedSystems(fleet.system_id).some(
+                                (system) => system.system_id === archontState.system_id,
+                              );
+                            })
+                            .map((fleet) => (
+                              <button
+                                key={fleet.id}
+                                type="button"
+                                onClick={() => handleResistanceAttackArchont(fleet.id)}
+                                disabled={isArchontActionLoading}
+                              >
+                                {fleet.name} → ATTACK ARCHONT
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {actionErrors.archontEndgame && (
+                      <p className="inline-action-error">{actionErrors.archontEndgame}</p>
+                    )}
+                  </aside>
+                )}
               </div>
 
-              <div className="game-map-legend archont-map-legend">
-                <span className="legend-line-safe">Safe corridor</span>
-                <span className="legend-line-dangerous">
-                  Dangerous corridor
-                </span>
-                <span className="legend-line-wraparound">
-                  Wraparound corridor
-                </span>
-                <span className="legend-ownership-friendly">Your control</span>
-                <span className="legend-ownership-hostile">Rival control</span>
-                <span className="legend-ownership-neutral">Uncharted</span>
-              </div>
+              <details className="archont-map-key">
+                <summary title="Map legend" aria-label="Map legend">
+                  <span aria-hidden="true">?</span>
+                </summary>
+                <div className="game-map-legend archont-map-legend">
+                  <span className="legend-line-safe">Safe corridor</span>
+                  <span className="legend-line-dangerous">
+                    Dangerous corridor
+                  </span>
+                  <span className="legend-line-wraparound">
+                    Wraparound corridor
+                  </span>
+                  <span className="legend-ownership-friendly">Your control</span>
+                  <span className="legend-ownership-hostile">Rival control</span>
+                  <span className="legend-ownership-neutral">Uncharted</span>
+                </div>
+              </details>
 
               <nav
                 className="archont-workspace-tabs"
@@ -4467,357 +4738,49 @@ export default function GamePlay() {
               </nav>
 
               {activeWorkspaceTab === "buildings" && (
-                <section className="archont-workspace-panel archont-buildings-workspace">
-                  <div className="archont-workspace-heading">
-                    <div>
-                      <span className="archont-eyebrow">
-                        Infrastructure command
-                      </span>
-                      <h2>Buildings across your systems</h2>
-                      <p>
-                        Review existing infrastructure, select a controlled
-                        system and construct a new building.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="archont-building-inventory-grid">
-                    {controlledSystems.map((system) => {
-                      const groupedBuildings = groupBuildingsByType(
-                        (system.buildings ?? []).filter(
-                          (building) =>
-                            building.owner_player_id === currentPlayer?.id,
-                        ),
-                      );
-                      const buildingGroups = Object.values(groupedBuildings);
-
-                      return (
-                        <button
-                          type="button"
-                          key={system.system_id}
-                          className={[
-                            "archont-building-system-card",
-                            selectedSystemId === system.system_id
-                              ? "selected"
-                              : "",
-                          ].join(" ")}
-                          onClick={() => {
-                            setSelectedSystemId(system.system_id);
-                            setSelectedStructureKey(null);
-                            setSelectedUnitId(null);
-                          }}
-                        >
-                          <header>
-                            <span className="archont-building-system-emblem">
-                              ◎
-                            </span>
-                            <span>
-                              <strong>{system.system_name}</strong>
-                              <small>
-                                {buildingGroups.reduce(
-                                  (sum, group) => sum + group.length,
-                                  0,
-                                )}{" "}
-                                structures
-                              </small>
-                            </span>
-                          </header>
-
-                          <div className="archont-building-inventory-list">
-                            {buildingGroups.length > 0 ? (
-                              buildingGroups.map((buildings) => {
-                                const firstBuilding = buildings[0];
-                                const incomeResources =
-                                  getBuildingIncomeResources(
-                                    firstBuilding.building_type,
-                                    buildings.length,
-                                  );
-
-                                return (
-                                  <div
-                                    key={firstBuilding.building_type}
-                                    className="archont-building-inventory-row"
-                                  >
-                                    <span className="archont-building-inventory-icon">
-                                      {getBuildingOverviewIcon(
-                                        firstBuilding.building_type,
-                                      )}
-                                    </span>
-                                    <span className="archont-building-inventory-copy">
-                                      <strong>
-                                        {getBuildingDisplayName(firstBuilding)}
-                                      </strong>
-                                      <small>×{buildings.length}</small>
-                                    </span>
-                                    <span className="archont-building-inventory-yield">
-                                      {incomeResources.length > 0 ? (
-                                        incomeResources.map((resource) => (
-                                          <ResourceBadge
-                                            key={resource.kind}
-                                            kind={resource.kind}
-                                            value={resource.value}
-                                            compact
-                                            valuePrefix="+"
-                                          />
-                                        ))
-                                      ) : (
-                                        <small>No direct income</small>
-                                      )}
-                                    </span>
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <p className="archont-empty-workspace-note">
-                                No structures built in this system yet.
-                              </p>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <section className="archont-technologies-panel">
-                    <header className="archont-technologies-heading">
-                      <div>
-                        <span className="archont-eyebrow">Technology program</span>
-                        <h2>Technologies</h2>
-                        <p>
-                          Research permanent upgrades through your buildings.
-                          Each completed technology adds Dominance Points.
-                        </p>
-                      </div>
-                      <strong className="archont-dominance-pill">
-                        DP {currentPlayer?.dominance_points ?? 0}
-                      </strong>
-                    </header>
-
-                    <div className="archont-technology-grid">
-                      {technologyCatalog.map((technology) => {
-                        const isSelected = selectedTechnology?.key === technology.key;
-                        const isResearched = currentPlayerTechnologyKeys.has(
-                          technology.key,
-                        );
-                        const hasRequiredBuilding = currentPlayerBuildingTypes.has(
-                          technology.building_type,
-                        );
-
-                        return (
-                          <button
-                            key={technology.key}
-                            type="button"
-                            className={[
-                              "archont-technology-card",
-                              isSelected ? "selected" : "",
-                              isResearched ? "researched" : "",
-                              !hasRequiredBuilding ? "locked" : "",
-                            ].join(" ")}
-                            onClick={() => {
-                              setSelectedTechnologyKey(technology.key);
-                              setActionErrors((currentErrors) => ({
-                                ...currentErrors,
-                                technology: "",
-                              }));
-                            }}
-                          >
-                            <span className="archont-technology-type">
-                              {technology.category}
-                            </span>
-                            <strong>{technology.name}</strong>
-                            <small>{technology.effect_summary}</small>
-
-                            <span className="archont-technology-requirement">
-                              Requires {technology.building_name}
-                            </span>
-
-                            <span className="archont-technology-cost">
-                              {RESOURCE_ORDER.map((kind) => {
-                                const amount = technology.cost[kind] ?? 0;
-
-                                return amount > 0 ? (
-                                  <ResourceBadge
-                                    key={kind}
-                                    kind={kind}
-                                    value={amount}
-                                    compact
-                                  />
-                                ) : null;
-                              })}
-                            </span>
-
-                            <span className="archont-technology-status">
-                              {isResearched
-                                ? "Researched"
-                                : hasRequiredBuilding
-                                  ? `+${technology.dominance_points} DP`
-                                  : "Locked"}
-                            </span>
-                          </button>
-                        );
-                      })}
+                <section
+                  className="archont-workspace-panel hud16-buildings"
+                  style={getPlayerVisualStyle(currentPlayer?.id)}
+                >
+                  <header className="hud16-build-header">
+                    <div className="hud16-build-title">
+                      <span>INFRASTRUCTURE</span>
+                      <strong>Buildings</strong>
                     </div>
 
-                    {selectedTechnology && (
-                      <aside className="archont-technology-research-card">
-                        <div>
-                          <span className="archont-eyebrow">Selected technology</span>
-                          <h3>{selectedTechnology.name}</h3>
-                          <p>{selectedTechnology.description}</p>
-                          <small>{selectedTechnology.effect_summary}</small>
-                        </div>
+                    <nav className="hud16-build-tabs" aria-label="Building actions">
+                      <button
+                        type="button"
+                        className={buildingWorkspaceMode === "construct" ? "active" : ""}
+                        onClick={() => setBuildingWorkspaceMode("construct")}
+                      >
+                        <i>B</i>
+                        <span>Build</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={buildingWorkspaceMode === "production" ? "active" : ""}
+                        onClick={() => setBuildingWorkspaceMode("production")}
+                      >
+                        <i>P</i>
+                        <span>Production</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={buildingWorkspaceMode === "technologies" ? "active" : ""}
+                        onClick={() => setBuildingWorkspaceMode("technologies")}
+                      >
+                        <i>T</i>
+                        <span>Technologies</span>
+                      </button>
+                    </nav>
 
-                        {selectedTechnologyAlreadyResearched && (
-                          <p className="action-hint">
-                            This technology is already researched.
-                          </p>
-                        )}
-
-                        {selectedTechnologyBuildingMissing && (
-                          <p className="action-hint">
-                            Build or control a {selectedTechnology.building_name} to research this technology.
-                          </p>
-                        )}
-
-                        {selectedTechnologyResourceError && (
-                          <p className="inline-action-error">
-                            {selectedTechnologyResourceError}
-                          </p>
-                        )}
-
-                        {actionErrors.technology && (
-                          <p className="inline-action-error">
-                            {actionErrors.technology}
-                          </p>
-                        )}
-
-                        <button
-                          type="button"
-                          className="build-submit-button archont-research-submit-button"
-                          onClick={handleResearchTechnology}
-                          disabled={
-                            isResearchingTechnology ||
-                            session.status !== "started" ||
-                            !currentPlayer ||
-                            !selectedTechnology ||
-                            selectedTechnologyAlreadyResearched ||
-                            selectedTechnologyBuildingMissing ||
-                            Boolean(selectedTechnologyResourceError)
-                          }
-                        >
-                          {isResearchingTechnology
-                            ? "Researching..."
-                            : "Research technology · 1 CP"}
-                        </button>
-                      </aside>
-                    )}
-                  </section>
-
-                  <aside
-                    className="simulation-sidebar build-sidebar archont-construction-ribbon"
-                    style={getPlayerVisualStyle(currentPlayer?.id)}
-                  >
-                    <h2>Construction</h2>
-                    <div className="acting-player-card">
-                      <span>Acting player</span>
-                      <strong>
-                        {currentPlayer?.faction_name ?? "No active player"}
-                      </strong>
-                      <small>
-                        {currentPlayer
-                          ? `CP: ${currentPlayer.command_points_left}/${COMMAND_POINTS_PER_ROUND}`
-                          : "No turn state"}
-                      </small>
-
-                      {currentPlayer && (
-                        <div
-                          className="archont-construction-resource-grid"
-                          aria-label="Active player resources"
-                        >
-                          <ResourceBadge
-                            kind="matter"
-                            value={currentPlayer.matter}
-                            compact
-                          />
-                          <ResourceBadge
-                            kind="energy"
-                            value={currentPlayer.energy}
-                            compact
-                          />
-                          <ResourceBadge
-                            kind="food"
-                            value={currentPlayer.food}
-                            compact
-                          />
-                          <ResourceBadge
-                            kind="data"
-                            value={currentPlayer.data}
-                            compact
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="building-buttons">
-                      {BUILDING_OPTIONS.map((building) => (
-                        <button
-                          key={building.type}
-                          className={
-                            selectedBuildingType === building.type
-                              ? "building-option selected"
-                              : "building-option"
-                          }
-                          onClick={() => {
-                            setSelectedBuildingType(building.type);
-                            setActionErrors((currentErrors) => ({
-                              ...currentErrors,
-                              build: "",
-                            }));
-                          }}
-                        >
-                          <span className="building-icon">{building.icon}</span>
-
-                          <span>
-                            <strong>{building.name}</strong>
-
-                            <span
-                              className="building-cost-resources"
-                              aria-label={`${building.name} resource cost`}
-                            >
-                              {RESOURCE_ORDER.map((kind) => {
-                                const amount =
-                                  BUILDING_COSTS[building.type][kind] ?? 0;
-
-                                return amount > 0 ? (
-                                  <ResourceBadge
-                                    key={kind}
-                                    kind={kind}
-                                    value={amount}
-                                    compact
-                                  />
-                                ) : null;
-                              })}
-                            </span>
-
-                            <small className="building-effect">
-                              {building.income}
-                            </small>
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <label>
-                      Controlled system
+                    <label className="hud16-system-select">
+                      <span>System</span>
                       <select
-                        value={
-                          canBuildInSelectedSystem
-                            ? (selectedSystemId ?? "")
-                            : ""
-                        }
+                        value={canBuildInSelectedSystem ? (selectedSystemId ?? "") : ""}
                         onChange={(event) => {
                           const value = event.target.value;
-
                           setSelectedSystemId(value ? Number(value) : null);
                           setSelectedStructureKey(null);
                           setSelectedUnitId(null);
@@ -4826,76 +4789,299 @@ export default function GamePlay() {
                             build: "",
                           }));
                         }}
-                        disabled={
-                          !currentPlayer || controlledSystems.length === 0
-                        }
+                        disabled={!currentPlayer || controlledSystems.length === 0}
                       >
                         <option value="">Select system</option>
-
                         {controlledSystems.map((system) => (
-                          <option
-                            key={system.system_id}
-                            value={system.system_id}
-                          >
+                          <option key={system.system_id} value={system.system_id}>
                             {system.system_name}
                           </option>
                         ))}
                       </select>
                     </label>
 
-                    {controlledSystems.length === 0 && (
-                      <p className="action-hint">
-                        Current player does not control any systems.
-                      </p>
-                    )}
-
-                    {selectedSystem && !canBuildInSelectedSystem && (
-                      <p className="action-hint">
-                        Select a system controlled by the selected player to
-                        build here.
-                      </p>
-                    )}
-
-                    {selectedBuildingResourceError && (
-                      <p className="inline-action-error">
-                        {selectedBuildingResourceError}
-                      </p>
-                    )}
-
-                    {actionErrors.build && (
-                      <p className="inline-action-error">
-                        {actionErrors.build}
-                      </p>
-                    )}
-
                     <button
-                      className="build-submit-button"
-                      onClick={handleBuildBuilding}
-                      disabled={
-                        isBuilding ||
-                        session.status !== "started" ||
-                        !currentPlayer ||
-                        !selectedSystemId ||
-                        !canBuildInSelectedSystem ||
-                        Boolean(selectedBuildingResourceError)
-                      }
+                      type="button"
+                      className="hud16-close"
+                      aria-label="Close buildings panel"
+                      onClick={() => setActiveWorkspaceTab(null)}
                     >
-                      {isBuilding ? "Building..." : "Build · 1 CP"}
+                      ×
                     </button>
-                  </aside>
+                  </header>
+
+                  <div className="hud16-build-content">
+                    {buildingWorkspaceMode === "construct" && (
+                      <div className="hud16-build-layout">
+                        <aside className="hud16-system-summary">
+                          <div className="hud16-section-title">
+                            <span>Selected system</span>
+                            <strong>{selectedSystem?.system_name ?? "—"}</strong>
+                          </div>
+
+                          {selectedSystem && canBuildInSelectedSystem ? (
+                            <>
+                              <div className="hud16-system-stats">
+                                <span><small>Buildings</small><strong>{selectedSystem.buildings?.length ?? 0}</strong></span>
+                                <span><small>Units</small><strong>{selectedSystem.units?.length ?? 0}</strong></span>
+                              </div>
+                              <div className="hud16-existing-buildings">
+                                <small>Built here</small>
+                                <div>
+                                  {(selectedSystem.buildings ?? []).length > 0 ? (
+                                    Object.values(groupBuildingsByType(selectedSystem.buildings ?? [])).map((buildings) => {
+                                      const building = buildings[0];
+                                      const label = BUILDING_DISPLAY_NAMES[building.building_type] ?? getBuildingDisplayName(building);
+                                      return (
+                                        <span key={building.building_type}>
+                                          <i>{label.slice(0, 2).toUpperCase()}</i>
+                                          <b>{getBuildingDisplayName(building)}</b>
+                                          {buildings.length > 1 && <em>×{buildings.length}</em>}
+                                        </span>
+                                      );
+                                    })
+                                  ) : (
+                                    <p>No buildings yet.</p>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <p className="hud16-muted">Select one of your controlled systems.</p>
+                          )}
+                        </aside>
+
+                        <section className="hud16-building-catalog">
+                          <div className="hud16-section-title">
+                            <span>Available buildings</span>
+                            <small>Choose a building to construct</small>
+                          </div>
+                          <div className="hud16-building-grid">
+                            {BUILDING_OPTIONS.map((building) => {
+                              const isSelected = selectedBuildingType === building.type;
+                              const resourceError = getResourceShortageMessage(
+                                currentPlayer,
+                                BUILDING_COSTS[building.type],
+                              );
+                              return (
+                                <button
+                                  key={building.type}
+                                  type="button"
+                                  className={["hud16-building-card", isSelected ? "selected" : "", resourceError ? "unaffordable" : ""].join(" ")}
+                                  onClick={() => {
+                                    setSelectedBuildingType(building.type);
+                                    setActionErrors((currentErrors) => ({ ...currentErrors, build: "" }));
+                                  }}
+                                >
+                                  <i className="hud16-building-icon">{building.icon}</i>
+                                  <strong>{building.name}</strong>
+                                  <small>{building.income}</small>
+                                  <div className="hud16-cost-row">
+                                    {RESOURCE_ORDER.map((kind) => {
+                                      const amount = BUILDING_COSTS[building.type][kind] ?? 0;
+                                      return amount > 0 ? <ResourceBadge key={kind} kind={kind} value={amount} compact /> : null;
+                                    })}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </section>
+
+                        <aside className="hud16-build-action">
+                          {(() => {
+                            const building = BUILDING_OPTIONS.find((option) => option.type === selectedBuildingType) ?? BUILDING_OPTIONS[0];
+                            if (!building) return null;
+                            return (
+                              <>
+                                <span className="hud16-kicker">Selected building</span>
+                                <div className="hud16-selected-building">
+                                  <i>{building.icon}</i>
+                                  <div><strong>{building.name}</strong><small>{building.income}</small></div>
+                                </div>
+                                <div className="hud16-cost-row hud16-selected-cost">
+                                  {RESOURCE_ORDER.map((kind) => {
+                                    const amount = BUILDING_COSTS[building.type][kind] ?? 0;
+                                    return amount > 0 ? <ResourceBadge key={kind} kind={kind} value={amount} compact /> : null;
+                                  })}
+                                </div>
+                                <div className="hud16-action-message">
+                                  {!canBuildInSelectedSystem && <small>Select a controlled system.</small>}
+                                  {selectedBuildingResourceError && <small className="error">{selectedBuildingResourceError}</small>}
+                                  {actionErrors.build && <small className="error">{actionErrors.build}</small>}
+                                  {canBuildInSelectedSystem && !selectedBuildingResourceError && !actionErrors.build && <small className="ready">Ready to construct.</small>}
+                                </div>
+                                <button
+                                  type="button"
+                                  className="hud16-primary"
+                                  onClick={handleBuildBuilding}
+                                  disabled={isBuilding || session.status !== "started" || !currentPlayer || !selectedSystemId || !canBuildInSelectedSystem || Boolean(selectedBuildingResourceError)}
+                                >
+                                  {isBuilding ? "Building…" : "Build · 1 CP"}
+                                </button>
+                              </>
+                            );
+                          })()}
+                        </aside>
+                      </div>
+                    )}
+
+                    {buildingWorkspaceMode === "production" && (
+                      <div className="hud16-production-layout">
+                        <aside className="hud16-production-summary">
+                          <div className="hud16-section-title">
+                            <span>Production in</span>
+                            <strong>{selectedSystem?.system_name ?? "—"}</strong>
+                          </div>
+                          <small className="hud16-muted">Only production structures in this system are shown.</small>
+                          <div className="hud16-existing-buildings">
+                            <small>Production structures</small>
+                            <div>
+                              {currentPlayerBuildings.filter((building) => building.system_id === selectedSystemId && (getProductionOptionsForBuilding(building.building_type).length > 0 || building.building_type === "colony")).length > 0 ? (
+                                currentPlayerBuildings
+                                  .filter((building) => building.system_id === selectedSystemId && (getProductionOptionsForBuilding(building.building_type).length > 0 || building.building_type === "colony"))
+                                  .map((building) => (
+                                    <span key={building.id}>
+                                      <i>{getBuildingDisplayName(building).slice(0, 2).toUpperCase()}</i>
+                                      <b>{getBuildingDisplayName(building)}</b>
+                                    </span>
+                                  ))
+                              ) : <p>No production structures here.</p>}
+                            </div>
+                          </div>
+                        </aside>
+
+                        <section className="hud16-production-catalog">
+                          <div className="hud16-section-title">
+                            <span>Available actions</span>
+                            <small>Each action costs 1 CP</small>
+                          </div>
+                          <div className="hud16-production-grid">
+                            {currentPlayerBuildings
+                              .filter((building) => building.system_id === selectedSystemId && (getProductionOptionsForBuilding(building.building_type).length > 0 || building.building_type === "colony"))
+                              .flatMap((building) => {
+                                const options = getProductionOptionsForBuilding(building.building_type);
+                                const rows = options.map((unitOption) => {
+                                  const unitResourceError = getResourceShortageMessage(currentPlayer, unitOption.resourceCost);
+                                  const produceErrorKey = `produce-${building.id}-${unitOption.unit_type}`;
+                                  return (
+                                    <article key={`${building.id}-${unitOption.unit_type}`} className={["hud16-production-card", unitResourceError ? "unavailable" : ""].join(" ")}>
+                                      <i>{unitOption.unit_type.slice(0, 2).toUpperCase()}</i>
+                                      <div className="hud16-production-copy">
+                                        <small>{getBuildingDisplayName(building)}</small>
+                                        <strong>{unitOption.name}</strong>
+                                        <em>{unitOption.statsText}</em>
+                                      </div>
+                                      <div className="hud16-cost-row">
+                                        {RESOURCE_ORDER.map((kind) => {
+                                          const amount = unitOption.resourceCost[kind] ?? 0;
+                                          return amount > 0 ? <ResourceBadge key={kind} kind={kind} value={amount} compact /> : null;
+                                        })}
+                                      </div>
+                                      <button type="button" onClick={() => handleProduceUnit(building, unitOption)} disabled={isProducingUnit || session.status !== "started" || Boolean(unitResourceError)}>Produce</button>
+                                      {(unitResourceError || actionErrors[produceErrorKey]) && <small className="hud16-card-error">{unitResourceError ?? actionErrors[produceErrorKey]}</small>}
+                                    </article>
+                                  );
+                                });
+
+                                if (building.building_type === "colony") {
+                                  const colonyResourceError = getResourceShortageMessage(currentPlayer, { energy: UNIT_ACTION_ENERGY_COST });
+                                  const currentPlayerColonyCount = currentPlayer ? getPlayerColonyCount(session, currentPlayer.id) : 0;
+                                  const isLastColony = currentPlayerColonyCount <= 1;
+                                  const colonyErrorKey = `building-${building.id}`;
+                                  rows.push(
+                                    <article key={`${building.id}-pack-ark`} className={["hud16-production-card", isLastColony || colonyResourceError ? "unavailable" : ""].join(" ")}>
+                                      <i>AR</i>
+                                      <div className="hud16-production-copy"><small>Colony</small><strong>Pack into Ark</strong><em>Convert the Colony into a mobile Ark.</em></div>
+                                      <div className="hud16-cost-row"><ResourceBadge kind="energy" value={UNIT_ACTION_ENERGY_COST} compact /></div>
+                                      <button type="button" onClick={() => handlePackColonyBuildingIntoArk(building)} disabled={isUnitActionLoading || isLastColony || Boolean(colonyResourceError)}>Pack</button>
+                                      {(isLastColony || colonyResourceError || actionErrors[colonyErrorKey]) && <small className="hud16-card-error">{isLastColony ? "The last Colony cannot be packed." : colonyResourceError ?? actionErrors[colonyErrorKey]}</small>}
+                                    </article>,
+                                  );
+                                }
+                                return rows;
+                              })}
+
+                            {currentPlayerBuildings.filter((building) => building.system_id === selectedSystemId && (getProductionOptionsForBuilding(building.building_type).length > 0 || building.building_type === "colony")).length === 0 && (
+                              <div className="hud16-empty-state"><strong>No production available</strong><small>Build Barracks or Spaceport in this system, or select another controlled system.</small></div>
+                            )}
+                          </div>
+                        </section>
+                      </div>
+                    )}
+
+                    {buildingWorkspaceMode === "technologies" && (
+                      <div className="hud16-tech-layout">
+                        <section className="hud16-tech-catalog">
+                          <div className="hud16-section-title"><span>Technologies</span><small>DP {currentPlayer?.dominance_points ?? 0}</small></div>
+                          <div className="hud16-tech-grid">
+                            {technologyCatalog.length > 0 ? technologyCatalog.map((technology) => {
+                              const isSelected = selectedTechnology?.key === technology.key;
+                              const isResearched = currentPlayerTechnologyKeys.has(technology.key);
+                              const hasRequiredBuilding = currentPlayerBuildingTypes.has(technology.building_type);
+                              return (
+                                <button
+                                  key={technology.key}
+                                  type="button"
+                                  className={["hud16-tech-card", isSelected ? "selected" : "", isResearched ? "researched" : "", !hasRequiredBuilding ? "locked" : ""].join(" ")}
+                                  onClick={() => {
+                                    setSelectedTechnologyKey(technology.key);
+                                    setActionErrors((currentErrors) => ({ ...currentErrors, technology: "" }));
+                                  }}
+                                >
+                                  <small>{technology.category}</small>
+                                  <strong>{technology.name}</strong>
+                                  <p>{technology.effect_summary}</p>
+                                  <em>{isResearched ? "Researched" : hasRequiredBuilding ? `+${technology.dominance_points} DP` : `Requires ${technology.building_name}`}</em>
+                                  <div className="hud16-cost-row">
+                                    {RESOURCE_ORDER.map((kind) => {
+                                      const amount = technology.cost[kind] ?? 0;
+                                      return amount > 0 ? <ResourceBadge key={kind} kind={kind} value={amount} compact /> : null;
+                                    })}
+                                  </div>
+                                </button>
+                              );
+                            }) : <div className="hud16-empty-state"><strong>No technologies available.</strong></div>}
+                          </div>
+                        </section>
+
+                        <aside className="hud16-tech-action">
+                          {selectedTechnology ? (
+                            <>
+                              <span className="hud16-kicker">Selected technology</span>
+                              <strong>{selectedTechnology.name}</strong>
+                              <p>{selectedTechnology.effect_summary}</p>
+                              <small>Requires {selectedTechnology.building_name}</small>
+                              <div className="hud16-cost-row">
+                                {RESOURCE_ORDER.map((kind) => {
+                                  const amount = selectedTechnology.cost[kind] ?? 0;
+                                  return amount > 0 ? <ResourceBadge key={kind} kind={kind} value={amount} compact /> : null;
+                                })}
+                              </div>
+                              <div className="hud16-action-message">
+                                {selectedTechnologyAlreadyResearched && <small>Already researched.</small>}
+                                {selectedTechnologyBuildingMissing && <small className="error">Requires {selectedTechnology.building_name}.</small>}
+                                {selectedTechnologyResourceError && <small className="error">{selectedTechnologyResourceError}</small>}
+                                {actionErrors.technology && <small className="error">{actionErrors.technology}</small>}
+                                {!selectedTechnologyAlreadyResearched && !selectedTechnologyBuildingMissing && !selectedTechnologyResourceError && !actionErrors.technology && <small className="ready">Ready to research.</small>}
+                              </div>
+                              <button type="button" className="hud16-primary" onClick={handleResearchTechnology} disabled={isResearchingTechnology || session.status !== "started" || !currentPlayer || selectedTechnologyAlreadyResearched || selectedTechnologyBuildingMissing || Boolean(selectedTechnologyResourceError)}>{isResearchingTechnology ? "Researching…" : "Research · 1 CP"}</button>
+                            </>
+                          ) : <small className="hud16-muted">No technologies available.</small>}
+                        </aside>
+                      </div>
+                    )}
+                  </div>
                 </section>
               )}
 
               {activeWorkspaceTab === "fleets" && (
-                <section className="archont-workspace-panel archont-fleets-workspace">
+                <section className="archont-workspace-panel archont-fleets-workspace archont-fleets-workspace-v15">
                   <div className="archont-workspace-heading">
                     <div>
-                      <span className="archont-eyebrow">Fleet registry</span>
-                      <h2>Fleet slots and active formations</h2>
-                      <p>
-                        Select a fleet slot to inspect its units and prepare
-                        coordinated orders.
-                      </p>
+                      <span className="archont-eyebrow">Fleets</span>
+                      <h2>Fleet slots</h2>
+                      <p>Select a ready fleet to prepare an order.</p>
                     </div>
                   </div>
 
@@ -5079,18 +5265,50 @@ export default function GamePlay() {
                     })}
                   </div>
 
-                  <section className="fleet-command-center">
+                  <div className="archont-fleet-command-launcher">
+                    <span>
+                      <small>Fleet command</small>
+                      <strong>
+                        {selectedCommandFleet?.name ?? "Select a ready fleet"}
+                      </strong>
+                      <em>
+                        {selectedCommandFleet
+                          ? `${selectedCommandFleet.units.length}/5 units · ${getFleetStatusText(selectedCommandFleet)}`
+                          : "Movement, defense, transfer and attack"}
+                      </em>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFleetConsoleOpen(true)}
+                      disabled={!currentPlayer || currentPlayerFleets.length === 0}
+                    >
+                      COMMAND FLEET
+                    </button>
+                  </div>
+
+                  {fleetConsoleOpen && createPortal(
+                    <div
+                      className="hud16-fleet-overlay archont-command-console-overlay archont-fleet-console-overlay-v15"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-label="Fleet command"
+                    >
+                      <div className="hud16-fleet-modal archont-command-console-shell archont-fleet-console-shell archont-fleet-console-v15">
+                        <button
+                          type="button"
+                          className="archont-console-close"
+                          onClick={() => setFleetConsoleOpen(false)}
+                          aria-label="Close fleet command"
+                        >
+                          ×
+                        </button>
+
+                  <section className="fleet-command-center archont-fleet-command-center-v15">
                     <div className="fleet-command-center-header">
                       <div>
-                        <span className="fleet-command-kicker">
-                          Fleet command
-                        </span>
-                        <h2>Issue coordinated orders</h2>
-                        <p>
-                          Select every movement step manually. The interface
-                          shows each corridor and its danger before the command
-                          is added.
-                        </p>
+                        <span className="fleet-command-kicker">Fleet command</span>
+                        <h2>Prepare orders</h2>
+                        <p>Choose a fleet, order and destination. The whole command package costs 1 CP.</p>
                       </div>
 
                       <div className="fleet-command-cost">
@@ -5178,6 +5396,11 @@ export default function GamePlay() {
                                     <option value="move_attack">
                                       Move → Attack
                                     </option>
+                                    {!isArchonCoreClaimed && (
+                                      <option value="move_attack_home">
+                                        Move → Attack Home
+                                      </option>
+                                    )}
                                     <option value="move_move">Move → Move</option>
                                     <option value="move_transfer">
                                       Move → Transfer
@@ -5247,11 +5470,25 @@ export default function GamePlay() {
                                         getEnemyFleetsInSystem(system.system_id).length > 0
                                           ? " · HOSTILE · INTERCEPTION"
                                           : ""}
+                                        {selectedCommandOrderType === "move_attack_home"
+                                          ? " · HOME WORLD"
+                                          : ""}
                                       </option>
                                     ),
                                   )}
                                 </select>
                               </label>
+                            </div>
+                          )}
+
+                          {selectedCommandOrderType === "move_attack_home" && (
+                            <div className="archont-engaged-action-note">
+                              <span>HOME ASSAULT</span>
+                              <strong>Elimination objective</strong>
+                              <small>
+                                Entering an undefended enemy Home World destroys it,
+                                eliminates that player and frees all systems they controlled.
+                              </small>
                             </div>
                           )}
 
@@ -5348,7 +5585,7 @@ export default function GamePlay() {
                                           system.system_id,
                                         )}
                                         {((system.owner_player_id !== null &&
-                                          system.owner_player_id !== currentPlayer?.id) ||
+                                          isPlayerHostileToCurrent(system.owner_player_id)) ||
                                           getEnemyFleetsInSystem(system.system_id).length > 0)
                                           ? " · HOSTILE"
                                           : ""}
@@ -6149,8 +6386,7 @@ export default function GamePlay() {
 
                           {stagedCommandOrders.length === 0 ? (
                             <p className="action-hint">
-                              Add one or more fleet orders. The full package
-                              costs only 1 CP.
+                              Add at least one fleet order. The full package costs 1 CP.
                             </p>
                           ) : (
                             <div className="fleet-command-order-list">
@@ -6324,6 +6560,10 @@ export default function GamePlay() {
 
 
                   </section>
+                      </div>
+                    </div>,
+                    document.body,
+                  )}
                 </section>
               )}
 
@@ -6411,6 +6651,7 @@ export default function GamePlay() {
                     )}
                   </div>
 
+                  {selectedMapSystem?.system_type === "archive" && (
                   <section className="archont-archive-research-panel">
                     <header className="archont-archive-research-heading">
                       <div>
@@ -6517,6 +6758,9 @@ export default function GamePlay() {
                     )}
                   </section>
 
+                  )}
+
+                  {(selectedSystemIsHeartOfTheGalaxy || isArchonCoreClaimed) && (
                   <section className="archont-core-claim-panel">
                     <header className="archont-archive-research-heading">
                       <div>
@@ -6570,7 +6814,7 @@ export default function GamePlay() {
                         </h3>
                         <p>{archonCoreClaimHint}</p>
                         <small>
-                          Claim cost: 1 CP · Result: Archon Player vs Resistance phase
+                          Claim cost: {coreActivationCost.matter} MAT · {coreActivationCost.energy} ENG · {coreActivationCost.data} DAT · {coreActivationCost.command_points} CP · Result: ARCHONT vs Resistance
                         </small>
                       </div>
 
@@ -6591,807 +6835,245 @@ export default function GamePlay() {
                       >
                         {isClaimingArchonCore
                           ? "Claiming Archon Core..."
-                          : "Claim Archon Core · 1 CP"}
+                          : `Claim Archon Core · ${coreActivationCost.matter}/${coreActivationCost.energy}/${coreActivationCost.data} · ${coreActivationCost.command_points} CP`}
                       </button>
                     </div>
                   </section>
 
-                  {selectedSystem &&
-                    selectedSystem.owner_player_id === currentPlayer?.id && (
-                      <section
-                        className="system-overview-panel"
-                        style={getPlayerVisualStyle(
-                          selectedSystem.owner_player_id,
-                        )}
-                      >
-                        <div
-                          className={`system-overview-header archont-system-overview-header ownership-${selectedSystemRelation}`}
-                          style={getPlayerVisualStyle(
-                            selectedSystem.owner_player_id,
-                          )}
-                        >
-                          <div className="archont-system-overview-identity">
-                            <span className="archont-system-overview-emblem">
-                              {getFactionInitials(
-                                selectedSystemOwner?.faction_name,
-                              )}
-                            </span>
+                  )}
 
-                            <div>
-                              <span className="archont-eyebrow">
-                                {getOwnershipLabel(
-                                  selectedSystem.owner_player_id,
-                                )}
+                  {selectedSystem && (
+                    <section
+                      className={`archont-system-inspector ownership-${selectedSystemRelation}`}
+                      style={getPlayerVisualStyle(selectedSystem.owner_player_id)}
+                    >
+                      {(() => {
+                        const mapSystem = getMapSystemDetailsById(
+                          selectedSystem.system_id,
+                        );
+                        const buildings = selectedSystem.buildings ?? [];
+                        const groupedBuildings = groupBuildingsByType(buildings);
+                        const fleets = getFleetsInSystem(selectedSystem.system_id);
+                        const friendlyFleets = fleets.filter(
+                          (fleet) => fleet.owner_player_id === currentPlayer?.id,
+                        );
+                        const rivalFleets = fleets.filter(
+                          (fleet) => isPlayerHostileToCurrent(fleet.owner_player_id),
+                        );
+                        const colonizingArk = (selectedSystem.units ?? []).find(
+                          (unit) =>
+                            unit.owner_player_id === currentPlayer?.id &&
+                            (unit.unit_type === "ark" || unit.state === "ark"),
+                        );
+                        const colonizeResourceError = colonizingArk
+                          ? getResourceShortageMessage(currentPlayer, {
+                              energy: UNIT_ACTION_ENERGY_COST,
+                            })
+                          : null;
+                        const colonizeActionError = colonizingArk
+                          ? actionErrors[`unit-${colonizingArk.id}`]
+                          : null;
+                        const ownerName =
+                          selectedSystemOwner?.faction_name ?? "Uncharted";
+                        const systemType =
+                          getSystemTypeLabel(selectedSystem.system_id) ??
+                          mapSystem?.system_type?.toUpperCase() ??
+                          "SYSTEM";
+
+                        const capacityItems = mapSystem
+                          ? [
+                              ["◆", "Mine", mapSystem.mineral_slots],
+                              ["ϟ", "Power", mapSystem.energy_slots],
+                              ["▰", "Supply", mapSystem.storage_slots],
+                              ["⌁", "Research", mapSystem.research_center_slots],
+                            ]
+                          : [];
+
+                        return (
+                          <>
+                            <header className="archont-system-inspector-header">
+                              <span className="archont-system-inspector-emblem">
+                                {getFactionInitials(selectedSystemOwner?.faction_name)}
                               </span>
-                              <h2>{selectedSystem.system_name}</h2>
-                              <p>
-                                {selectedSystem.owner_faction
-                                  ? selectedSystem.owner_faction
-                                  : "Neutral system"}
-                              </p>
+                              <span className="archont-system-inspector-title">
+                                <small>{systemType}</small>
+                                <strong>{selectedSystem.system_name}</strong>
+                                <em>{ownerName}</em>
+                              </span>
+                              <button
+                                type="button"
+                                className="archont-system-inspector-close"
+                                onClick={() => {
+                                  setSelectedSystemId(null);
+                                  setSelectedStructureKey(null);
+                                  setSelectedUnitId(null);
+                                  setActiveWorkspaceTab(null);
+                                }}
+                                aria-label="Close system inspector"
+                              >
+                                ×
+                              </button>
+                            </header>
+
+                            <div className="archont-system-inspector-stats">
+                              <span>
+                                <small>BUILDINGS</small>
+                                <strong>{buildings.length}</strong>
+                              </span>
+                              <span>
+                                <small>FLEETS</small>
+                                <strong>{fleets.length}</strong>
+                              </span>
+                              <span>
+                                <small>UNITS</small>
+                                <strong>{selectedSystem.units?.length ?? 0}</strong>
+                              </span>
                             </div>
-                          </div>
 
-                          <div className="archont-system-overview-metrics">
-                            <span>
-                              <small>ID</small>
-                              <strong>{selectedSystem.system_id}</strong>
-                            </span>
-                            <span>
-                              <small>STRUCTURES</small>
-                              <strong>
-                                {selectedSystem.buildings?.length ?? 0}
-                              </strong>
-                            </span>
-                            <span>
-                              <small>UNITS</small>
-                              <strong>
-                                {selectedSystem.units?.length ?? 0}
-                              </strong>
-                            </span>
-                            <span>
-                              <small>FLEETS</small>
-                              <strong>
-                                {
-                                  getFleetsInSystem(selectedSystem.system_id)
-                                    .length
-                                }
-                              </strong>
-                            </span>
-                          </div>
-                        </div>
-
-                        {(() => {
-                          const mapSystem = mapDetails?.systems.find(
-                            (system) => system.id === selectedSystem.system_id,
-                          );
-
-                          if (!mapSystem) {
-                            return null;
-                          }
-
-                          const systemBuildings =
-                            selectedSystem.buildings ?? [];
-                          const countBuildings = (...buildingTypes: string[]) =>
-                            systemBuildings.filter((building) =>
-                              buildingTypes.includes(building.building_type),
-                            ).length;
-
-                          const capacityItems = [
-                            {
-                              key: "mine",
-                              icon: "◆",
-                              label: "Mines",
-                              current: countBuildings("mine"),
-                              maximum: mapSystem.mineral_slots,
-                            },
-                            {
-                              key: "energy",
-                              icon: "ϟ",
-                              label: "Power Plants",
-                              current: countBuildings(
-                                "power_plant",
-                                "energy_plant",
-                              ),
-                              maximum: mapSystem.energy_slots,
-                            },
-                            {
-                              key: "storage",
-                              icon: "▰",
-                              label: "Supply Depots",
-                              current: countBuildings("storage"),
-                              maximum: mapSystem.storage_slots,
-                            },
-                            {
-                              key: "research",
-                              icon: "⌁",
-                              label: "Research Centers",
-                              current: countBuildings("research_center"),
-                              maximum: mapSystem.research_center_slots,
-                            },
-                          ];
-
-                          return (
-                            <section className="system-building-capacity">
-                              <div className="system-building-capacity-heading">
-                                <div>
-                                  <span className="archont-eyebrow">
-                                    System infrastructure
+                            {capacityItems.length > 0 && (
+                              <div className="archont-system-capacity-strip">
+                                {capacityItems.map(([icon, label, value]) => (
+                                  <span key={String(label)} title={`${label} slots`}>
+                                    <i>{icon}</i>
+                                    <small>{label}</small>
+                                    <strong>{value}</strong>
                                   </span>
-                                  <h3>Building capacity</h3>
-                                </div>
-                                <p>
-                                  Built structures compared with this system's
-                                  available resource slots.
-                                </p>
+                                ))}
                               </div>
+                            )}
 
-                              <div className="system-building-capacity-grid">
-                                {capacityItems.map((item) => {
-                                  const ratio =
-                                    item.maximum > 0
-                                      ? Math.min(
-                                          100,
-                                          (item.current / item.maximum) * 100,
-                                        )
-                                      : 0;
-                                  const isFull =
-                                    item.maximum > 0 &&
-                                    item.current >= item.maximum;
-                                  const isUnavailable = item.maximum <= 0;
+                            <section className="archont-system-inspector-section">
+                              <header>
+                                <strong>Infrastructure</strong>
+                                <small>{buildings.length} total</small>
+                              </header>
+                              <div className="archont-system-compact-list">
+                                {Object.values(groupedBuildings).length > 0 ? (
+                                  Object.values(groupedBuildings).map((group) => {
+                                    const firstBuilding = group[0];
+                                    const incomeResources = getBuildingIncomeResources(
+                                      firstBuilding.building_type,
+                                      group.length,
+                                    );
 
-                                  return (
-                                    <article
-                                      className={[
-                                        "system-building-capacity-card",
-                                        isFull ? "is-full" : "",
-                                        isUnavailable ? "is-unavailable" : "",
-                                      ].join(" ")}
-                                      key={item.key}
-                                    >
-                                      <span className="system-building-capacity-icon">
-                                        {item.icon}
-                                      </span>
-
-                                      <span className="system-building-capacity-copy">
-                                        <strong>{item.label}</strong>
-                                        <small>
-                                          {isUnavailable
-                                            ? "Unavailable"
-                                            : `${item.current} / ${item.maximum}`}
-                                        </small>
-                                      </span>
-
-                                      <span className="system-building-capacity-meter">
-                                        <i style={{ width: `${ratio}%` }} />
-                                      </span>
-                                    </article>
-                                  );
-                                })}
+                                    return (
+                                      <div
+                                        className="archont-system-compact-row"
+                                        key={firstBuilding.building_type}
+                                      >
+                                        <span className="archont-system-row-icon">
+                                          {getBuildingOverviewIcon(firstBuilding.building_type)}
+                                        </span>
+                                        <span>
+                                          <strong>{getBuildingDisplayName(firstBuilding)}</strong>
+                                          <small>×{group.length}</small>
+                                        </span>
+                                        <em>
+                                          {incomeResources.length > 0
+                                            ? incomeResources
+                                                .map(
+                                                  (resource) =>
+                                                    `+${resource.value} ${resource.kind.toUpperCase().slice(0, 3)}`,
+                                                )
+                                                .join(" · ")
+                                            : "UTILITY"}
+                                        </em>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="archont-system-empty-row">No infrastructure</p>
+                                )}
                               </div>
                             </section>
-                          );
-                        })()}
 
-                        <div className="system-overview-grid">
-                          <div className="system-overview-block">
-                            <h3>Buildings & Colonies</h3>
-
-                            {(() => {
-                              const buildings = selectedSystem.buildings ?? [];
-                              const groupedBuildings =
-                                groupBuildingsByType(buildings);
-
-                              if (Object.keys(groupedBuildings).length === 0) {
-                                return (
-                                  <p className="action-hint">
-                                    No buildings or colonies.
-                                  </p>
-                                );
-                              }
-
-                              return (
-                                <div className="overview-card-grid">
-                                  {Object.entries(groupedBuildings).map(
-                                    ([buildingType, buildingGroup]) => {
-                                      const firstBuilding = buildingGroup[0];
-
-                                      if (!firstBuilding) {
-                                        return null;
-                                      }
-
-                                      const structureKey = `building-${buildingType}-${firstBuilding.owner_player_id}`;
-                                      const isSelected =
-                                        selectedStructureKey === structureKey;
-                                      const details = BUILDING_DETAILS[
-                                        buildingType
-                                      ] ?? {
-                                        income: "No income data",
-                                        produces: [],
-                                        technologies: [],
-                                        description: "No description yet.",
-                                      };
-                                      const isColony =
-                                        buildingType === "colony";
-                                      const incomeResources =
-                                        getBuildingIncomeResources(
-                                          buildingType,
-                                          buildingGroup.length,
-                                        );
-                                      const canControl =
-                                        firstBuilding.owner_player_id ===
-                                          currentPlayer?.id &&
-                                        session.status === "started";
-                                      const resourceError =
-                                        getResourceShortageMessage(
-                                          currentPlayer,
-                                          { energy: UNIT_ACTION_ENERGY_COST },
-                                        );
-                                      const actionErrorKey = `building-${firstBuilding.id}`;
-                                      const currentPlayerColonyCount =
-                                        currentPlayer
-                                          ? getPlayerColonyCount(
-                                              session,
-                                              currentPlayer.id,
-                                            )
-                                          : 0;
-                                      const isLastPlayerColony =
-                                        isColony &&
-                                        canControl &&
-                                        currentPlayerColonyCount <= 1;
-
-                                      return (
-                                        <div
-                                          key={structureKey}
-                                          className={
-                                            isSelected
-                                              ? "overview-card selected"
-                                              : "overview-card"
-                                          }
-                                          style={getPlayerVisualStyle(
-                                            firstBuilding.owner_player_id,
-                                          )}
-                                          role="button"
-                                          tabIndex={0}
-                                          onClick={() => {
-                                            setSelectedStructureKey(
-                                              structureKey,
-                                            );
-                                            setSelectedUnitId(null);
-                                          }}
-                                          onKeyDown={(event) => {
-                                            if (event.key === "Enter") {
-                                              setSelectedStructureKey(
-                                                structureKey,
-                                              );
-                                              setSelectedUnitId(null);
-                                            }
-                                          }}
-                                        >
-                                          <div className="overview-structure-header">
-                                            <span
-                                              className="overview-structure-icon"
-                                              aria-hidden="true"
-                                            >
-                                              {getBuildingOverviewIcon(
-                                                buildingType,
-                                              )}
-                                            </span>
-
-                                            <span className="overview-structure-copy">
-                                              <strong>
-                                                {getBuildingDisplayName(
-                                                  firstBuilding,
-                                                )}
-                                              </strong>
-                                              <small>
-                                                {isColony
-                                                  ? "COLONY"
-                                                  : "STRUCTURE"}
-                                              </small>
-                                            </span>
-
-                                            <span className="overview-structure-count">
-                                              ×{buildingGroup.length}
-                                            </span>
-                                          </div>
-
-                                          {incomeResources.length > 0 ? (
-                                            <div className="overview-structure-income">
-                                              <small className="overview-income-caption">
-                                                PER ROUND
-                                              </small>
-
-                                              <div className="overview-resource-income-row">
-                                                {incomeResources.map(
-                                                  (incomeResource) => (
-                                                    <ResourceBadge
-                                                      key={incomeResource.kind}
-                                                      kind={incomeResource.kind}
-                                                      value={
-                                                        incomeResource.value
-                                                      }
-                                                      valuePrefix="+"
-                                                      compact
-                                                    />
-                                                  ),
-                                                )}
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            <span className="overview-no-income">
-                                              NO DIRECT INCOME
-                                            </span>
-                                          )}
-
-                                          {isSelected && (
-                                            <div className="overview-card-details">
-                                              <p>{details.description}</p>
-
-                                              <p>
-                                                <strong>Can produce:</strong>{" "}
-                                                {details.produces.length > 0
-                                                  ? details.produces.join(", ")
-                                                  : "Nothing yet"}
-                                              </p>
-
-                                              <p>
-                                                <strong>Technologies:</strong>{" "}
-                                                {details.technologies.length > 0
-                                                  ? details.technologies.join(
-                                                      ", ",
-                                                    )
-                                                  : "No technologies yet"}
-                                              </p>
-
-                                              {getProductionOptionsForBuilding(
-                                                buildingType,
-                                              ).length > 0 && (
-                                                <div className="unit-production-panel">
-                                                  <strong>Production</strong>
-
-                                                  <div className="unit-production-list">
-                                                    {getProductionOptionsForBuilding(
-                                                      buildingType,
-                                                    ).map((unitOption) => {
-                                                      const produceErrorKey = `produce-${firstBuilding.id}-${unitOption.unit_type}`;
-                                                      const unitResourceError =
-                                                        getResourceShortageMessage(
-                                                          currentPlayer,
-                                                          unitOption.resourceCost,
-                                                        );
-
-                                                      return (
-                                                        <div
-                                                          key={
-                                                            unitOption.unit_type
-                                                          }
-                                                          className="unit-production-row"
-                                                        >
-                                                          <button
-                                                            type="button"
-                                                            onClick={(
-                                                              event,
-                                                            ) => {
-                                                              event.stopPropagation();
-                                                              handleProduceUnit(
-                                                                firstBuilding,
-                                                                unitOption,
-                                                              );
-                                                            }}
-                                                            disabled={
-                                                              isProducingUnit ||
-                                                              !canControl ||
-                                                              Boolean(
-                                                                unitResourceError,
-                                                              )
-                                                            }
-                                                          >
-                                                            <span>
-                                                              {unitOption.icon}
-                                                            </span>
-                                                            <span>
-                                                              Produce{" "}
-                                                              {unitOption.name}{" "}
-                                                              · 1 CP
-                                                              <small>
-                                                                {
-                                                                  unitOption.costText
-                                                                }
-                                                              </small>
-                                                              <small>
-                                                                {
-                                                                  unitOption.statsText
-                                                                }
-                                                              </small>
-                                                            </span>
-                                                          </button>
-
-                                                          {unitResourceError && (
-                                                            <p className="inline-action-error">
-                                                              {
-                                                                unitResourceError
-                                                              }
-                                                            </p>
-                                                          )}
-
-                                                          {actionErrors[
-                                                            produceErrorKey
-                                                          ] && (
-                                                            <p className="inline-action-error">
-                                                              {
-                                                                actionErrors[
-                                                                  produceErrorKey
-                                                                ]
-                                                              }
-                                                            </p>
-                                                          )}
-                                                        </div>
-                                                      );
-                                                    })}
-                                                  </div>
-                                                </div>
-                                              )}
-
-                                              {isColony && (
-                                                <>
-                                                  <button
-                                                    type="button"
-                                                    onClick={(event) => {
-                                                      event.stopPropagation();
-                                                      handlePackColonyBuildingIntoArk(
-                                                        firstBuilding,
-                                                      );
-                                                    }}
-                                                    disabled={
-                                                      isUnitActionLoading ||
-                                                      !canControl ||
-                                                      isLastPlayerColony ||
-                                                      Boolean(resourceError)
-                                                    }
-                                                  >
-                                                    Pack into Ark · 1 CP ·{" "}
-                                                    {UNIT_ACTION_ENERGY_COST} ⚡
-                                                  </button>
-
-                                                  {isLastPlayerColony && (
-                                                    <p className="action-hint">
-                                                      Last Colony cannot be
-                                                      packed into Ark.
-                                                    </p>
-                                                  )}
-
-                                                  {resourceError && (
-                                                    <p className="inline-action-error">
-                                                      {resourceError}
-                                                    </p>
-                                                  )}
-
-                                                  {actionErrors[
-                                                    actionErrorKey
-                                                  ] && (
-                                                    <p className="inline-action-error">
-                                                      {
-                                                        actionErrors[
-                                                          actionErrorKey
-                                                        ]
-                                                      }
-                                                    </p>
-                                                  )}
-                                                </>
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    },
-                                  )}
-                                </div>
-                              );
-                            })()}
-                          </div>
-
-                          <div className="system-overview-block">
-                            <h3>Fleets in system</h3>
-
-                            {(() => {
-                              if (!selectedSystem) {
-                                return null;
-                              }
-
-                              const fleets = getFleetsInSystem(
-                                selectedSystem.system_id,
-                              );
-
-                              if (fleets.length === 0) {
-                                return (
-                                  <p className="action-hint">
-                                    No fleets in this system.
-                                  </p>
-                                );
-                              }
-
-                              return (
-                                <div className="fleet-command-grid">
-                                  {fleets.map((fleet) => {
+                            <section className="archont-system-inspector-section">
+                              <header>
+                                <strong>Fleet presence</strong>
+                                <small>
+                                  {friendlyFleets.length} yours · {rivalFleets.length} rival
+                                </small>
+                              </header>
+                              <div className="archont-system-compact-list">
+                                {fleets.length > 0 ? (
+                                  fleets.slice(0, 4).map((fleet) => {
                                     const owner = getFleetOwner(fleet);
-                                    const canPrepareOrder =
-                                      fleet.owner_player_id ===
-                                        currentPlayer?.id &&
-                                      !fleet.has_acted_this_round &&
-                                      session.status === "started";
-
-                                    const fleetRelation = getOwnershipRelation(
+                                    const relation = getOwnershipRelation(
                                       fleet.owner_player_id,
                                     );
 
                                     return (
-                                      <div
+                                      <button
+                                        type="button"
                                         key={fleet.id}
-                                        className={`fleet-command-card archont-fleet-card ownership-${fleetRelation}`}
-                                        style={getPlayerVisualStyle(
-                                          fleet.owner_player_id,
-                                        )}
-                                      >
-                                        <div className="fleet-command-card-header archont-fleet-card-header">
-                                          <span className="archont-fleet-emblem">
-                                            {getFactionInitials(
-                                              owner?.faction_name,
-                                            )}
-                                          </span>
-                                          <span className="archont-fleet-identity">
-                                            <strong>{fleet.name}</strong>
-                                            <small>
-                                              {owner?.faction_name ?? "Unknown"}
-                                            </small>
-                                          </span>
-                                          <span className="archont-fleet-status">
-                                            {getFleetStatusText(fleet)}
-                                          </span>
-                                        </div>
-
-                                        <div className="archont-fleet-metrics">
-                                          <span>
-                                            <small>CAPACITY</small>
-                                            <strong>
-                                              {fleet.units.length}/5
-                                            </strong>
-                                          </span>
-                                          <span>
-                                            <small>COMBAT</small>
-                                            <strong>
-                                              {getFleetCombatRating(fleet)}
-                                            </strong>
-                                          </span>
-                                          <span>
-                                            <small>POSITION</small>
-                                            <strong>
-                                              {fleet.is_defensive
-                                                ? "DEF"
-                                                : "OPEN"}
-                                            </strong>
-                                          </span>
-                                        </div>
-
-                                        {fleet.units.length > 0 && (
-                                          <div className="fleet-unit-strip archont-fleet-unit-strip">
-                                            {fleet.units.map((unit) => (
-                                              <span
-                                                key={unit.id}
-                                                className={
-                                                  isUnitDamaged(unit)
-                                                    ? "damaged"
-                                                    : ""
-                                                }
-                                                title={`${getUnitDisplayName(unit)} · ${getUnitHpText(unit)}`}
-                                              >
-                                                <i>{getUnitIcon(unit)}</i>
-                                                <b>
-                                                  {getUnitDisplayName(unit)}
-                                                </b>
-                                                <small>
-                                                  {getUnitHpText(unit)}
-                                                </small>
-                                              </span>
-                                            ))}
-                                          </div>
-                                        )}
-
-                                        {canPrepareOrder && (
-                                          <button
-                                            type="button"
-                                            className="fleet-command-prepare-button"
-                                            onClick={() =>
-                                              handleSelectCommandFleet(fleet.id)
-                                            }
-                                          >
-                                            Open command console
-                                          </button>
-                                        )}
-
-                                        {fleet.has_acted_this_round && (
-                                          <p className="action-hint">
-                                            Fleet command already resolved this
-                                            round.
-                                          </p>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })()}
-                          </div>
-
-                          <div className="system-overview-block">
-                            <h3>Units</h3>
-
-                            {(() => {
-                              const visibleUnits = selectedSystem.units ?? [];
-
-                              if (visibleUnits.length === 0) {
-                                return (
-                                  <p className="action-hint">
-                                    No units in this system.
-                                  </p>
-                                );
-                              }
-
-                              return (
-                                <div className="overview-card-grid">
-                                  {visibleUnits.map((unit) => {
-                                    const isSelected =
-                                      selectedUnitId === unit.id;
-                                    const canControl =
-                                      unit.owner_player_id ===
-                                        currentPlayer?.id &&
-                                      session.status === "started";
-                                    const unitOwner = getPlayerById(
-                                      unit.owner_player_id,
-                                    );
-                                    const unitRelation = getOwnershipRelation(
-                                      unit.owner_player_id,
-                                    );
-                                    const resourceError =
-                                      getResourceShortageMessage(
-                                        currentPlayer,
-                                        { energy: UNIT_ACTION_ENERGY_COST },
-                                      );
-                                    const actionErrorKey = `unit-${unit.id}`;
-
-                                    return (
-                                      <div
-                                        key={unit.id}
-                                        className={[
-                                          "overview-card",
-                                          "archont-unit-card",
-                                          `ownership-${unitRelation}`,
-                                          isSelected ? "selected" : "",
-                                          isUnitDamaged(unit) ? "damaged" : "",
-                                        ].join(" ")}
-                                        style={getPlayerVisualStyle(
-                                          unit.owner_player_id,
-                                        )}
-                                        role="button"
-                                        tabIndex={0}
+                                        className={`archont-system-fleet-row ownership-${relation}`}
                                         onClick={() => {
-                                          setSelectedUnitId(unit.id);
-                                          setSelectedStructureKey(null);
-                                        }}
-                                        onKeyDown={(event) => {
-                                          if (event.key === "Enter") {
-                                            setSelectedUnitId(unit.id);
-                                            setSelectedStructureKey(null);
+                                          if (fleet.owner_player_id === currentPlayer?.id) {
+                                            handleSelectCommandFleet(fleet.id);
+                                            setActiveWorkspaceTab("fleets");
                                           }
                                         }}
                                       >
-                                        <div className="archont-unit-card-heading">
-                                          <span className="archont-unit-icon">
-                                            {getUnitIcon(unit)}
-                                          </span>
-                                          <span>
-                                            <strong>
-                                              {getUnitDisplayName(unit)}
-                                            </strong>
-                                            <small>
-                                              {unitOwner?.faction_name ??
-                                                "Unknown owner"}
-                                            </small>
-                                          </span>
-                                          <span className="archont-entity-relation">
-                                            {unitRelation === "friendly"
-                                              ? "YOURS"
-                                              : unitRelation === "hostile"
-                                                ? "RIVAL"
-                                                : "NEUTRAL"}
-                                          </span>
-                                        </div>
-
-                                        <div className="archont-unit-stat-grid">
-                                          <span>
-                                            <small>ATK</small>
-                                            <strong>{unit.attack}</strong>
-                                          </span>
-                                          <span>
-                                            <small>DEF</small>
-                                            <strong>{unit.defense}</strong>
-                                          </span>
-                                          <span>
-                                            <small>HP</small>
-                                            <strong>
-                                              {unit.current_hp ?? "—"}/
-                                              {unit.max_hp ?? "—"}
-                                            </strong>
-                                          </span>
-                                        </div>
-
-                                        {unit.current_hp !== null &&
-                                          unit.max_hp !== null && (
-                                            <span className="archont-hp-track">
-                                              <i
-                                                style={{
-                                                  width: `${Math.max(
-                                                    0,
-                                                    Math.min(
-                                                      100,
-                                                      (unit.current_hp /
-                                                        unit.max_hp) *
-                                                        100,
-                                                    ),
-                                                  )}%`,
-                                                }}
-                                              />
-                                            </span>
-                                          )}
-
-                                        {isSelected && (
-                                          <div className="overview-card-details">
-                                            <p>
-                                              Food upkeep: {unit.food_upkeep}
-                                            </p>
-
-                                            {(unit.unit_type === "ark" ||
-                                              unit.state === "ark") && (
-                                              <button
-                                                type="button"
-                                                onClick={(event) => {
-                                                  event.stopPropagation();
-                                                  handleColonizeSystem(unit);
-                                                }}
-                                                disabled={
-                                                  isUnitActionLoading ||
-                                                  !canControl ||
-                                                  Boolean(resourceError)
-                                                }
-                                              >
-                                                Colonize System · 1 CP ·{" "}
-                                                {UNIT_ACTION_ENERGY_COST} ⚡
-                                              </button>
-                                            )}
-
-                                            {resourceError && (
-                                              <p className="inline-action-error">
-                                                {resourceError}
-                                              </p>
-                                            )}
-
-                                            {actionErrors[actionErrorKey] && (
-                                              <p className="inline-action-error">
-                                                {actionErrors[actionErrorKey]}
-                                              </p>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
+                                        <span className="archont-system-row-icon">▲</span>
+                                        <span>
+                                          <strong>{fleet.name}</strong>
+                                          <small>{owner?.faction_name ?? "Unknown"}</small>
+                                        </span>
+                                        <em>
+                                          {fleet.units.length}/5 · ATK {getFleetCombatRating(fleet)} · {fleet.is_defensive ? "DEF" : "READY"}
+                                        </em>
+                                      </button>
                                     );
-                                  })}
-                                </div>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                      </section>
-                    )}
+                                  })
+                                ) : (
+                                  <p className="archont-system-empty-row">No fleets present</p>
+                                )}
+                              </div>
+                            </section>
+
+                            <footer className="archont-system-inspector-actions">
+                              {!selectedSystem.owner_player_id && colonizingArk && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleColonizeSystem(colonizingArk)}
+                                  disabled={
+                                    isUnitActionLoading ||
+                                    Boolean(colonizeResourceError)
+                                  }
+                                  title={colonizeResourceError ?? undefined}
+                                >
+                                  ◉ COLONIZE · {UNIT_ACTION_ENERGY_COST} ⚡ · 1 CP
+                                </button>
+                              )}
+                              {selectedSystem.owner_player_id === currentPlayer?.id && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveWorkspaceTab("buildings")}
+                                >
+                                  ▦ BUILDINGS
+                                </button>
+                              )}
+                              {friendlyFleets.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveWorkspaceTab("fleets")}
+                                >
+                                  ▲ FLEETS
+                                </button>
+                              )}
+                            </footer>
+                            {(colonizeResourceError || colonizeActionError) &&
+                              !selectedSystem.owner_player_id &&
+                              colonizingArk && (
+                                <small className="inline-action-error archont-inspector-action-error">
+                                  {colonizeResourceError ?? colonizeActionError}
+                                </small>
+                              )}
+                          </>
+                        );
+                      })()}
+                    </section>
+                  )}
                 </section>
               )}
             </main>

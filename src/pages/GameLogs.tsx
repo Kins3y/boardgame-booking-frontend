@@ -30,6 +30,7 @@ const ORDER_LABELS: Record<string, { en: string; ru: string }> = {
     ru: "Разделение → Движение",
   },
   move_attack: { en: "Move → Attack", ru: "Движение → Атака" },
+  move_attack_home: { en: "Move → Attack Home", ru: "Движение → Штурм Home World" },
 };
 
 const EVENT_LABELS: Record<string, { en: string; ru: string }> = {
@@ -51,6 +52,22 @@ const EVENT_LABELS: Record<string, { en: string; ru: string }> = {
     en: "Fleet command resolved",
     ru: "Команда флотов выполнена",
   },
+  technology_researched: {
+    en: "Technology researched",
+    ru: "Исследована технология",
+  },
+  archon_core_claimed: {
+    en: "ARCHONT activated",
+    ru: "АРХОНТ активирован",
+  },
+  archont_action: {
+    en: "ARCHONT action",
+    ru: "Действие АРХОНТА",
+  },
+  resistance_archont_attack: {
+    en: "Resistance assault",
+    ru: "Атака Сопротивления",
+  },
   game_finished: { en: "Game finished", ru: "Игра завершена" },
 };
 
@@ -58,6 +75,7 @@ const BUILDING_LABELS: Record<string, { en: string; ru: string }> = {
   mine: { en: "Mine", ru: "Шахта" },
   power_plant: { en: "Power Plant", ru: "Энергоблок" },
   storage: { en: "Supply Depot", ru: "Склад снабжения" },
+  research_center: { en: "Research Center", ru: "Исследовательский центр" },
   barracks: { en: "Barracks", ru: "Казармы" },
   spaceport: { en: "Spaceport", ru: "Космопорт" },
   colony: { en: "Colony", ru: "Колония" },
@@ -301,6 +319,61 @@ function EventSummary({
     );
   }
 
+  if (entry.event_type === "technology_researched") {
+    const technology = asRecord(payload.technology);
+    const name = asString(technology.name) ?? asString(technology.key) ?? "technology";
+    return (
+      <p>
+        {language === "ru" ? "Исследована технология:" : "Technology researched:"}{" "}
+        <strong>{name}</strong>.
+      </p>
+    );
+  }
+
+  if (entry.event_type === "archon_core_claimed") {
+    const faction = asString(payload.archon_player_faction) ?? getActorName(entry, language);
+    const hp = asNumber(payload.archont_hp);
+    return (
+      <p>
+        <strong>{faction}</strong>{" "}
+        {language === "ru"
+          ? `активировал Ядро и стал АРХОНТОМ${hp !== null ? ` (${hp} HP)` : ""}. Все остальные игроки объединены в Сопротивление.`
+          : `activated the Core and became the ARCHONT${hp !== null ? ` (${hp} HP)` : ""}. All other players are now allied as the Resistance.`}
+      </p>
+    );
+  }
+
+  if (entry.event_type === "archont_action") {
+    const actionType = asString(payload.action_type) ?? "action";
+    const targetSystemId = asNumber(payload.target_system_id);
+    const destroyedHomePlayerId = asNumber(payload.destroyed_home_world_player_id);
+    return (
+      <p>
+        {language === "ru" ? "АРХОНТ выполнил" : "The ARCHONT performed"}{" "}
+        <strong>{actionType.toUpperCase()}</strong>
+        {targetSystemId !== null ? ` → #${targetSystemId}` : ""}
+        {destroyedHomePlayerId !== null
+          ? language === "ru"
+            ? ` · уничтожен Home World игрока #${destroyedHomePlayerId}`
+            : ` · player #${destroyedHomePlayerId} Home World destroyed`
+          : ""}.
+      </p>
+    );
+  }
+
+  if (entry.event_type === "resistance_archont_attack") {
+    const combat = asRecord(payload.combat);
+    const damageToArchont = asNumber(combat.damage_to_archont) ?? 0;
+    const archontHpAfter = asNumber(combat.archont_hp_after);
+    return (
+      <p>
+        {language === "ru" ? "Сопротивление атаковало АРХОНТА." : "The Resistance attacked the ARCHONT."}{" "}
+        {language === "ru" ? "Урон:" : "Damage:"} <strong>{damageToArchont}</strong>
+        {archontHpAfter !== null ? ` · HP ${archontHpAfter}` : ""}.
+      </p>
+    );
+  }
+
   if (entry.event_type === "game_finished") {
     return <p>{language === "ru" ? "Сессия завершена." : "The session was finished."}</p>;
   }
@@ -405,6 +478,22 @@ function FleetCommandDetails({
                   {language === "ru"
                     ? `Односторонний урон: ${order.interception.damage} · Потери: ${order.interception.damage_events.filter((event) => event.destroyed).length}`
                     : `One-way damage: ${order.interception.damage} · Units lost: ${order.interception.damage_events.filter((event) => event.destroyed).length}`}
+                </small>
+              </div>
+            )}
+
+            {order.destroyed_home_world_player_id != null && (
+              <div className="game-log-combat-result game-log-home-destroyed">
+                <span>{language === "ru" ? "HOME WORLD УНИЧТОЖЕН" : "HOME WORLD DESTROYED"}</span>
+                <strong>
+                  {language === "ru"
+                    ? `Игрок #${order.destroyed_home_world_player_id} устранён из партии`
+                    : `Player #${order.destroyed_home_world_player_id} eliminated from the game`}
+                </strong>
+                <small>
+                  {language === "ru"
+                    ? "Все юниты и здания уничтожены, контролируемые системы освобождены."
+                    : "All units and buildings were destroyed and controlled systems were released."}
                 </small>
               </div>
             )}
@@ -518,10 +607,15 @@ export default function GameLogs() {
         </div>
 
         <div className="game-logs-header-actions">
-          <Link to={`/game/sessions/${numericSessionId}/play`}>
+          <Link to="/" className="game-logs-action">
+            <span aria-hidden="true">⌂</span>
+            {language === "ru" ? "Главное меню" : "Main menu"}
+          </Link>
+          <Link to={`/game/sessions/${numericSessionId}/play`} className="game-logs-action game-logs-action-primary">
+            <span aria-hidden="true">←</span>
             {language === "ru" ? "Вернуться к игре" : "Back to game"}
           </Link>
-          <button type="button" onClick={loadLogs} disabled={isLoading}>
+          <button type="button" className="game-logs-action" onClick={loadLogs} disabled={isLoading}>
             {isLoading
               ? language === "ru"
                 ? "Обновление..."

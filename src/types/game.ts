@@ -80,6 +80,37 @@ export type ArchonCoreClaim = {
   claimed_round: number;
 };
 
+export type SessionArchont = {
+  id: number;
+  session_id: number;
+  owner_player_id: number;
+  owner_faction: string | null;
+  system_id: number;
+  system_name: string | null;
+  current_hp: number;
+  max_hp: number;
+  has_acted_this_round: boolean;
+  attack_profile: {
+    dice: number;
+    hit_min: number;
+    damage_per_hit: number;
+  };
+  occupies_fleet_slot: false;
+};
+
+export type SessionHomeWorld = {
+  player_id: number;
+  player_faction: string | null;
+  system_id: number;
+  system_name: string | null;
+  destroyed: boolean;
+  destroyed_round: number | null;
+  destroyed_by_player_id: number | null;
+  team: "independent" | "archont" | "resistance";
+  is_victory_target: boolean;
+  eliminated?: boolean;
+};
+
 export type FleetOrderType =
   | "move_defend"
   | "move_move"
@@ -88,6 +119,7 @@ export type FleetOrderType =
   | "split_move"
   | "defend"
   | "move_attack"
+  | "move_attack_home"
   | "continue_combat"
   | "retreat";
 
@@ -307,6 +339,7 @@ export type FleetCommandOrderReport = {
   retreat?: FleetRetreatReport | null;
   combat: FleetCombatReport | null;
   interception?: FleetInterceptionReport | null;
+  destroyed_home_world_player_id?: number | null;
 };
 
 export type FleetCommandResponse = {
@@ -375,16 +408,37 @@ export type FullGameSession = {
   name: string;
   status: string;
   current_round: number;
-  max_rounds?: number;
+  max_rounds?: number | null;
   victory_framework?: {
-    max_rounds: number;
+    max_rounds: number | null;
     fallback_victory: string;
     archon_state: string;
     core_state: string;
     archon_player_id?: number | null;
     archon_player_faction?: string | null;
     archon_core_claim?: ArchonCoreClaim | null;
+    archont?: SessionArchont | null;
     resistance_player_ids?: number[];
+    active_resistance_player_ids?: number[];
+    home_worlds?: SessionHomeWorld[];
+    winner_side?: "conquest" | "archont" | "resistance" | null;
+    winner_player_ids?: number[];
+    victory_reason?: string | null;
+    core_activation_cost?: {
+      matter: number;
+      energy: number;
+      data: number;
+      command_points: number;
+    };
+    endgame_rules?: {
+      pre_archont_victory?: string;
+      home_destruction_eliminates_player?: boolean;
+      archont_occupies_fleet_slot: boolean;
+      archont_home_world_is_victory_target: boolean;
+      archont_victory: string;
+      resistance_victory: string;
+      resistance_allied: boolean;
+    };
   };
   technology_catalog?: Technology[];
   archon_blueprint_catalog?: ArchonBlueprintCatalogItem[];
@@ -468,7 +522,8 @@ export type BuildingType =
   | "power_plant"
   | "storage"
   | "barracks"
-  | "spaceport";
+  | "spaceport"
+  | "research_center";
 
 export type UnitType = "scout" | "marine" | "ark" | "frigate" | "cruiser";
 

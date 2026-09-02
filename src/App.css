@@ -261,3 +261,15 @@
   pointer-events: none;
   backdrop-filter: blur(8px);
 }
+/* Gameplay owns the viewport. Global page chrome must not create page scroll. */
+.gameplay-app-shell {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.gameplay-app-content {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}

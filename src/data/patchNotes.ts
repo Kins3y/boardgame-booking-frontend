@@ -438,5 +438,48 @@ export const patchNotes: PatchNote[] = [
   ],
 },
 
+{
+  id: "gameplay-ui-overhaul-2026-08",
+  date: "2026-08-12",
+  type: "frontend",
+  title: text(
+    "Gameplay UI overhaul",
+    "Полная переработка игрового интерфейса"
+  ),
+  summary: text(
+    "The gameplay interface was rebuilt into a compact strategy-game HUD focused on the galaxy map, contextual controls and single-screen usability.",
+    "Игровой интерфейс полностью переработан в компактный HUD в стиле компьютерной стратегии с акцентом на карту галактики, контекстные действия и работу в пределах одного экрана."
+  ),
+  changes: [
+    text(
+      "Rebuilt the gameplay screen around a fullscreen galaxy map with a compact resource, round, Command Point and ARCHONT progress HUD.",
+      "Игровой экран перестроен вокруг полноэкранной карты галактики с компактным отображением ресурсов, раунда, Командных Очков и прогресса ARCHONT."
+    ),
+    text(
+      "Added compact player controls, a collapsible map legend, contextual system information and a Main Menu button.",
+      "Добавлены компактная панель игроков, сворачиваемая легенда карты, контекстная информация о системах и кнопка выхода в главное меню."
+    ),
+    text(
+      "Redesigned Buildings into dedicated Build, Production and Technologies workspaces.",
+      "Раздел зданий переработан в отдельные режимы строительства, производства и технологий."
+    ),
+    text(
+      "Redesigned fleet management and moved Fleet Command into a dedicated command console.",
+      "Переработано управление флотами, а Fleet Command вынесен в отдельную командную консоль."
+    ),
+    text(
+      "Improved UI spacing, icon alignment, text wrapping and contextual action presentation across gameplay panels.",
+      "Улучшены отступы, выравнивание иконок, перенос текста и отображение контекстных действий во всех игровых панелях."
+    ),
+    text(
+      "Redesigned the Game Logs page for clearer chronological event, movement, danger and combat presentation.",
+      "Переработана страница Game Logs для более понятного отображения хронологии событий, перемещений, опасностей и боёв."
+    ),
+    text(
+      "Optimized language controls and removed non-gameplay administrative elements from the active game interface.",
+      "Оптимизирован переключатель языка, а административные элементы убраны из активного игрового интерфейса."
+    )
+  ]
+},
 
 ];

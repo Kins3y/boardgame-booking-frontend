@@ -462,6 +462,52 @@ export async function claimArchonCore(
   return data.session;
 }
 
+export async function commandArchont(
+  sessionId: number,
+  actionType: "move" | "attack",
+  targetSystemId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/archont/action`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action_type: actionType,
+        target_system_id: targetSystemId
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+  return data.session;
+}
+
+export async function resistanceAttackArchont(
+  sessionId: number,
+  fleetId: number
+): Promise<FullGameSession> {
+  const response = await fetch(
+    `${API_URL}/game/sessions/${sessionId}/archont/resistance-attack`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fleet_id: fleetId })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response));
+  }
+
+  const data = await response.json();
+  return data.session;
+}
+
 export async function getEditorMaps(): Promise<MapEditorMapSummary[]> {
   const response = await fetch(`${API_URL}/game/maps/editor/`, {
     headers: getAuthHeaders()
